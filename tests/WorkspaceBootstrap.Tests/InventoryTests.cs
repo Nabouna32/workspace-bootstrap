@@ -13,8 +13,8 @@ public sealed class InventoryTests
         var provider = new FakeInventoryProvider(
             "test",
             [
-                Observation("tool.one", "Tool", "2.0.0", now),
-                Observation("tool.one", "Tool", "1.0.0", now.AddSeconds(-1))
+                Observation("tool.one.2", "Tool", "2.0.0", now),
+                Observation("tool.one.1", "Tool", "1.0.0", now.AddSeconds(-1))
             ]);
 
         var snapshot = await new InventoryScanner([provider]).ScanAsync();
