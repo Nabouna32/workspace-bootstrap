@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "components": [
+    "powershell",
+    "git",
+    "github-cli",
+    "chrome",
+    "edge",
+    "firefox",
+    "visual-studio",
+    "wsl",
+    "flutter",
+    "winrar",
+    "notepadpp",
+    "powertoys",
+    "vlc",
+    "kodi",
+    "steam",
+    "prismlauncher",
+    "vscode",
+    "intellij-community",
+    "python",
+    "rustup",
+    "go",
+    "llvm",
+    "temurin21"
+  ]
+}
