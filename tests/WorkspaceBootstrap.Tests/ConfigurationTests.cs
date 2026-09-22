@@ -79,3 +79,34 @@ public sealed class ConfigurationTests
         }
     }
 }
+
+
+[TestClass]
+public sealed class ProvisioningPlanContractTests
+{
+    [TestMethod]
+    public void Provisioning_plan_exposes_desktop_contract_fields()
+    {
+        var configuration = new ConfigurationStore();
+        var engine = new ProvisioningEngine(
+            configuration,
+            new InstallerEngine(new WorkspacePaths()),
+            new WorkspacePaths());
+
+        var plan = engine.Plan(configuration.LoadProfiles().Values.First().Id);
+        using var document = System.Text.Json.JsonDocument.Parse(
+            System.Text.Json.JsonSerializer.Serialize(plan));
+
+        foreach (var item in document.RootElement.GetProperty("Items").EnumerateArray())
+        {
+            Assert.IsTrue(item.TryGetProperty("StateCode", out var state));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(state.GetString()));
+
+            Assert.IsTrue(item.TryGetProperty("ActionCode", out var action));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(action.GetString()));
+
+            Assert.IsTrue(item.TryGetProperty("Message", out var message));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(message.GetString()));
+        }
+    }
+}
