@@ -2,7 +2,7 @@
 
 **Workspace Bootstrap** is a native Windows 11 application for rebuilding, provisioning, maintaining and recovering a workstation after a clean Windows installation.
 
-The product is implemented in **C#/.NET 10** with a WPF desktop application and a self-contained Windows CLI sharing the same engine. There is no PowerShell or batch execution layer.
+The product is built around **C#/.NET 10**. A native Windows desktop UI and a self-contained Windows CLI share the same Engine. The UI is a presentation layer; system changes, provisioning, cache management and recovery remain in the Engine.
 
 ## What it does
 
@@ -15,15 +15,29 @@ The product is implemented in **C#/.NET 10** with a WPF desktop application and 
 - Verifies SHA-256 and Authenticode where applicable.
 - Uses WinGet only as an explicit fallback declared by a component.
 - Provides dry-run plans, progress, operation history, diagnostics, maintenance and guarded optimization.
-- Produces a self-contained Windows x64 application suitable for a fresh Windows installation.
+- Produces a self-contained Windows x64 CLI suitable for a fresh Windows installation.
+
+## Desktop application
+
+The desktop application is designed as a real Windows 11 product rather than a thin launcher:
+
+- Dashboard with workstation health and quick actions.
+- Component/profile provisioning with plan preview before changes.
+- Visible operation progress, recovery and history.
+- Inventory and cleanup recommendations with explicit confirmation.
+- Diagnostics and maintenance surfaces.
+- Dark/light-ready design system with consistent cards, navigation, typography and state indicators.
+- Engine-driven operations so the UI never becomes a second provisioning implementation.
+
+The current presentation framework is WPF on .NET 10. WPF is only the UI layer; the application/domain/infrastructure logic remains ordinary C# in the shared Engine.
 
 ## Quick start
 
 Build the product on Windows:
 
 ```text
-dotnet restore src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj
-dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release
+dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
+dotnet build tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration Release
 dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release
 dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release
 ```
@@ -33,8 +47,6 @@ Publish the self-contained CLI:
 ```text
 dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true
 ```
-
-The desktop application and CLI use the same native engine; neither requires PowerShell 7.
 
 ## Local installer cache
 
@@ -58,7 +70,7 @@ Profiles are declarative collections of components under `bootstrap/windows/prof
 - WinGet only as an explicit fallback.
 - Reversible changes keep their previous state.
 - Irreversible changes require explicit confirmation.
-- CI runs exclusively on the project's self-hosted Windows runner.
+- CI runs exclusively on GitHub-hosted runners.
 - Credentials and secrets are never stored in ordinary configuration bundles.
 
 ## Documentation
