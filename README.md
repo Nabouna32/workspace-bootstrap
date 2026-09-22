@@ -5,10 +5,12 @@
 It brings software management, Windows configuration, diagnostics, maintenance, optimization, drivers, WSL, profiles and offline cache into one understandable application.
 
 ## Main capabilities
+
 - Install, update and uninstall applications.
 - Discover applications even without a curated definition.
 - Identify residuals conservatively.
 - Maintain a verified offline software cache.
+- Choose the appropriate installation source/provider, including interactive vendor installers.
 - Inspect and configure supported Windows settings and policies.
 - Recommend and apply documented optimizations.
 - Diagnose Windows and application problems.
@@ -21,16 +23,33 @@ It brings software management, Windows configuration, diagnostics, maintenance, 
 Workspace Control is not an antivirus, VPN, password manager or generic endpoint-security suite.
 
 ## User control
-Normal interactive mode never silently changes the system. Every meaningful mutation explains what changes, why, scope, risk, reversibility and restart requirements.
+
+Normal interactive mode never silently changes the system. Every meaningful mutation explains what changes, why, scope, risk, reversibility and restart requirements. Irreversible actions are explicitly identified and require stronger confirmation.
 
 ## Technology
-C#/.NET 10, WinUI 3 / Windows App SDK and Windows 11 x64. The CLI shares the same engine. The current repository contains the legacy WorkspaceBootstrap/WPF implementation during migration.
 
-## Architecture
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/PRODUCT-VISION.md](docs/PRODUCT-VISION.md) and [docs/UX-DESIGN.md](docs/UX-DESIGN.md).
+C#/.NET 10, WinUI 3 / Windows App SDK and Windows 11 x64. The CLI shares the same application/domain engine.
+
+The GitHub repository name `workspace-bootstrap` is historical; the product identity is **Workspace Control**.
+
+## Documentation
+
+The complete documentation index is in [docs/README.md](docs/README.md).
+
+Start with:
+
+- [Product vision](docs/PRODUCT-VISION.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [UX design](docs/UX-DESIGN.md)
+- [Profiles](docs/PROFILES.md)
+- [Software management](docs/SOFTWARE.md)
+- [Security](docs/SECURITY.md)
+- [Roadmap](docs/ROADMAP.md)
 
 ## Development
+
 GitHub is the source of truth. CI uses GitHub-hosted Windows runners. Self-hosted runners are not part of the project.
 
 ## License
+
 MIT.
