@@ -71,6 +71,7 @@ public sealed class DesktopEngineClient
 
             throw;
         }
+    }
 
     public Task<DesktopCommandResponse<string[]>> GetCapabilitiesAsync(CancellationToken cancellationToken = default) =>
         ExecuteAsync<string[]>("capabilities", cancellationToken: cancellationToken);
