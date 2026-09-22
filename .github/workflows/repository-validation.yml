@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: '17 4 * * 0'
   workflow_dispatch:
 
 permissions:
@@ -12,22 +14,22 @@ permissions:
 
 concurrency:
   group: workspace-bootstrap-ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
-  Configuration: Release
 
 jobs:
-  build-test:
-    name: Build and test (${{ matrix.configuration }})
+  validate:
+    name: Validate (${{ matrix.configuration }})
+    if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:
-        configuration: [Debug, Release]
+        configuration: [Release]
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -37,44 +39,48 @@ jobs:
         with:
           dotnet-version: 10.0.401
 
-      - name: Restore engine
-        run: dotnet restore src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'global.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
-      - name: Restore desktop
-        run: dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj --runtime win-x64
-
-      - name: Restore CLI
-        run: dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
-
-      - name: Restore tests
-        run: dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
+      - name: Restore projects
+        shell: pwsh
+        run: |
+          dotnet restore src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj
+          dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj --runtime win-x64
+          dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
+          dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
 
       - name: Build engine
-        run: dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
+        run: dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release --no-restore --warnaserror
 
       - name: Build desktop
-        run: dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
+        run: dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --no-restore --warnaserror
 
       - name: Build CLI
-        run: dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
+        run: dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --no-restore --warnaserror
 
       - name: Run tests
-        run: dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration ${{ matrix.configuration }} --no-restore --logger "trx;LogFileName=tests-${{ matrix.configuration }}.trx"
+        run: dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=tests-Release.trx"
 
       - name: Verify formatting
-        if: matrix.configuration == 'Release'
         run: dotnet format tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --no-restore --verify-no-changes
 
-      - name: Publish desktop package for smoke test
-        if: matrix.configuration == 'Release'
-        run: dotnet publish desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output "$env:RUNNER_TEMP\\workspace-bootstrap-package"
-
-      - name: Bundle CLI for smoke test
-        if: matrix.configuration == 'Release'
-        run: dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output "$env:RUNNER_TEMP\\workspace-bootstrap-package"
+      - name: Publish portable package
+        if: github.event_name == 'push'
+        shell: pwsh
+        run: |
+          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-package"
+          New-Item -ItemType Directory -Force -Path $package | Out-Null
+          dotnet publish desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
+          dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
 
       - name: Smoke-test portable package
-        if: matrix.configuration == 'Release'
+        if: github.event_name == 'push'
         shell: pwsh
         run: |
           $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-package"
@@ -93,18 +99,29 @@ jobs:
           & $cli capabilities
           if ($LASTEXITCODE -ne 0) { throw "Portable CLI smoke test failed with exit code $LASTEXITCODE." }
 
+      - name: Upload release package
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v6
+        with:
+          name: workspace-bootstrap-win-x64-${{ github.sha }}
+          path: ${{ runner.temp }}/workspace-bootstrap-package
+          if-no-files-found: error
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: test-results-${{ matrix.configuration }}-${{ github.run_id }}
+          name: test-results-release-${{ github.run_id }}
           path: '**/TestResults/*.trx'
           if-no-files-found: warn
 
-  publish:
-    name: Publish Windows artifacts
-    if: github.event_name != 'pull_request'
-    needs: build-test
+  full-validation:
+    name: Full validation (${{ matrix.configuration }})
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
@@ -116,42 +133,42 @@ jobs:
         with:
           dotnet-version: 10.0.401
 
-      - name: Restore desktop
-        run: dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj --runtime win-x64
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'global.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
-      - name: Restore CLI
-        run: dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
-
-      - name: Publish self-contained CLI
-        run: dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output artifacts/cli
-
-      - name: Publish desktop
-        run: dotnet publish desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output artifacts/desktop
-
-      - name: Bundle CLI with desktop
-        run: dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output artifacts/desktop
-
-      - name: Smoke-test portable package
+      - name: Restore projects
         shell: pwsh
         run: |
-          $desktop = "artifacts/desktop/WorkspaceBootstrap.exe"
-          $cli = "artifacts/desktop/WorkspaceBootstrap.Cli.exe"
-          $catalog = "artifacts/desktop/bootstrap/windows/components/catalog.json"
-          $profiles = "artifacts/desktop/bootstrap/windows/profiles"
-          $readme = "artifacts/desktop/README.md"
+          dotnet restore src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj
+          dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj --runtime win-x64
+          dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
+          dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
 
-          if (-not (Test-Path $desktop)) { throw "Desktop executable is missing: $desktop" }
-          if (-not (Test-Path $cli)) { throw "CLI executable is missing: $cli" }
-          if (-not (Test-Path $catalog)) { throw "Bundled component catalog is missing: $catalog" }
-          if (-not (Test-Path $profiles -PathType Container)) { throw "Bundled profiles directory is missing: $profiles" }
-          if (-not (Test-Path $readme)) { throw "Portable package README is missing: $readme" }
+      - name: Build engine
+        run: dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
 
-          & $cli capabilities
-          if ($LASTEXITCODE -ne 0) { throw "Portable CLI smoke test failed with exit code $LASTEXITCODE." }
+      - name: Build desktop
+        run: dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
 
-      - name: Upload release artifacts
+      - name: Build CLI
+        run: dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
+
+      - name: Run tests
+        run: dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration ${{ matrix.configuration }} --no-restore --logger "trx;LogFileName=tests-${{ matrix.configuration }}.trx"
+
+      - name: Verify formatting
+        if: matrix.configuration == 'Release'
+        run: dotnet format tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --no-restore --verify-no-changes
+
+      - name: Upload test results
+        if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: workspace-bootstrap-win-x64-${{ github.sha }}
-          path: artifacts/**
-          if-no-files-found: error
+          name: test-results-${{ matrix.configuration }}-${{ github.run_id }}
+          path: '**/TestResults/*.trx'
+          if-no-files-found: warn
