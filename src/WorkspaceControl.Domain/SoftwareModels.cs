@@ -31,7 +31,8 @@ public sealed record SoftwareEvidence(
     string Source,
     string Signal,
     string? Detail = null,
-    DateTimeOffset? ObservedAt = null);
+    DateTimeOffset? ObservedAt = null,
+    bool IsStrong = false);
 
 public sealed record SoftwareItem(
     string Id,
