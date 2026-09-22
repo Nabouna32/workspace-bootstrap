@@ -26,10 +26,10 @@
                     <TextBlock Text="WORKSPACE BOOTSTRAP" FontSize="17" FontWeight="SemiBold" Margin="4,4,4,8"
                     /><TextBlock Text="Windows workstation manager" FontSize="11" Foreground="{StaticResource SecondaryText}" Margin="4,0,4,24"/>
                     <Button Command="{Binding DashboardCommand}" Content="⌂   Tableau de bord" Style="{StaticResource NavigationButtonStyle}"/>
-                    <Button Command="{Binding OptimizationCommand}" Content="⚙   Optimisation" HorizontalContentAlignment="Left"/>
-                    <Button Command="{Binding ProvisioningCommand}" Content="▣   Provisionnement" HorizontalContentAlignment="Left"/>
-                    <Button Command="{Binding DiagnosticsCommand}" Content="◉   Diagnostic" HorizontalContentAlignment="Left"/>
-                    <Button Command="{Binding InventoryCommand}" Content="▦   Logiciels &amp; composants" HorizontalContentAlignment="Left"/>
+                    <Button Command="{Binding OptimizationCommand}" Content="⚙   Optimisation" Style="{StaticResource NavigationButtonStyle}"/>
+                    <Button Command="{Binding ProvisioningCommand}" Content="▣   Provisionnement" Style="{StaticResource NavigationButtonStyle}"/>
+                    <Button Command="{Binding DiagnosticsCommand}" Content="◉   Diagnostic" Style="{StaticResource NavigationButtonStyle}"/>
+                    <Button Command="{Binding InventoryCommand}" Content="▦   Logiciels &amp; composants" Style="{StaticResource NavigationButtonStyle}"/>
                 </StackPanel>
             </DockPanel>
         </Border>
