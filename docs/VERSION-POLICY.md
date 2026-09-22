@@ -17,7 +17,6 @@ The repository defines compatibility policy, not arbitrary frozen versions.
 | Tool | Policy |
 |---|---|
 | Windows | Windows 11 Pro, current supported stable |
-| PowerShell | Latest supported LTS |
 | Git for Windows | Latest stable |
 | GitHub CLI | Latest stable |
 | VS Code | Latest stable |
