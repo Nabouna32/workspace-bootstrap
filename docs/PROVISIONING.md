@@ -1,42 +1,31 @@
-# Provisioning
+# Operations and provisioning
 
-Provisioning is implemented in the native .NET engine.
+Provisioning is one operation family inside Workspace Control, not the product's architectural center.
 
-## Desired state
-
-A profile is a declarative list of component IDs. The engine resolves those IDs against the Windows component catalog and builds a plan before execution.
-
-The plan is read-only. It identifies the profile, components and intended action.
-
-## Installation flow
-
-```
-profile
-  -> component manifest
-  -> installed-state check
-  -> official source resolution
-  -> verified cache lookup
-  -> unique staging download
-  -> SHA-256 / Authenticode verification
-  -> atomic cache promotion
-  -> installer execution
-  -> postcondition verification
-  -> persistent operation state
+## Lifecycle
+```text
+requested → planned → awaiting-confirmation → running
+running → waiting-reboot / partially-completed / failed / cancelled
+running → completed
 ```
 
-WinGet is used only for components whose manifest explicitly declares `fallbackPackageManager: winget`.
+## Planning
+Planning compares requested capability, observed state, desired state, providers, prerequisites, cache availability, privilege and risk. Planning is read-only.
 
-## Cache-only mode
+## Execution
+Execution acquires resources, handles elevation, performs provider work, records progress, verifies postconditions, updates state and records diagnostics.
 
-Cache-only provisioning never downloads. It succeeds only when a verified compatible installer is already present in the package cache.
+## Interactive installers
+Resolve and verify the installer, launch it, wait for completion, rescan the machine and verify the expected state.
+
+## Offline
+Cache-only mode never downloads and succeeds only with a verified compatible artifact.
 
 ## Recovery
+Durable operations survive restart where technically possible. Recovery rescans the machine before continuing and avoids duplicate work.
 
-Every provisioning operation has a durable operation identifier and persistent state. Recovery must never create duplicate installation work. A resume operation continues from the persisted checkpoint.
+## Cancellation
+Cancellation is cooperative. If an external installer cannot safely stop, Workspace Control waits for a safe boundary.
 
 ## Safety
-
-- Installer execution is explicit and logged.
-- Destructive operations require confirmation.
-- Failed downloads are cleaned from staging only.
-- Existing verified cache entries are never removed as a side effect of a failed update.
+Destructive and irreversible actions require explicit confirmation. Failed downloads never invalidate valid cache artifacts.

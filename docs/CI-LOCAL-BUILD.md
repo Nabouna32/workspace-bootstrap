@@ -1,47 +1,28 @@
 # CI and local builds
 
 ## Source of truth
-
-GitHub is the source of truth. Development work happens on feature branches and is validated before merge.
+GitHub is the source of truth. The exact commit being merged must be validated by GitHub Actions.
 
 ## Runner policy
+All workflows use **GitHub-hosted Windows runners**. **Self-hosted runners are not part of Workspace Control.**
 
-All repository workflows run on the project's GitHub-hosted Windows runner:
+## PR validation
+Fast validation covers restore, build, unit tests, architecture/static analysis, formatting and contract/schema checks.
 
-`windows-latest`
+## Main / scheduled validation
+Heavier validation may run on main, scheduled or manual workflows: full Release builds, published artifacts, CLI smoke tests, Windows integration, provisioning simulations, cache/offline scenarios, install/update/remove integration, UI/accessibility tests, WSL scenarios and security analysis.
 
-Validation uses GitHub-hosted runners.
+Heavy suites do not need to run on every commit when that provides poor feedback, but they must run regularly and before releases.
 
-## Local build
-
-From the repository root on the current feature branch:
-
+## Local validation
 ```text
-dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
-dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj
-dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj
-
-dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release --no-restore
-dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --no-restore
-dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --no-restore
-
-dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration Release --no-restore
-dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore
+dotnet restore
+dotnet build --configuration Release
+dotnet test --configuration Release
+dotnet format --verify-no-changes
 ```
 
-## Validation policy
+Once the WinUI application exists, this document must include its exact branch-specific build/run command.
 
-A green result must come from the exact commit being merged. Do not rely on an older workflow run.
-
-Warnings and errors must be fixed at their source. Do not disable analyzers or suppress failures just to obtain a green run.
-
-## Release validation
-
-The release workflow additionally verifies:
-
-- self-contained Windows x64 publication;
-- component/profile catalog presence;
-- portable package startup through the CLI capabilities command;
-- SHA-256 checksum generation.
-
-Full Windows integration scenarios that require a real installed workstation remain a separate future test layer; they are not claimed by the current portable smoke test.
+## Quality rule
+Fix warnings, flaky tests and errors at the source. Do not disable tests or analyzers merely to obtain green CI.
