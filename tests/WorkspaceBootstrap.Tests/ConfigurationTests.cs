@@ -9,7 +9,7 @@ public sealed class ConfigurationTests
     [TestMethod]
     public void Components_are_loadable_and_have_unique_ids()
     {
-        var configuration = new ConfigurationStore();
+        var configuration = new ConfigurationStore(FindRepositoryRoot());
         var components = configuration.LoadComponents();
 
         Assert.IsNotEmpty(components);
@@ -88,10 +88,11 @@ public sealed class ProvisioningPlanContractTests
     public async Task Provisioning_plan_exposes_desktop_contract_fields()
     {
         var configuration = new ConfigurationStore();
+        var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
         var engine = new ProvisioningEngine(
             configuration,
-            new InstallerEngine(new WorkspacePaths()),
-            new WorkspacePaths(),
+            new InstallerEngine(paths),
+            paths,
             new InventoryScanner([]));
 
         var plan = await engine.PlanAsync(configuration.LoadProfiles().Values.First().Id);
@@ -112,6 +113,22 @@ public sealed class ProvisioningPlanContractTests
         }
     }
 }
+
+
+    private static string FindRepositoryRoot()
+    {
+        var current = new DirectoryInfo(AppContext.BaseDirectory);
+        while (current is not null)
+        {
+            if (File.Exists(Path.Combine(current.FullName, "bootstrap", "windows", "components", "catalog.json")))
+                return current.FullName;
+
+            current = current.Parent;
+        }
+
+        Assert.Fail("Repository content root could not be located for the configuration contract test.");
+        return string.Empty;
+    }
 
 
 [TestClass]
