@@ -38,8 +38,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
 {
     private readonly DesktopEngineClient _engineClient;
     private readonly DesktopDialogService _dialogService;
-    private readonly JobStore _jobStore;
-    private readonly JobScheduler _jobScheduler;
     private readonly ThemeManager _themeManager;
     private InventorySnapshot? _inventorySnapshot;
     private IReadOnlyList<InventoryCleanupRecommendation> _inventoryRecommendations = Array.Empty<InventoryCleanupRecommendation>();
@@ -65,19 +63,14 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private IReadOnlyList<ProvisioningOperationHistoryItemViewModel> _provisioningHistory = Array.Empty<ProvisioningOperationHistoryItemViewModel>();
     private ProvisioningOperationHistoryItemViewModel? _selectedProvisioningHistoryItem;
     private ProvisioningOperationDetail? _provisioningOperationDetail;
-    private JobSchedulerSnapshot? _jobQueueSnapshot;
     private ThemeOption _selectedTheme = new(ThemeMode.System, "Système");
 
     public MainViewModel(
         DesktopEngineClient engineClient,
-        DesktopDialogService dialogService,
-        JobStore jobStore,
-        JobScheduler jobScheduler)
+        DesktopDialogService dialogService)
     {
         _engineClient = engineClient;
         _dialogService = dialogService;
-        _jobStore = jobStore;
-        _jobScheduler = jobScheduler;
         _themeManager = new ThemeManager();
         SelectedTheme = ThemeOptions.First(option => option.Mode == _themeManager.LoadMode());
         DashboardCommand = new AsyncCommand(() => NavigateAsync(DesktopPage.Dashboard));
@@ -98,17 +91,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
-
-    public JobSchedulerSnapshot? JobQueueSnapshot
-    {
-        get => _jobQueueSnapshot;
-        private set
-        {
-            if (ReferenceEquals(_jobQueueSnapshot, value)) return;
-            _jobQueueSnapshot = value;
-            OnPropertyChanged();
-        }
-    }
 
     public AsyncCommand DashboardCommand { get; }
     public AsyncCommand OptimizationCommand { get; }
@@ -272,14 +254,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public async Task InitializeAsync()
     {
-        try
-        {
-            JobQueueSnapshot = await _jobScheduler.RecoverAndReconcileAsync();
-        }
-        catch (Exception ex)
-        {
-            ProvisioningOutput = $"Job scheduler startup reconciliation failed: {ex.Message}";
-        }
         await RefreshBaselineAsync();
         await LoadProvisioningProfilesAsync();
         await ScanInventoryAsync();
