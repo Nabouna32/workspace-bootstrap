@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/NabounaLab/dev-environment/blob/main/contracts/configuration-profile.schema.json",
-  "title": "BounaDevEnvironment Configuration Profile",
+  "$id": "https://github.com/Nabouna32/workspace-bootstrap/blob/main/contracts/configuration-profile.schema.json",
+  "title": "Workspace Bootstrap Configuration Profile",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -42,7 +42,9 @@
     "component": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id"],
+      "required": [
+        "id"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -57,17 +59,31 @@
     "versionPolicy": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["mode"],
+      "required": [
+        "mode"
+      ],
       "properties": {
         "mode": {
-          "enum": ["latest", "exact", "minimum", "range", "channel"]
+          "enum": [
+            "latest",
+            "exact",
+            "minimum",
+            "range",
+            "channel"
+          ]
         },
         "value": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "maxLength": 128
         },
         "channel": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "maxLength": 64
         }
       }
