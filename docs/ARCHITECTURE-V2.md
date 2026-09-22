@@ -2,11 +2,11 @@
 
 ## Product boundary
 
-Workspace Bootstrap is a Windows 11 workstation provisioning and recovery application. Linux/WSL bootstrap is not part of the product.
+Workspace Bootstrap is a Windows 11 workstation provisioning and recovery application.
 
 ## Native application architecture
 
-```
+```text
                     Workspace Bootstrap
                            |
               +------------+------------+
@@ -19,7 +19,7 @@ Workspace Bootstrap is a Windows 11 workstation provisioning and recovery applic
                            |
        +-------------------+-------------------+
        |                   |                   |
-  Configuration        Provisioning       Windows services
+  Configuration        Provisioning       Windows APIs
        |                   |                   |
   Components/Profiles  Installer/Cache   Inventory/Diagnostics
                            |
@@ -28,15 +28,17 @@ Workspace Bootstrap is a Windows 11 workstation provisioning and recovery applic
                     WinGet fallback
 ```
 
-There is one implementation of provisioning. The UI and CLI are clients of the engine.
+There is one implementation of provisioning. The UI and CLI are clients of the Engine.
 
 ## State and cache
 
-- Application state: `C:\Dev\WorkspaceBootstrap\state`
-- Logs: `C:\Dev\WorkspaceBootstrap\logs`
-- Installer cache: `C:\DevCache`
-- Cache staging: `C:\DevCache\staging`
-- Cache metadata: `C:\DevCache\metadata`
+The package contains its mutable state:
+
+- application state: `state`
+- logs: `logs`
+- installer cache: `cache`
+- cache staging: `cache/staging`
+- cache metadata: `cache/metadata`
 
 Downloads are written to unique staging files. Verification occurs before promotion into the versioned cache. A failed staging operation must not invalidate an existing verified artifact.
 
@@ -61,8 +63,8 @@ Downloads are written to unique staging files. Verification occurs before promot
 
 ## Execution safety
 
-Provisioning is idempotent and observable. Destructive operations require explicit confirmation. Reboot-required operations and failures must remain recoverable rather than being silently retried or duplicated.
+Provisioning is idempotent and observable. Destructive operations require explicit confirmation. Reboot-required operations and failures remain recoverable.
 
 ## CI architecture
 
-All GitHub Actions jobs run on the project's GitHub-hosted Windows runner. Repository validation must never depend on GitHub-hosted operating systems.
+GitHub Actions validates the repository on GitHub-hosted Windows runners.
