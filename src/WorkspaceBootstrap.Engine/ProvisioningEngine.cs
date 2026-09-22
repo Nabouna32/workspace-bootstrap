@@ -25,11 +25,13 @@ public sealed class ProvisioningEngine
     public IReadOnlyList<ProfileManifest> Profiles() =>
         _config.LoadProfiles().Values.OrderBy(x => x.Id).ToArray();
 
-    public object Plan(string profileId)
+    public async Task<object> PlanAsync(
+        string profileId,
+        CancellationToken token = default)
     {
         var profile = GetProfile(profileId);
         var components = _config.LoadComponents();
-        var inventory = _inventory.ScanAsync().GetAwaiter().GetResult();
+        var inventory = await _inventory.ScanAsync(token);
 
         return new
         {
@@ -270,24 +272,31 @@ public sealed class ProvisioningEngine
             psi = new ProcessStartInfo
             {
                 FileName = processPath,
-                Arguments = $"\"{entryAssembly}\" provisioning-worker --operation \"{operationId}\""
-                    + (cacheOnly ? " --cache-only" : ""),
                 WorkingDirectory = AppContext.BaseDirectory,
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
+            psi.ArgumentList.Add(entryAssembly);
+            psi.ArgumentList.Add("provisioning-worker");
+            psi.ArgumentList.Add("--operation");
+            psi.ArgumentList.Add(operationId);
+            if (cacheOnly)
+                psi.ArgumentList.Add("--cache-only");
         }
         else
         {
             psi = new ProcessStartInfo
             {
                 FileName = currentAssembly,
-                Arguments = $"provisioning-worker --operation \"{operationId}\""
-                    + (cacheOnly ? " --cache-only" : ""),
                 WorkingDirectory = AppContext.BaseDirectory,
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
+            psi.ArgumentList.Add("provisioning-worker");
+            psi.ArgumentList.Add("--operation");
+            psi.ArgumentList.Add(operationId);
+            if (cacheOnly)
+                psi.ArgumentList.Add("--cache-only");
         }
 
         var worker = Process.Start(psi)
