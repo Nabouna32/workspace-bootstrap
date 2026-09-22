@@ -7,17 +7,20 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
 {
     private readonly IProvisioningService _provisioning;
     private readonly IInventoryService _inventory;
+    private readonly ISoftwareInventoryService _softwareInventory;
     private readonly IWindowsAdministrationService _windows;
     private readonly IOptimizationService _optimization;
 
     public WorkspaceControlApplication(
         IProvisioningService provisioning,
         IInventoryService inventory,
+        ISoftwareInventoryService softwareInventory,
         IWindowsAdministrationService windows,
         IOptimizationService optimization)
     {
         _provisioning = provisioning ?? throw new ArgumentNullException(nameof(provisioning));
         _inventory = inventory ?? throw new ArgumentNullException(nameof(inventory));
+        _softwareInventory = softwareInventory ?? throw new ArgumentNullException(nameof(softwareInventory));
         _windows = windows ?? throw new ArgumentNullException(nameof(windows));
         _optimization = optimization ?? throw new ArgumentNullException(nameof(optimization));
     }
@@ -61,6 +64,9 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
 
     public Task<InventorySnapshot> GetInventoryAsync(CancellationToken cancellationToken = default) =>
         _inventory.ScanAsync(cancellationToken);
+
+    public Task<SoftwareInventorySnapshot> GetSoftwareInventoryAsync(CancellationToken cancellationToken = default) =>
+        _softwareInventory.ScanAsync(cancellationToken);
 
     public BaselineSnapshot GetBaseline() => _windows.GetBaseline();
 
