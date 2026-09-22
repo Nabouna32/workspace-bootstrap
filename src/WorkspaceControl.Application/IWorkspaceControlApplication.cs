@@ -15,6 +15,7 @@ public interface IWorkspaceControlApplication
     ProvisioningOperation? GetProvisioningDetail(string operationId);
     Task<InventorySnapshot> GetInventoryAsync(CancellationToken cancellationToken = default);
     Task<SoftwareInventorySnapshot> GetSoftwareInventoryAsync(CancellationToken cancellationToken = default);
+    Task<SoftwareInventorySnapshot> GetSoftwareInventoryAsync(CancellationToken cancellationToken = default);
     BaselineSnapshot GetBaseline();
     IReadOnlyList<OptimizationPlanItem> GetSafeOptimizationPlan();
     IReadOnlyList<string> ApplySafeOptimization();
