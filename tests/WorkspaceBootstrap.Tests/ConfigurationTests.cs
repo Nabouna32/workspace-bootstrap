@@ -26,6 +26,11 @@ public sealed class ConfigurationTests
                 component.OfficialSource is not null ||
                 string.Equals(component.FallbackPackageManager, "winget", StringComparison.OrdinalIgnoreCase),
                 $"Component {component.Id} has neither an official source nor the explicit WinGet fallback.");
+
+            if (component.OfficialSource is not null)
+            {
+                Assert.IsFalse(string.IsNullOrWhiteSpace(component.OfficialSource.Type));
+            }
         }
     }
 
@@ -37,14 +42,25 @@ public sealed class ConfigurationTests
         var profiles = configuration.LoadProfiles();
 
         Assert.IsNotEmpty(profiles);
+        Assert.AreEqual(
+            profiles.Count,
+            profiles.Values.Select(x => x.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count());
 
         foreach (var profile in profiles.Values)
         {
             Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Id));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Name));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Description));
             Assert.IsNotEmpty(profile.Components);
 
             foreach (var componentId in profile.Components)
                 Assert.IsTrue(components.ContainsKey(componentId), $"{profile.Id} references unknown component {componentId}.");
+        }
+
+        foreach (var component in components.Values)
+        {
+            foreach (var profileId in component.Profiles ?? Array.Empty<string>())
+                Assert.IsTrue(profiles.ContainsKey(profileId), $"{component.Id} references unknown profile {profileId}.");
         }
     }
 }

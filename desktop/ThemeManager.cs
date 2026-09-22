@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using Microsoft.Win32;
 using System.Windows;
@@ -33,8 +34,9 @@ public sealed class ThemeManager
                 ? mode
                 : ThemeMode.System;
         }
-        catch
+        catch (Exception ex)
         {
+            Trace.TraceWarning($"Unable to read theme settings '{_settingsPath}': {ex.Message}");
             return ThemeMode.System;
         }
     }
@@ -51,9 +53,9 @@ public sealed class ThemeManager
         {
             File.WriteAllText(_settingsPath, mode.ToString());
         }
-        catch
+        catch (Exception ex)
         {
-            // The selected theme remains active for the current session if persistence is unavailable.
+            Trace.TraceWarning($"Unable to persist theme settings '{_settingsPath}': {ex.Message}");
         }
     }
 
@@ -69,8 +71,9 @@ public sealed class ThemeManager
                 ? ThemeMode.Light
                 : ThemeMode.Dark;
         }
-        catch
+        catch (Exception ex)
         {
+            Trace.TraceWarning($"Unable to read the Windows theme preference: {ex.Message}");
             return ThemeMode.Dark;
         }
     }
