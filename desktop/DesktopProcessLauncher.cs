@@ -6,10 +6,7 @@ public sealed class DesktopProcessLauncher
 {
     public void LaunchInteractiveProvisioning(string repositoryRoot)
     {
-        var executable = Environment.GetEnvironmentVariable("WORKSPACE_BOOTSTRAP_ENGINE");
-        executable = !string.IsNullOrWhiteSpace(executable) && File.Exists(executable)
-            ? executable
-            : Path.Combine(AppContext.BaseDirectory, "WorkspaceBootstrap.Cli.exe");
+        var executable = Path.Combine(AppContext.BaseDirectory, "WorkspaceBootstrap.Cli.exe");
 
         if (!File.Exists(executable))
             throw new FileNotFoundException(
