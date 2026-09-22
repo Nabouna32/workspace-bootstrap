@@ -8,6 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\WorkspaceControl.Domain\WorkspaceControl.Domain.csproj" />
+    <ProjectReference Include="..\WorkspaceControl.Application\WorkspaceControl.Application.csproj" />
     <PackageReference Include="System.Management" Version="10.0.0" />
   </ItemGroup>
 </Project>
