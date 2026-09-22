@@ -1,23 +1,39 @@
 # Workspace Bootstrap Desktop
 
-Native WPF desktop client for Workspace Bootstrap.
+Native Windows desktop application for Workspace Bootstrap.
 
 ## Architecture
 
-The desktop application is presentation and interaction. Provisioning, installer resolution, cache handling, Windows diagnostics and operation state belong to the shared C# engine.
+- UI: WPF on .NET 10.
+- Application logic: shared `WorkspaceBootstrap.Engine`.
+- Provisioning: Engine-owned; the desktop does not execute scripts.
+- CLI and desktop share the same domain and provisioning implementation.
+- Persistent state: `C:\Dev\WorkspaceBootstrap`.
+- Installer cache: `C:\DevCache`.
 
-Build:
+## Development
+
+From the repository root:
 
 ```text
-dotnet build .\WorkspaceBootstrap.Desktop.csproj --configuration Release
+dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj
+dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Debug
+dotnet run --project desktop/WorkspaceBootstrap.Desktop.csproj --configuration Debug
 ```
 
-Run:
+## UX direction
 
-```text
-dotnet run --project .\WorkspaceBootstrap.Desktop.csproj
-```
+The desktop is a real Windows 11 management application:
 
-The desktop client communicates with the self-contained Workspace Bootstrap CLI when running from a published installation, and can use `dotnet run` against the CLI project during development.
+- dashboard-first navigation;
+- consistent cards and state indicators;
+- profile/component selection;
+- plan preview before mutation;
+- visible progress and recovery;
+- operation history;
+- diagnostics and inventory;
+- guarded maintenance/optimization;
+- keyboard-friendly, accessible controls;
+- dark/light-ready design tokens.
 
-There is no PowerShell execution backend.
+The presentation layer must not duplicate Engine behavior.
