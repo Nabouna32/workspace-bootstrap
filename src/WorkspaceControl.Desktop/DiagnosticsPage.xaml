@@ -1,0 +1,25 @@
+<Page
+    x:Class="WorkspaceControl.Desktop.DiagnosticsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Padding="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel Spacing="4">
+            <TextBlock Text="Diagnostics" FontSize="32" FontWeight="SemiBold" />
+            <TextBlock Text="Provider and discovery signals collected during the latest scan." Opacity="0.72" />
+        </StackPanel>
+
+        <InfoBar Grid.Row="1" Margin="0,20,0,12"
+                 IsOpen="{Binding Error, Converter={StaticResource StringToBooleanConverter}}"
+                 Severity="Error"
+                 Title="Refresh error"
+                 Message="{Binding Error}" />
+
+        <ListView Grid.Row="2" ItemsSource="{Binding Diagnostics}" SelectionMode="None" />
+    </Grid>
+</Page>
