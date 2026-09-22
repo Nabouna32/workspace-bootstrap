@@ -31,11 +31,16 @@ public sealed class EngineFacade
     public string ResumeProvisioning(string operationId, bool cacheOnly = false) => _provisioning.Resume(operationId, cacheOnly);
     public IReadOnlyList<ProvisioningOperation> GetProvisioningHistory() => _provisioning.History().ToArray();
 
-    public ProvisioningOperation? GetProvisioningRecovery() =>
-        _provisioning.History()
-            .Where(x => x.Status is "starting" or "running" or "failed")
+    public ProvisioningOperation? GetProvisioningRecovery()
+    {
+        var latest = _provisioning.History()
             .OrderByDescending(x => x.UpdatedAt)
             .FirstOrDefault();
+
+        return latest?.Status is "starting" or "running" or "failed"
+            ? latest
+            : null;
+    }
 
     public ProvisioningOperation? GetProvisioningDetail(string operationId) =>
         _provisioning.Get(operationId);
