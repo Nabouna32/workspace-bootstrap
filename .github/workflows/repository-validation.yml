@@ -2,9 +2,6 @@ name: Repository validation
 
 on:
   pull_request:
-  push:
-    branches:
-      - main
   schedule:
     - cron: '17 4 * * 0'
   workflow_dispatch:
@@ -22,14 +19,10 @@ env:
 
 jobs:
   validate:
-    name: Validate (${{ matrix.configuration }})
-    if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
-    strategy:
-      fail-fast: false
-      matrix:
-        configuration: [Release]
+    name: PR validation
+    if: github.event_name == 'pull_request'
     runs-on: windows-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -47,7 +40,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Restore projects
+      - name: Restore
         shell: pwsh
         run: |
           dotnet restore src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj
@@ -55,86 +48,18 @@ jobs:
           dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
           dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
 
-      - name: Build engine
-        run: dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release --no-restore --warnaserror
+      - name: Build
+        shell: pwsh
+        run: |
+          dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release --no-restore --warnaserror
+          dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --no-restore --warnaserror
+          dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --no-restore --warnaserror
 
-      - name: Build desktop
-        run: dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --no-restore --warnaserror
-
-      - name: Build CLI
-        run: dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --no-restore --warnaserror
-
-      - name: Run tests
+      - name: Test
         run: dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=tests-Release.trx"
 
       - name: Verify formatting
         run: dotnet format tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --no-restore --verify-no-changes
-
-      - name: Publish portable package
-        if: github.event_name == 'push'
-        shell: pwsh
-        run: |
-          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-package"
-          New-Item -ItemType Directory -Force -Path $package | Out-Null
-          dotnet publish desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
-          dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
-
-      - name: Smoke-test portable package
-        if: github.event_name == 'push'
-        shell: pwsh
-        run: |
-          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-package"
-          $desktop = Join-Path $package "WorkspaceBootstrap.exe"
-          $cli = Join-Path $package "WorkspaceBootstrap.Cli.exe"
-          $catalog = Join-Path $package "bootstrap/windows/components/catalog.json"
-          $profiles = Join-Path $package "bootstrap/windows/profiles"
-          $readme = Join-Path $package "README.md"
-
-          if (-not (Test-Path $desktop)) { throw "Desktop executable is missing: $desktop" }
-          if (-not (Test-Path $cli)) { throw "CLI executable is missing: $cli" }
-          if (-not (Test-Path $catalog)) { throw "Bundled component catalog is missing: $catalog" }
-          if (-not (Test-Path $profiles -PathType Container)) { throw "Bundled profiles directory is missing: $profiles" }
-          if (-not (Test-Path $readme)) { throw "Portable package README is missing: $readme" }
-
-          & $cli capabilities
-          if ($LASTEXITCODE -ne 0) { throw "Portable CLI smoke test failed with exit code $LASTEXITCODE." }
-
-      - name: Upload release package
-        if: github.event_name == 'push'
-        uses: actions/upload-artifact@v6
-        with:
-          name: workspace-bootstrap-win-x64-${{ github.sha }}
-          path: ${{ runner.temp }}/workspace-bootstrap-package
-          if-no-files-found: error
-
-      - name: Publish portable package for scheduled smoke test
-        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && matrix.configuration == 'Release'
-        shell: pwsh
-        run: |
-          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-package"
-          New-Item -ItemType Directory -Force -Path $package | Out-Null
-          dotnet publish desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
-          dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
-
-      - name: Smoke-test scheduled portable package
-        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && matrix.configuration == 'Release'
-        shell: pwsh
-        run: |
-          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-package"
-          $desktop = Join-Path $package "WorkspaceBootstrap.exe"
-          $cli = Join-Path $package "WorkspaceBootstrap.Cli.exe"
-          $catalog = Join-Path $package "bootstrap/windows/components/catalog.json"
-          $profiles = Join-Path $package "bootstrap/windows/profiles"
-          $readme = Join-Path $package "README.md"
-
-          if (-not (Test-Path $desktop)) { throw "Desktop executable is missing: $desktop" }
-          if (-not (Test-Path $cli)) { throw "CLI executable is missing: $cli" }
-          if (-not (Test-Path $catalog)) { throw "Bundled component catalog is missing: $catalog" }
-          if (-not (Test-Path $profiles -PathType Container)) { throw "Bundled profiles directory is missing: $profiles" }
-          if (-not (Test-Path $readme)) { throw "Portable package README is missing: $readme" }
-
-          & $cli capabilities
-          if ($LASTEXITCODE -ne 0) { throw "Portable CLI smoke test failed with exit code $LASTEXITCODE." }
 
       - name: Upload test results
         if: always()
@@ -145,14 +70,14 @@ jobs:
           if-no-files-found: warn
 
   full-validation:
-    name: Full validation (${{ matrix.configuration }})
+    name: Weekly/full validation (${{ matrix.configuration }})
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:
         configuration: [Debug, Release]
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -170,7 +95,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Restore projects
+      - name: Restore
         shell: pwsh
         run: |
           dotnet restore src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj
@@ -178,16 +103,14 @@ jobs:
           dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
           dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
 
-      - name: Build engine
-        run: dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
+      - name: Build
+        shell: pwsh
+        run: |
+          dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
+          dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
+          dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
 
-      - name: Build desktop
-        run: dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
-
-      - name: Build CLI
-        run: dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
-
-      - name: Run tests
+      - name: Test
         run: dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration ${{ matrix.configuration }} --no-restore --logger "trx;LogFileName=tests-${{ matrix.configuration }}.trx"
 
       - name: Verify formatting
@@ -201,3 +124,32 @@ jobs:
           name: test-results-${{ matrix.configuration }}-${{ github.run_id }}
           path: '**/TestResults/*.trx'
           if-no-files-found: warn
+
+      - name: Publish weekly portable package
+        if: matrix.configuration == 'Release'
+        shell: pwsh
+        run: |
+          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-weekly"
+          New-Item -ItemType Directory -Force -Path $package | Out-Null
+          dotnet publish desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
+          dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
+
+      - name: Smoke-test weekly package
+        if: matrix.configuration == 'Release'
+        shell: pwsh
+        run: |
+          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-weekly"
+          $desktop = Join-Path $package "WorkspaceBootstrap.exe"
+          $cli = Join-Path $package "WorkspaceBootstrap.Cli.exe"
+          $catalog = Join-Path $package "bootstrap/windows/components/catalog.json"
+          $profiles = Join-Path $package "bootstrap/windows/profiles"
+          $readme = Join-Path $package "README.md"
+
+          if (-not (Test-Path $desktop)) { throw "Desktop executable is missing: $desktop" }
+          if (-not (Test-Path $cli)) { throw "CLI executable is missing: $cli" }
+          if (-not (Test-Path $catalog)) { throw "Bundled component catalog is missing: $catalog" }
+          if (-not (Test-Path $profiles -PathType Container)) { throw "Bundled profiles directory is missing: $profiles" }
+          if (-not (Test-Path $readme)) { throw "Portable package README is missing: $readme" }
+
+          & $cli capabilities
+          if ($LASTEXITCODE -ne 0) { throw "Portable CLI smoke test failed with exit code $LASTEXITCODE." }

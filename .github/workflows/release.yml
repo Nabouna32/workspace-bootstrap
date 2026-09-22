@@ -1,0 +1,109 @@
+name: Release Windows package
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: workspace-bootstrap-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  release:
+    name: Build and package Windows release
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.401
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'global.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore
+        shell: pwsh
+        run: |
+          dotnet restore src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj
+          dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj --runtime win-x64
+          dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
+          dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
+
+      - name: Build and test
+        shell: pwsh
+        run: |
+          dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release --no-restore --warnaserror
+          dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --no-restore --warnaserror
+          dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --no-restore --warnaserror
+          dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=tests-Release.trx"
+          dotnet format tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --no-restore --verify-no-changes
+
+      - name: Publish portable package
+        shell: pwsh
+        run: |
+          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-release"
+          New-Item -ItemType Directory -Force -Path $package | Out-Null
+          dotnet publish desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
+          dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
+
+      - name: Smoke-test package
+        shell: pwsh
+        run: |
+          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-release"
+          $desktop = Join-Path $package "WorkspaceBootstrap.exe"
+          $cli = Join-Path $package "WorkspaceBootstrap.Cli.exe"
+          $catalog = Join-Path $package "bootstrap/windows/components/catalog.json"
+          $profiles = Join-Path $package "bootstrap/windows/profiles"
+          $readme = Join-Path $package "README.md"
+
+          if (-not (Test-Path $desktop)) { throw "Desktop executable is missing: $desktop" }
+          if (-not (Test-Path $cli)) { throw "CLI executable is missing: $cli" }
+          if (-not (Test-Path $catalog)) { throw "Bundled component catalog is missing: $catalog" }
+          if (-not (Test-Path $profiles -PathType Container)) { throw "Bundled profiles directory is missing: $profiles" }
+          if (-not (Test-Path $readme)) { throw "Portable package README is missing: $readme" }
+
+          & $cli capabilities
+          if ($LASTEXITCODE -ne 0) { throw "Portable CLI smoke test failed with exit code $LASTEXITCODE." }
+
+      - name: Create checksum
+        shell: pwsh
+        run: |
+          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-release"
+          $zip = Join-Path $env:RUNNER_TEMP "WorkspaceBootstrap-win-x64.zip"
+          Compress-Archive -Path (Join-Path $package '*') -DestinationPath $zip -Force
+          $hash = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash
+          "$hash  WorkspaceBootstrap-win-x64.zip" | Set-Content -Encoding ascii (Join-Path $env:RUNNER_TEMP "SHA256SUMS.txt")
+
+      - name: Upload release package
+        uses: actions/upload-artifact@v6
+        with:
+          name: workspace-bootstrap-win-x64-${{ github.ref_name }}
+          path: |
+            ${{ runner.temp }}/WorkspaceBootstrap-win-x64.zip
+            ${{ runner.temp }}/SHA256SUMS.txt
+          if-no-files-found: error
+
+      - name: Create GitHub release for tag
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" "${{ runner.temp }}/WorkspaceBootstrap-win-x64.zip" "${{ runner.temp }}/SHA256SUMS.txt" --generate-notes
