@@ -23,10 +23,8 @@ public sealed class RepositoryPolicyTests
         foreach (var workflow in workflows)
         {
             var content = File.ReadAllText(workflow);
-            StringAssert.DoesNotContain(content, "ubuntu-latest");
-            StringAssert.DoesNotContain(content, "windows-latest");
-            StringAssert.DoesNotContain(content, "macos-latest");
-            StringAssert.Contains(content, "runs-on: [self-hosted, windows, x64]");
+            StringAssert.DoesNotContain(content, "self-hosted");
+            StringAssert.Contains(content, "runs-on: windows-latest");
         }
     }
 
