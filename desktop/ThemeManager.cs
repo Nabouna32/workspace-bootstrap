@@ -42,18 +42,11 @@ public sealed class ThemeManager
 
     public void Apply(ThemeMode mode)
     {
-        var palette = ResolvePalette(mode);
+        var palette = GetPalette(ResolveSystemTheme(mode));
         var resources = Application.Current.Resources;
 
         foreach (var pair in palette)
             resources[pair.Key] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(pair.Value));
-
-        resources["ThemeModeLabel"] = mode switch
-        {
-            ThemeMode.Dark => "Sombre",
-            ThemeMode.Light => "Clair",
-            _ => "Système"
-        };
 
         try
         {
@@ -61,11 +54,11 @@ public sealed class ThemeManager
         }
         catch
         {
-            // Theme selection remains valid for the current session if persistence is unavailable.
+            // The selected theme remains active for the current session if persistence is unavailable.
         }
     }
 
-    private static ThemeMode ResolvePalette(ThemeMode mode)
+    private static ThemeMode ResolveSystemTheme(ThemeMode mode)
     {
         if (mode != ThemeMode.System)
             return mode;
@@ -73,8 +66,7 @@ public sealed class ThemeManager
         try
         {
             using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
-            var useLight = key?.GetValue("AppsUseLightTheme");
-            return useLight is int value && value == 1
+            return key?.GetValue("AppsUseLightTheme") is int value && value == 1
                 ? ThemeMode.Light
                 : ThemeMode.Dark;
         }
@@ -84,7 +76,7 @@ public sealed class ThemeManager
         }
     }
 
-    private static IReadOnlyDictionary<string, string> Palette(ThemeMode mode) =>
+    private static IReadOnlyDictionary<string, string> GetPalette(ThemeMode mode) =>
         mode == ThemeMode.Light
             ? new Dictionary<string, string>(StringComparer.Ordinal)
             {
@@ -128,10 +120,4 @@ public sealed class ThemeManager
                 ["Info"] = "#78A9FF",
                 ["InfoSoft"] = "#20334F"
             };
-
-    private static IReadOnlyDictionary<string, string> ResolvePaletteInternal(ThemeMode mode) =>
-        Palette(mode == ThemeMode.System ? ResolvePalette(ThemeMode.System) : mode);
-
-    private static IReadOnlyDictionary<string, string> ResolvePalette(ThemeMode mode, bool _ = false) =>
-        ResolvePaletteInternal(mode);
 }
