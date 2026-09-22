@@ -58,7 +58,9 @@ public sealed class InstallerEngine
     {
         if (cacheOnly)
         {
-            return FindVerifiedCached(component);
+            return FindVerifiedCached(component)
+                ?? throw new InvalidOperationException(
+                    $"Aucun installateur vérifié disponible dans le cache pour '{component.Name}'.");
         }
 
         if (component.OfficialSource is null)
