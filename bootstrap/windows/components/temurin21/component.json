@@ -1,0 +1,18 @@
+{
+  "id": "temurin21",
+  "name": "Eclipse Temurin JDK 21",
+  "category": "development",
+  "profiles": ["development"],
+  "platforms": ["windows"],
+  "versionPolicy": "minimum",
+  "packageManager": "winget",
+  "packageId": "EclipseAdoptium.Temurin.21.JDK",
+  "source": "winget",
+  "installerType": "msi",
+  "installer": "Install-WingetPackage.ps1",
+  "installerParameters": ["-PackageId", "EclipseAdoptium.Temurin.21.JDK"],
+  "dependencies": [],
+  "prerequisites": [{"type": "admin"}, {"type": "command", "name": "winget"}],
+  "checks": [{"type": "winget-package", "id": "EclipseAdoptium.Temurin.21.JDK"}],
+  "minimumVersion": "21.0.0"
+}

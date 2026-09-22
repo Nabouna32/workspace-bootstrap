@@ -1,0 +1,7 @@
+{
+  "id":"vlc","name":"VLC media player","category":"utility","profiles": ["base"],"platforms":["windows"],
+  "versionPolicy":"latest-stable","packageManager":"winget","packageId":"VideoLAN.VLC","source":"winget",
+  "installerType":"exe","installer":"Install-WingetPackage.ps1","installerParameters":["-PackageId","VideoLAN.VLC"],
+  "dependencies":[],"prerequisites":[{"type":"admin"},{"type":"windows-build","minimum":22000},{"type":"command","name":"winget"}],
+  "checks":[{"type":"file-any","paths":["C:\\Program Files\\VideoLAN\\VLC\\vlc.exe","C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe"]}]
+}
