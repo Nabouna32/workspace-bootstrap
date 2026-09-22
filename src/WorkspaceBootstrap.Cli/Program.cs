@@ -1,5 +1,6 @@
 using System.Text.Json;
 using WorkspaceBootstrap;
+using WorkspaceControl.Domain;
 
 try
 {
