@@ -85,7 +85,7 @@ public sealed class ConfigurationTests
 public sealed class ProvisioningPlanContractTests
 {
     [TestMethod]
-    public void Provisioning_plan_exposes_desktop_contract_fields()
+    public async Task Provisioning_plan_exposes_desktop_contract_fields()
     {
         var configuration = new ConfigurationStore();
         var engine = new ProvisioningEngine(
@@ -94,7 +94,7 @@ public sealed class ProvisioningPlanContractTests
             new WorkspacePaths(),
             new InventoryScanner([]));
 
-        var plan = engine.Plan(configuration.LoadProfiles().Values.First().Id);
+        var plan = await engine.PlanAsync(configuration.LoadProfiles().Values.First().Id);
         using var document = System.Text.Json.JsonDocument.Parse(
             System.Text.Json.JsonSerializer.Serialize(plan));
 
