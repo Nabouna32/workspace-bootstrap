@@ -176,7 +176,7 @@
                                         Margin="0,14,0,0">
                                     <StackPanel>
                                         <DockPanel>
-                                            <TextBlock Text="{Binding ProvisioningOperationStatus}" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding ProvisioningOperationStatus}" FontWeight="SemiBold" Style="{StaticResource StatusTextStyle}"/>
                                             <TextBlock Text="{Binding ProvisioningCurrentStep}" Foreground="{StaticResource SecondaryText}" HorizontalAlignment="Right"/>
                                         </DockPanel>
                                         <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProvisioningOperation.Percent}" Height="6" Margin="0,10,0,0"/>
@@ -204,7 +204,7 @@
                                                             <ColumnDefinition Width="1.4*"/>
                                                         </Grid.ColumnDefinitions>
                                                         <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                                        <TextBlock Grid.Column="1" Text="{Binding StateLabel}" Foreground="{StaticResource SecondaryText}" Margin="12,0" VerticalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding StateLabel}" Margin="12,0" VerticalAlignment="Center" Style="{StaticResource StatusTextStyle}"/>
                                                         <TextBlock Grid.Column="2" Text="{Binding ActionLabel}" Foreground="{StaticResource Accent}" VerticalAlignment="Center"/>
                                                     </Grid>
                                                 </Border>
@@ -235,7 +235,7 @@
                                                             <TextBlock Text="{Binding ProfileId}" FontWeight="SemiBold"/>
                                                             <TextBlock Text="{Binding OperationId}" Foreground="{StaticResource SecondaryText}" FontSize="11"/>
                                                         </StackPanel>
-                                                        <TextBlock Grid.Column="1" Text="{Binding StatusLabel}" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding StatusLabel}" VerticalAlignment="Center" Style="{StaticResource StatusTextStyle}"/>
                                                         <TextBlock Grid.Column="2" Text="{Binding ProgressLabel}" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
                                                         <TextBlock Grid.Column="3" Text="{Binding UpdatedAtLabel}" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
                                                     </Grid>
