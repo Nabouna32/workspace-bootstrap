@@ -1,4 +1,3 @@
-using WorkspaceBootstrap;
 using WorkspaceControl.Domain;
 
 namespace WorkspaceControl.Application.Contracts;
