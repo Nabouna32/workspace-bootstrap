@@ -180,7 +180,7 @@ public sealed class InstallerEngine
         var html = await response.Content.ReadAsStringAsync(token);
         var match = Regex.Match(
             html,
-            @"href=[\"'](?<url>[^\"']*winrar-x64-(?<version>\d+)fr\.exe)[\"']",
+            @"href=['""](?<url>[^'""]*winrar-x64-(?<version>\d+)fr\.exe)['""]",
             RegexOptions.IgnoreCase);
 
         if (!match.Success)
