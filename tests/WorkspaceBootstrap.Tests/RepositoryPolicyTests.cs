@@ -80,6 +80,37 @@ public sealed class RepositoryPolicyTests
         }
     }
 
+
+    [TestMethod]
+    public void Workflows_do_not_depend_on_shell_scripts_for_product_execution()
+    {
+        var root = LocateRepositoryRoot();
+        var workflowsRoot = Path.Combine(root, ".github", "workflows");
+
+        foreach (var workflow in Directory.EnumerateFiles(workflowsRoot, "*.y*ml", SearchOption.AllDirectories))
+        {
+            var content = File.ReadAllText(workflow);
+            StringAssert.DoesNotContain(content, "bootstrap\\windows\\", workflow);
+            StringAssert.DoesNotContain(content, "powershell -File", workflow);
+            StringAssert.DoesNotContain(content, "pwsh -File", workflow);
+            StringAssert.DoesNotContain(content, "self-hosted", workflow);
+        }
+    }
+
+    [TestMethod]
+    public void Desktop_has_explicit_theme_modes()
+    {
+        var root = LocateRepositoryRoot();
+        var manager = File.ReadAllText(Path.Combine(root, "desktop", "ThemeManager.cs"));
+        var viewModel = File.ReadAllText(Path.Combine(root, "desktop", "MainViewModel.cs"));
+
+        StringAssert.Contains(manager, "ThemeMode.System");
+        StringAssert.Contains(manager, "ThemeMode.Light");
+        StringAssert.Contains(manager, "ThemeMode.Dark");
+        StringAssert.Contains(viewModel, "ThemeOptions");
+        StringAssert.Contains(viewModel, "SelectedTheme");
+    }
+
     private static string LocateRepositoryRoot()
     {
         var current = new DirectoryInfo(AppContext.BaseDirectory);
