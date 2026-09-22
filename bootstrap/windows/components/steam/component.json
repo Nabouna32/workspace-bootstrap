@@ -2,16 +2,37 @@
   "id": "steam",
   "name": "Steam",
   "category": "gaming",
-  "profiles": ["gaming"],
-  "platforms": ["windows"],
+  "profiles": [
+    "gaming"
+  ],
+  "platforms": [
+    "windows"
+  ],
   "versionPolicy": "latest-stable",
-  "packageManager": "winget",
   "packageId": "Valve.Steam",
-  "source": "winget",
   "installerType": "exe",
-  "installer": "Install-WingetPackage.ps1",
-  "installerParameters": ["-PackageId", "Valve.Steam"],
   "dependencies": [],
-  "prerequisites": [{"type": "admin"}, {"type": "windows-build", "minimum": 22000}, {"type": "command", "name": "winget"}],
-  "checks": [{"type": "file-any", "paths": ["C:\\Program Files (x86)\\Steam\\steam.exe", "C:\\Program Files\\Steam\\steam.exe"]}]
+  "prerequisites": [
+    {
+      "type": "admin"
+    },
+    {
+      "type": "windows-build",
+      "minimum": 22000
+    },
+    {
+      "type": "command",
+      "name": "winget"
+    }
+  ],
+  "checks": [
+    {
+      "type": "file-any",
+      "paths": [
+        "C:\\Program Files (x86)\\Steam\\steam.exe",
+        "C:\\Program Files\\Steam\\steam.exe"
+      ]
+    }
+  ],
+  "fallbackPackageManager": "winget"
 }
