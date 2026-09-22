@@ -20,6 +20,9 @@ try
         case "baseline":
             data = engine.GetBaseline();
             break;
+        case "inventory":
+            data = engine.GetInventory();
+            break;
         case "optimization-plan-safe":
             data = engine.GetSafeOptimizationPlan();
             break;
@@ -94,10 +97,14 @@ static object MapPlan(object plan)
         {
             Id = x.GetProperty("Id").GetString() ?? "",
             Name = x.GetProperty("Name").GetString() ?? "",
-            StateCode = "MISSING",
-            ActionCode = "INSTALL_OR_VERIFY",
-            Message = "Contrôle natif disponible lors de l'exécution."
+            StateCode = x.GetProperty("StateCode").GetString() ?? "UNKNOWN",
+            ActionCode = x.GetProperty("ActionCode").GetString() ?? "version-unverified",
+            Message = x.GetProperty("Message").GetString() ?? "État inconnu."
         }).ToArray();
+
+    var diagnostics = json.TryGetProperty("InventoryDiagnostics", out var diagnosticElement)
+        ? diagnosticElement
+        : JsonSerializer.SerializeToElement(Array.Empty<object>());
 
     return new
     {
@@ -107,6 +114,10 @@ static object MapPlan(object plan)
             Name = profile.GetProperty("Name").GetString() ?? "",
             Description = profile.GetProperty("Description").GetString() ?? ""
         },
+        InventoryScanId = json.TryGetProperty("InventoryScanId", out var scanId)
+            ? scanId.GetString()
+            : null,
+        InventoryDiagnostics = diagnostics,
         Items = items
     };
 }
