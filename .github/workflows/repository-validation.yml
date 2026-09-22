@@ -107,6 +107,35 @@ jobs:
           path: ${{ runner.temp }}/workspace-bootstrap-package
           if-no-files-found: error
 
+      - name: Publish portable package for scheduled smoke test
+        if: matrix.configuration == 'Release'
+        shell: pwsh
+        run: |
+          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-package"
+          New-Item -ItemType Directory -Force -Path $package | Out-Null
+          dotnet publish desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
+          dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
+
+      - name: Smoke-test scheduled portable package
+        if: matrix.configuration == 'Release'
+        shell: pwsh
+        run: |
+          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-package"
+          $desktop = Join-Path $package "WorkspaceBootstrap.exe"
+          $cli = Join-Path $package "WorkspaceBootstrap.Cli.exe"
+          $catalog = Join-Path $package "bootstrap/windows/components/catalog.json"
+          $profiles = Join-Path $package "bootstrap/windows/profiles"
+          $readme = Join-Path $package "README.md"
+
+          if (-not (Test-Path $desktop)) { throw "Desktop executable is missing: $desktop" }
+          if (-not (Test-Path $cli)) { throw "CLI executable is missing: $cli" }
+          if (-not (Test-Path $catalog)) { throw "Bundled component catalog is missing: $catalog" }
+          if (-not (Test-Path $profiles -PathType Container)) { throw "Bundled profiles directory is missing: $profiles" }
+          if (-not (Test-Path $readme)) { throw "Portable package README is missing: $readme" }
+
+          & $cli capabilities
+          if ($LASTEXITCODE -ne 0) { throw "Portable CLI smoke test failed with exit code $LASTEXITCODE." }
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v6
