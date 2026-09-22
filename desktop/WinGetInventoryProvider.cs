@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-namespace BounaDevEnvironment;
+namespace WorkspaceBootstrap.Desktop;
 
 public sealed class WinGetInventoryProvider : IInventoryProvider
 {
