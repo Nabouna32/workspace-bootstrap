@@ -37,7 +37,6 @@ public sealed class ProvisioningOperationHistoryItemViewModel
 public sealed class MainViewModel : INotifyPropertyChanged
 {
     private readonly DesktopEngineClient _engineClient;
-    private readonly DesktopProcessLauncher _processLauncher;
     private readonly string _repositoryRoot;
     private readonly DesktopDialogService _dialogService;
     private readonly JobStore _jobStore;
@@ -74,14 +73,12 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public MainViewModel(
         string repositoryRoot,
         DesktopEngineClient engineClient,
-        DesktopProcessLauncher processLauncher,
         DesktopDialogService dialogService,
         JobStore jobStore,
         JobScheduler jobScheduler)
     {
         _repositoryRoot = repositoryRoot;
         _engineClient = engineClient;
-        _processLauncher = processLauncher;
         _dialogService = dialogService;
         _jobStore = jobStore;
         _jobScheduler = jobScheduler;
@@ -101,7 +98,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
         OptimizationPlanCommand = new AsyncCommand(LoadOptimizationPlanAsync, () => !IsBusy);
         OptimizationApplyCommand = new AsyncCommand(ApplyOptimizationAsync, () => !IsBusy);
         OptimizationRollbackCommand = new AsyncCommand(RollbackOptimizationAsync, () => !IsBusy);
-        ProvisioningLaunchCommand = new AsyncCommand(LaunchProvisioningAsync, () => !IsBusy);
         ProvisioningPlanCommand = new AsyncCommand(LoadProvisioningPlanAsync, () => !IsBusy);
         ProvisioningExecuteCommand = new AsyncCommand(ExecuteProvisioningAsync, () => !IsBusy && !IsProvisioningOperationActive);
         ProvisioningResumeCommand = new AsyncCommand(ResumeProvisioningAsync, () => !IsBusy && ProvisioningOperation?.CanResume == true);
@@ -130,7 +126,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public AsyncCommand OptimizationPlanCommand { get; }
     public AsyncCommand OptimizationApplyCommand { get; }
     public AsyncCommand OptimizationRollbackCommand { get; }
-    public AsyncCommand ProvisioningLaunchCommand { get; }
     public AsyncCommand ProvisioningPlanCommand { get; }
     public AsyncCommand ProvisioningExecuteCommand { get; }
     public AsyncCommand ProvisioningResumeCommand { get; }
@@ -285,8 +280,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public async Task InitializeAsync()
     {
-        await _jobStore.InitializeAsync();
-        await _jobStore.RecoverInterruptedAsync();
         try
         {
             JobQueueSnapshot = await _jobScheduler.RecoverAndReconcileAsync();
@@ -680,21 +673,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
         });
     }
 
-    private Task LaunchProvisioningAsync()
-    {
-        try
-        {
-            _processLauncher.LaunchInteractiveProvisioning(_repositoryRoot);
-            ProvisioningOutput = "Le moteur interactif a été lancé dans sa fenêtre dédiée. L'intégration graphique des profils viendra ensuite, sans remplacer le moteur existant.";
-        }
-        catch (Exception ex)
-        {
-            ProvisioningOutput = ex.Message;
-        }
-
-        return Task.CompletedTask;
-    }
-
     private async Task RunBusyAsync(string message, Func<Task> operation)
     {
         if (IsBusy) return;
@@ -743,7 +721,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
         OptimizationPlanCommand.RaiseCanExecuteChanged();
         OptimizationApplyCommand.RaiseCanExecuteChanged();
         OptimizationRollbackCommand.RaiseCanExecuteChanged();
-        ProvisioningLaunchCommand.RaiseCanExecuteChanged();
         ProvisioningPlanCommand.RaiseCanExecuteChanged();
         ProvisioningExecuteCommand.RaiseCanExecuteChanged();
         ProvisioningResumeCommand.RaiseCanExecuteChanged();
