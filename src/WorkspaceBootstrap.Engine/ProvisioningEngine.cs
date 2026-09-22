@@ -8,15 +8,18 @@ public sealed class ProvisioningEngine
     private readonly ConfigurationStore _config;
     private readonly InstallerEngine _installer;
     private readonly WorkspacePaths _paths;
+    private readonly InventoryScanner _inventory;
 
     public ProvisioningEngine(
         ConfigurationStore config,
         InstallerEngine installer,
-        WorkspacePaths paths)
+        WorkspacePaths paths,
+        InventoryScanner inventory)
     {
         _config = config;
         _installer = installer;
         _paths = paths;
+        _inventory = inventory;
     }
 
     public IReadOnlyList<ProfileManifest> Profiles() =>
@@ -26,25 +29,65 @@ public sealed class ProvisioningEngine
     {
         var profile = GetProfile(profileId);
         var components = _config.LoadComponents();
+        var inventory = _inventory.ScanAsync().GetAwaiter().GetResult();
 
         return new
         {
             Profile = profile,
+            InventoryScanId = inventory.ScanId,
+            InventoryDiagnostics = inventory.ProviderDiagnostics,
             Items = profile.Components.Select(id =>
             {
                 var component = components.TryGetValue(id, out var value)
                     ? value
                     : throw new InvalidOperationException($"Composant inconnu : {id}");
 
-                return new
-                {
-                    component.Id,
-                    component.Name,
-                    StateCode = "UNKNOWN",
-                    ActionCode = "version-unverified",
-                    Message = "L'état installé doit encore être vérifié sur cette machine."
-                };
+                var match = FindInventoryMatch(component, inventory.Items);
+                return BuildPlanItem(component, match);
             }).ToArray()
+        };
+    }
+
+    private static InventoryItem? FindInventoryMatch(
+        ComponentManifest component,
+        IReadOnlyList<InventoryItem> items)
+    {
+        if (string.IsNullOrWhiteSpace(component.PackageId))
+            return null;
+
+        return items.FirstOrDefault(item =>
+            item.Observations.Any(observation =>
+                string.Equals(observation.ProviderId, component.PackageId, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(observation.Id, component.PackageId, StringComparison.OrdinalIgnoreCase) ||
+                observation.ProviderId?.EndsWith($":{component.PackageId}", StringComparison.OrdinalIgnoreCase) == true));
+    }
+
+    private static object BuildPlanItem(ComponentManifest component, InventoryItem? match)
+    {
+        if (match is null)
+        {
+            return new
+            {
+                component.Id,
+                component.Name,
+                StateCode = "MISSING",
+                ActionCode = "install",
+                Message = "Composant absent de l'inventaire détecté."
+            };
+        }
+
+        var updateAvailable = match.Evidence.Any(evidence =>
+            evidence.Kind.Equals("available-update", StringComparison.OrdinalIgnoreCase));
+
+        return new
+        {
+            component.Id,
+            component.Name,
+            StateCode = updateAvailable ? "OUTDATED" : "INSTALLED",
+            ActionCode = updateAvailable ? "update" : "none",
+            Message = updateAvailable
+                ? $"Version installée : {match.Version ?? "inconnue"} ; une mise à jour est signalée par l'inventaire."
+                : $"Version installée : {match.Version ?? "inconnue"}."
         };
     }
 
