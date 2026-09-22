@@ -4,7 +4,7 @@
         Title="Workspace Bootstrap"
         Width="1320" Height="820"
         MinWidth="1080" MinHeight="700"
-        Background="{StaticResource WindowBackground}"
+        Background="{DynamicResource WindowBackground}"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
@@ -16,21 +16,21 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="{StaticResource SidebarBackground}" Padding="18">
+        <Border Grid.Column="0" Background="{DynamicResource SidebarBackground}" Padding="18">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Bottom">
-                    <TextBlock Text="Apparence" FontSize="11" Foreground="{StaticResource SecondaryText}" Margin="4,0,4,6"/>
+                    <TextBlock Text="Apparence" FontSize="11" Foreground="{DynamicResource SecondaryText}" Margin="4,0,4,6"/>
                     <ComboBox ItemsSource="{Binding ThemeOptions}"
                               DisplayMemberPath="Label"
                               SelectedItem="{Binding SelectedTheme, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                               Margin="4,0,4,14"
                               Padding="7"/>
-                    <TextBlock Text="Workspace Bootstrap" FontSize="12" Foreground="{StaticResource SecondaryText}"/>
-                    <TextBlock Text="Windows 11 • local-first" FontSize="11" Foreground="{StaticResource SecondaryText}" Margin="0,4,0,0"/>
+                    <TextBlock Text="Workspace Bootstrap" FontSize="12" Foreground="{DynamicResource SecondaryText}"/>
+                    <TextBlock Text="Windows 11 • local-first" FontSize="11" Foreground="{DynamicResource SecondaryText}" Margin="0,4,0,0"/>
                 </StackPanel>
                 <StackPanel>
                     <TextBlock Text="WORKSPACE BOOTSTRAP" FontSize="17" FontWeight="SemiBold" Margin="4,4,4,8"
-                    /><TextBlock Text="Windows workstation manager" FontSize="11" Foreground="{StaticResource SecondaryText}" Margin="4,0,4,24"/>
+                    /><TextBlock Text="Windows workstation manager" FontSize="11" Foreground="{DynamicResource SecondaryText}" Margin="4,0,4,24"/>
                     <Button Command="{Binding DashboardCommand}" Content="⌂   Tableau de bord" Style="{StaticResource NavigationButtonStyle}"/>
                     <Button Command="{Binding OptimizationCommand}" Content="⚙   Optimisation" Style="{StaticResource NavigationButtonStyle}"/>
                     <Button Command="{Binding ProvisioningCommand}" Content="▣   Provisionnement" Style="{StaticResource NavigationButtonStyle}"/>
@@ -49,20 +49,20 @@
 
             <StackPanel Grid.Row="0" Margin="0,0,0,18">
                 <TextBlock Text="{Binding PageTitle}" FontSize="30" FontWeight="SemiBold"/>
-                <TextBlock Text="{Binding PageSubtitle}" Foreground="{StaticResource SecondaryText}" FontSize="14" Margin="0,6,0,0"/>
+                <TextBlock Text="{Binding PageSubtitle}" Foreground="{DynamicResource SecondaryText}" FontSize="14" Margin="0,6,0,0"/>
             </StackPanel>
 
             <Border Grid.Row="1"
                     Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Background="{StaticResource CardBackground}"
-                    BorderBrush="{StaticResource CardBorder}"
+                    Background="{DynamicResource CardBackground}"
+                    BorderBrush="{DynamicResource CardBorder}"
                     BorderThickness="1"
                     CornerRadius="8"
                     Padding="12"
                     Margin="0,0,0,18">
                 <DockPanel>
                     <ProgressBar IsIndeterminate="True" Width="120" Height="5" VerticalAlignment="Center" Margin="0,0,14,0"/>
-                    <TextBlock Text="{Binding BusyMessage}" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding BusyMessage}" Foreground="{DynamicResource SecondaryText}" VerticalAlignment="Center"/>
                 </DockPanel>
             </Border>
 
@@ -73,23 +73,23 @@
 
                     <Border Grid.Column="0" Style="{StaticResource CardBorderStyle}" Margin="0,0,12,18" Padding="18">
                         <StackPanel>
-                            <TextBlock Text="Windows" Foreground="{StaticResource SecondaryText}"/>
+                            <TextBlock Text="Windows" Foreground="{DynamicResource SecondaryText}"/>
                             <TextBlock Text="{Binding WindowsValue}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                            <TextBlock Text="{Binding BuildValue}" Foreground="{StaticResource SecondaryText}" Margin="0,4,0,0"/>
+                            <TextBlock Text="{Binding BuildValue}" Foreground="{DynamicResource SecondaryText}" Margin="0,4,0,0"/>
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="1" Style="{StaticResource CardBorderStyle}" Margin="0,0,12,18" Padding="18">
                         <StackPanel>
-                            <TextBlock Text="Processeur" Foreground="{StaticResource SecondaryText}"/>
+                            <TextBlock Text="Processeur" Foreground="{DynamicResource SecondaryText}"/>
                             <TextBlock Text="{Binding CpuValue}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,8,0,0"/>
-                            <TextBlock Text="{Binding CoreValue}" Foreground="{StaticResource SecondaryText}" Margin="0,4,0,0"/>
+                            <TextBlock Text="{Binding CoreValue}" Foreground="{DynamicResource SecondaryText}" Margin="0,4,0,0"/>
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="2" Style="{StaticResource CardBorderStyle}" Margin="0,0,0,18" Padding="18">
                         <StackPanel>
-                            <TextBlock Text="Mémoire" Foreground="{StaticResource SecondaryText}"/>
+                            <TextBlock Text="Mémoire" Foreground="{DynamicResource SecondaryText}"/>
                             <TextBlock Text="{Binding MemoryValue}" FontSize="22" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                            <TextBlock Text="{Binding UptimeValue}" Foreground="{StaticResource SecondaryText}" Margin="0,4,0,0"/>
+                            <TextBlock Text="{Binding UptimeValue}" Foreground="{DynamicResource SecondaryText}" Margin="0,4,0,0"/>
                         </StackPanel>
                     </Border>
 
@@ -98,16 +98,16 @@
                             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,18">
                                 <StackPanel>
                                     <TextBlock Text="État de la machine" FontSize="20" FontWeight="SemiBold"/>
-                                    <TextBlock Text="Lecture seule • aucune modification" Foreground="{StaticResource SecondaryText}" Margin="0,4,0,0"/>
+                                    <TextBlock Text="Lecture seule • aucune modification" Foreground="{DynamicResource SecondaryText}" Margin="0,4,0,0"/>
                                 </StackPanel>
                                 <Button Command="{Binding RefreshCommand}" Content="↻ Actualiser" HorizontalAlignment="Right" Margin="20,0,0,0" Padding="18,9"/>
                             </StackPanel>
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
                                 <StackPanel>
                                     <TextBlock Text="Stockage" FontSize="15" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding StorageValue}" Foreground="{StaticResource SecondaryText}" Margin="0,8,0,20" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding StorageValue}" Foreground="{DynamicResource SecondaryText}" Margin="0,8,0,20" TextWrapping="Wrap"/>
                                     <TextBlock Text="Démarrage" FontSize="15" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding StartupValue}" Foreground="{StaticResource SecondaryText}" Margin="0,8,0,0" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding StartupValue}" Foreground="{DynamicResource SecondaryText}" Margin="0,8,0,0" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </ScrollViewer>
                         </DockPanel>
@@ -126,7 +126,7 @@
                             <TextBox Text="{Binding OptimizationOutput}"
                                      Background="Transparent"
                                      BorderThickness="0"
-                                     Foreground="{StaticResource PrimaryText}"
+                                     Foreground="{DynamicResource PrimaryText}"
                                      FontFamily="Consolas"
                                      FontSize="13"
                                      IsReadOnly="True"
@@ -147,7 +147,7 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Profil" Foreground="{StaticResource SecondaryText}"/>
+                                <TextBlock Text="Profil" Foreground="{DynamicResource SecondaryText}"/>
                                 <ComboBox ItemsSource="{Binding ProvisioningProfiles}"
                                           DisplayMemberPath="Name"
                                           SelectedValuePath="Id"
@@ -157,7 +157,7 @@
                             </StackPanel>
                             <TextBlock Grid.Column="1"
                                        Text="{Binding ProvisioningProfileDescription}"
-                                       Foreground="{StaticResource SecondaryText}"
+                                       Foreground="{DynamicResource SecondaryText}"
                                        TextWrapping="Wrap"
                                        VerticalAlignment="Center"
                                        Margin="0,22,16,0"/>
@@ -174,8 +174,8 @@
                         <DockPanel>
                             <StackPanel DockPanel.Dock="Bottom">
                                 <Border Visibility="{Binding IsProvisioningOperationVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                        Background="{StaticResource CardBackground}"
-                                        BorderBrush="{StaticResource CardBorder}"
+                                        Background="{DynamicResource CardBackground}"
+                                        BorderBrush="{DynamicResource CardBorder}"
                                         BorderThickness="1"
                                         CornerRadius="8"
                                         Padding="12"
@@ -183,17 +183,17 @@
                                     <StackPanel>
                                         <DockPanel>
                                             <TextBlock Text="{Binding ProvisioningOperationStatus}" FontWeight="SemiBold" Style="{StaticResource StatusTextStyle}"/>
-                                            <TextBlock Text="{Binding ProvisioningCurrentStep}" Foreground="{StaticResource SecondaryText}" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="{Binding ProvisioningCurrentStep}" Foreground="{DynamicResource SecondaryText}" HorizontalAlignment="Right"/>
                                         </DockPanel>
                                         <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProvisioningOperation.Percent}" Height="6" Margin="0,10,0,0"/>
-                                        <TextBlock Text="{Binding ProvisioningOperation.Error}" Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                                        <TextBlock Text="{Binding ProvisioningOperation.Error}" Foreground="{DynamicResource SecondaryText}" TextWrapping="Wrap" Margin="0,8,0,0"/>
                                         <Button Command="{Binding ProvisioningResumeCommand}" Content="↻ Reprendre l’opération" HorizontalAlignment="Left" Padding="14,8" Margin="0,10,0,0"
                                                 Visibility="{Binding ProvisioningOperation.CanResume, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                     </StackPanel>
                                 </Border>
                                 <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
                                     <Button Command="{Binding ProvisioningLaunchCommand}" Content="▶ Ouvrir le provisioning interactif" Padding="18,10"/>
-                                    <TextBlock Text="{Binding ProvisioningOutput}" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center" Margin="14,0,0,0"/>
+                                    <TextBlock Text="{Binding ProvisioningOutput}" Foreground="{DynamicResource SecondaryText}" VerticalAlignment="Center" Margin="14,0,0,0"/>
                                 </StackPanel>
                             </StackPanel>
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -202,7 +202,7 @@
                                     <ItemsControl ItemsSource="{Binding ProvisioningPlanItems}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border BorderBrush="{StaticResource CardBorder}" BorderThickness="0,0,0,1" Padding="8,12">
+                                                <Border BorderBrush="{DynamicResource CardBorder}" BorderThickness="0,0,0,1" Padding="8,12">
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="2*"/>
@@ -211,7 +211,7 @@
                                                         </Grid.ColumnDefinitions>
                                                         <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                                         <TextBlock Grid.Column="1" Text="{Binding StateLabel}" Margin="12,0" VerticalAlignment="Center" Style="{StaticResource StatusTextStyle}"/>
-                                                        <TextBlock Grid.Column="2" Text="{Binding ActionLabel}" Foreground="{StaticResource Accent}" VerticalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="2" Text="{Binding ActionLabel}" Foreground="{DynamicResource Accent}" VerticalAlignment="Center"/>
                                                     </Grid>
                                                 </Border>
                                             </DataTemplate>
@@ -229,7 +229,7 @@
                                              MaxHeight="170">
                                         <ListBox.ItemTemplate>
                                             <DataTemplate>
-                                                <Border BorderBrush="{StaticResource CardBorder}" BorderThickness="0,0,0,1" Padding="8,10">
+                                                <Border BorderBrush="{DynamicResource CardBorder}" BorderThickness="0,0,0,1" Padding="8,10">
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="2*"/>
@@ -239,11 +239,11 @@
                                                         </Grid.ColumnDefinitions>
                                                         <StackPanel>
                                                             <TextBlock Text="{Binding ProfileId}" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="{Binding OperationId}" Foreground="{StaticResource SecondaryText}" FontSize="11"/>
+                                                            <TextBlock Text="{Binding OperationId}" Foreground="{DynamicResource SecondaryText}" FontSize="11"/>
                                                         </StackPanel>
                                                         <TextBlock Grid.Column="1" Text="{Binding StatusLabel}" VerticalAlignment="Center" Style="{StaticResource StatusTextStyle}"/>
-                                                        <TextBlock Grid.Column="2" Text="{Binding ProgressLabel}" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
-                                                        <TextBlock Grid.Column="3" Text="{Binding UpdatedAtLabel}" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="2" Text="{Binding ProgressLabel}" Foreground="{DynamicResource SecondaryText}" VerticalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="3" Text="{Binding UpdatedAtLabel}" Foreground="{DynamicResource SecondaryText}" VerticalAlignment="Center"/>
                                                     </Grid>
                                                 </Border>
                                             </DataTemplate>
@@ -251,8 +251,8 @@
                                     </ListBox>
 
                                     <Border Visibility="{Binding ProvisioningOperationDetail, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                            Background="{StaticResource CardBackground}"
-                                            BorderBrush="{StaticResource CardBorder}"
+                                            Background="{DynamicResource CardBackground}"
+                                            BorderBrush="{DynamicResource CardBorder}"
                                             BorderThickness="1"
                                             CornerRadius="8"
                                             Padding="14"
@@ -260,10 +260,10 @@
                                         <StackPanel>
                                             <DockPanel>
                                                 <TextBlock Text="Détail de l’opération" FontWeight="SemiBold"/>
-                                                <TextBlock Text="{Binding ProvisioningDetailSummary}" Foreground="{StaticResource SecondaryText}" HorizontalAlignment="Right"/>
+                                                <TextBlock Text="{Binding ProvisioningDetailSummary}" Foreground="{DynamicResource SecondaryText}" HorizontalAlignment="Right"/>
                                             </DockPanel>
                                             <TextBlock Text="{Binding ProvisioningDetailLogs}" FontFamily="Consolas" FontSize="12"
-                                                       Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                                                       Foreground="{DynamicResource SecondaryText}" TextWrapping="Wrap" Margin="0,10,0,0"/>
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
@@ -278,9 +278,9 @@
                         <DockPanel>
                             <StackPanel>
                                 <TextBlock Text="Logiciels &amp; composants" FontSize="22" FontWeight="SemiBold"/>
-                                <TextBlock Text="{Binding InventorySummary}" Foreground="{StaticResource SecondaryText}" Margin="0,5,0,0"/>
-                                <TextBlock Text="{Binding InventoryOlderSummary}" Foreground="{StaticResource SecondaryText}" Margin="0,3,0,0"/>
-                                <TextBlock Text="{Binding InventoryProviderHealthSummary}" Foreground="{StaticResource SecondaryText}" Margin="0,3,0,0"/>
+                                <TextBlock Text="{Binding InventorySummary}" Foreground="{DynamicResource SecondaryText}" Margin="0,5,0,0"/>
+                                <TextBlock Text="{Binding InventoryOlderSummary}" Foreground="{DynamicResource SecondaryText}" Margin="0,3,0,0"/>
+                                <TextBlock Text="{Binding InventoryProviderHealthSummary}" Foreground="{DynamicResource SecondaryText}" Margin="0,3,0,0"/>
                             </StackPanel>
                             <Button DockPanel.Dock="Right" Command="{Binding InventoryScanCommand}" Content="↻ Analyser" Padding="18,10" VerticalAlignment="Center"/>
                         </DockPanel>
@@ -292,7 +292,7 @@
                                 <ItemsControl ItemsSource="{Binding InventorySnapshot.Items}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border BorderBrush="{StaticResource CardBorder}" BorderThickness="0,0,0,1" Padding="8,12">
+                                            <Border BorderBrush="{DynamicResource CardBorder}" BorderThickness="0,0,0,1" Padding="8,12">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="2.4*"/>
@@ -302,11 +302,11 @@
                                                     </Grid.ColumnDefinitions>
                                                     <StackPanel>
                                                         <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold"/>
-                                                        <TextBlock Text="{Binding Id}" Foreground="{StaticResource SecondaryText}" FontSize="10"/>
+                                                        <TextBlock Text="{Binding Id}" Foreground="{DynamicResource SecondaryText}" FontSize="10"/>
                                                     </StackPanel>
-                                                    <TextBlock Grid.Column="1" Text="{Binding Version}" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
-                                                    <TextBlock Grid.Column="2" Text="{Binding FamilyId}" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
-                                                    <TextBlock Grid.Column="3" Text="{Binding Ownership}" Foreground="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Version}" Foreground="{DynamicResource SecondaryText}" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="2" Text="{Binding FamilyId}" Foreground="{DynamicResource SecondaryText}" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="3" Text="{Binding Ownership}" Foreground="{DynamicResource SecondaryText}" VerticalAlignment="Center"/>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
@@ -316,15 +316,15 @@
                                 <ItemsControl ItemsSource="{Binding InventoryRecommendationItems}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border BorderBrush="{StaticResource CardBorder}" BorderThickness="0,0,0,1" Padding="8,12">
+                                            <Border BorderBrush="{DynamicResource CardBorder}" BorderThickness="0,0,0,1" Padding="8,12">
                                                 <StackPanel>
                                                     <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold"/>
-                                                    <TextBlock Text="{Binding InstalledVersionLabel}" Foreground="{StaticResource SecondaryText}"/>
-                                                    <TextBlock Text="{Binding ReasonLabel}" Foreground="{StaticResource SecondaryText}"/>
-                                                    <TextBlock Text="{Binding NewerVersionLabel}" Foreground="{StaticResource SecondaryText}"/>
-                                                    <TextBlock Text="{Binding PublisherLabel}" Foreground="{StaticResource SecondaryText}"/>
-                                                    <TextBlock Text="{Binding EvidenceLabel}" Foreground="{StaticResource SecondaryText}"/>
-                                                    <TextBlock Text="Suppression uniquement après validation explicite." Foreground="{StaticResource Accent}" Margin="0,4,0,0"/>
+                                                    <TextBlock Text="{Binding InstalledVersionLabel}" Foreground="{DynamicResource SecondaryText}"/>
+                                                    <TextBlock Text="{Binding ReasonLabel}" Foreground="{DynamicResource SecondaryText}"/>
+                                                    <TextBlock Text="{Binding NewerVersionLabel}" Foreground="{DynamicResource SecondaryText}"/>
+                                                    <TextBlock Text="{Binding PublisherLabel}" Foreground="{DynamicResource SecondaryText}"/>
+                                                    <TextBlock Text="{Binding EvidenceLabel}" Foreground="{DynamicResource SecondaryText}"/>
+                                                    <TextBlock Text="Suppression uniquement après validation explicite." Foreground="{DynamicResource Accent}" Margin="0,4,0,0"/>
                                                 </StackPanel>
                                             </Border>
                                         </DataTemplate>
@@ -340,7 +340,7 @@
                         <StackPanel>
                             <TextBlock Text="Diagnostic" FontSize="22" FontWeight="SemiBold"/>
                             <TextBlock Text="Les diagnostics détaillés seront progressivement exposés ici sans dupliquer la logique du moteur natif."
-                                       Foreground="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,12,0,20"/>
+                                       Foreground="{DynamicResource SecondaryText}" TextWrapping="Wrap" Margin="0,12,0,20"/>
                             <Button Command="{Binding RefreshCommand}" Content="↻ Recharger le baseline" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </Border>
