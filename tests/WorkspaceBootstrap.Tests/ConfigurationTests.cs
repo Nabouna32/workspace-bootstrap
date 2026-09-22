@@ -107,6 +107,7 @@ public sealed class ProvisioningPlanContractTests
 
             Assert.IsTrue(item.TryGetProperty("Message", out var message));
             Assert.IsFalse(string.IsNullOrWhiteSpace(message.GetString()));
+            Assert.AreEqual("UNKNOWN", state.GetString());
         }
     }
 }
