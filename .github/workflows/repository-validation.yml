@@ -27,6 +27,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Enforce GitHub-hosted runner policy
+        shell: pwsh
+        run: |
+          $matches = Get-ChildItem .github/workflows -File -Filter '*.yml' |
+            Select-String -Pattern '(?i)self-hosted|runs-on:\s*\['
+          if ($matches) {
+            $matches | ForEach-Object { $_.ToString() } | Write-Error
+            throw "CI policy violation: repository workflows must use GitHub-hosted runners only."
+          }
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
