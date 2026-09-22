@@ -10,55 +10,127 @@ on:
 permissions:
   contents: read
 
-jobs:
-  validate:
-    name: Restore, build, test and publish
-    runs-on: windows-latest
-    timeout-minutes: 30
+concurrency:
+  group: workspace-bootstrap-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  Configuration: Release
+
+jobs:
+  policy:
+    name: Repository policy
+    runs-on: windows-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Show toolchain
-        shell: cmd
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.401
+
+      - name: Validate repository tests
+        run: dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration Release --verbosity normal --logger "trx;LogFileName=policy.trx"
+
+      - name: Verify no retired product scripts
+        shell: pwsh
         run: |
-          dotnet --info
-          git --version
+          $ErrorActionPreference = 'Stop'
+          $extensions = '.ps1', '.bat', '.cmd', '.sh'
+          $files = Get-ChildItem -Recurse -File | Where-Object { $_.FullName -notmatch '\\.git\\' }
+          $legacy = $files | Where-Object { $extensions -contains $_.Extension.ToLowerInvariant() }
+          if ($legacy) {
+            $legacy | ForEach-Object { Write-Error $_.FullName }
+            exit 1
+          }
+
+  build-test:
+    name: Build and test (${{ matrix.configuration }})
+    needs: policy
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.401
 
       - name: Restore
-        shell: cmd
-        run: |
-          dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
-          dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj
-          dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj
+        run: dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
 
       - name: Build engine
-        run: dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release --no-restore
+        run: dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
 
       - name: Build desktop
-        run: dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --no-restore
+        run: dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
 
       - name: Build CLI
-        run: dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --no-restore
+        run: dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
 
-      - name: Test
-        run: dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=tests.trx"
+      - name: Run tests
+        run: dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration ${{ matrix.configuration }} --no-restore --logger "trx;LogFileName=tests-${{ matrix.configuration }}.trx"
+
+      - name: Verify formatting
+        if: matrix.configuration == 'Release'
+        run: dotnet format tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --no-restore --verify-no-changes
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-results-${{ matrix.configuration }}-${{ github.run_id }}
+          path: '**/TestResults/*.trx'
+          if-no-files-found: warn
+
+  publish:
+    name: Publish Windows artifacts
+    needs: build-test
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.401
+
+      - name: Restore
+        run: dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj
 
       - name: Publish self-contained CLI
         run: dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output artifacts/cli
 
-      - name: Verify publish output
-        shell: cmd
-        run: |
-          if not exist artifacts\cli\WorkspaceBootstrap.exe exit /b 1
+      - name: Publish desktop
+        run: dotnet publish desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output artifacts/desktop
 
-      - name: Upload validation artifacts
+      - name: Verify CLI artifact
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not (Test-Path 'artifacts/cli/WorkspaceBootstrap.exe')) { throw 'CLI executable was not published.' }
+
+      - name: Verify desktop artifact
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not (Test-Path 'artifacts/desktop/WorkspaceBootstrap.exe')) { throw 'Desktop executable was not published.' }
+
+      - name: Upload release artifacts
         uses: actions/upload-artifact@v6
         with:
-          name: workspace-bootstrap-validation-${{ github.run_id }}
-          path: |
-            artifacts/cli/**
-            **/TestResults/*.trx
+          name: workspace-bootstrap-win-x64-${{ github.sha }}
+          path: artifacts/**
           if-no-files-found: error
-
