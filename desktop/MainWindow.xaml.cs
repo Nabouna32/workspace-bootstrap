@@ -1,7 +1,7 @@
 using System.IO;
 using System.Windows;
 
-namespace BounaDevEnvironment;
+namespace WorkspaceBootstrap.Desktop;
 
 public partial class MainWindow : Window
 {
