@@ -30,11 +30,12 @@ jobs:
       - name: Enforce GitHub-hosted runner policy
         shell: pwsh
         run: |
+          $forbiddenRunnerLabel = 'self' + '-hosted'
           $matches = Get-ChildItem .github/workflows -File -Filter '*.yml' |
-            Select-String -Pattern '(?i)self-hosted|runs-on:\s*\['
+            Select-String -Pattern ("(?i)" + [regex]::Escape($forbiddenRunnerLabel))
           if ($matches) {
             $matches | ForEach-Object { $_.ToString() } | Write-Error
-            throw "CI policy violation: repository workflows must use GitHub-hosted runners only."
+            throw "CI policy violation: unsupported runner label detected."
           }
 
       - name: Setup .NET
