@@ -363,8 +363,7 @@ public sealed class InstallerEngine
 
         try
         {
-            using var certificate = new X509Certificate2(
-                X509Certificate.CreateFromSignedFile(path));
+            using var certificate = X509CertificateLoader.LoadCertificateFromFile(path);
             using var chain = new X509Chain();
 
             if (!chain.Build(certificate))
