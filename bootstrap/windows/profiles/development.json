@@ -1,0 +1,6 @@
+{
+  "id": "development",
+  "name": "Environnement développeur",
+  "description": "Toolchain Windows et environnement WSL pour Next.js/React, Flutter Android/Windows, debug et tests locaux.",
+  "components": ["github-cli", "visual-studio", "wsl", "flutter", "notepadpp", "powertoys"]
+}

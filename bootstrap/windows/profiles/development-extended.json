@@ -1,0 +1,6 @@
+{
+  "id": "development-extended",
+  "name": "Développement étendu",
+  "description": "Outillage supplémentaire pour Python, Rust, Go, LLVM, IDE et développement Minecraft/modding.",
+  "components": ["github-cli", "visual-studio", "wsl", "flutter", "notepadpp", "powertoys", "vscode", "intellij-community", "python", "rustup", "go", "llvm", "temurin21"]
+}

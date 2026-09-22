@@ -1,0 +1,6 @@
+{
+  "id": "gaming",
+  "name": "Environnement gaming",
+  "description": "Applications de jeu et outils associés ajoutés après la base du PC.",
+  "components": ["steam", "prismlauncher"]
+}
