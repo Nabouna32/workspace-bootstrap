@@ -79,7 +79,7 @@ Profiles are declarative collections of components under `bootstrap/windows/prof
 - WinGet only as an explicit fallback.
 - Reversible changes keep their previous state.
 - Irreversible changes require explicit confirmation.
-- CI is validated on GitHub-hosted Windows runners.
+- CI is validated on the project's self-hosted Windows runner.
 - Credentials and secrets are never stored in ordinary configuration bundles.
 
 ## Documentation
