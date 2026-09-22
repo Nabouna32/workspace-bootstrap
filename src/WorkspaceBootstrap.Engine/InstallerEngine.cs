@@ -35,11 +35,15 @@ public sealed class InstallerEngine
             || string.Equals(component.InstallerType, "wix", StringComparison.OrdinalIgnoreCase))
         {
             psi.FileName = "msiexec.exe";
-            psi.Arguments = $"/i \"{artifact.FilePath}\" {string.Join(' ', arguments)}";
+            psi.ArgumentList.Add("/i");
+            psi.ArgumentList.Add(artifact.FilePath);
+            foreach (var argument in arguments)
+                psi.ArgumentList.Add(argument);
         }
         else
         {
-            psi.Arguments = string.Join(' ', arguments.Select(EscapeArgument));
+            foreach (var argument in arguments)
+                psi.ArgumentList.Add(argument);
         }
 
         using var process = Process.Start(psi)
