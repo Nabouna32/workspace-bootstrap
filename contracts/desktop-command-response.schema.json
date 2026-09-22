@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/NabounaLab/dev-environment/blob/main/contracts/desktop-command-response.schema.json",
+  "title": "Bouna Dev Environment desktop command response",
+  "type": "object",
+  "required": ["schemaVersion", "command", "success", "exitCode", "timestampUtc", "data", "messages", "error"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "command": { "type": "string", "minLength": 1 },
+    "success": { "type": "boolean" },
+    "exitCode": { "type": "integer", "minimum": 0 },
+    "timestampUtc": { "type": "string", "format": "date-time" },
+    "data": {},
+    "messages": { "type": "array", "items": { "type": "string" } },
+    "error": { "type": ["string", "null"] }
+  },
+  "additionalProperties": false
+}

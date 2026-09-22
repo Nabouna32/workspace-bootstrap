@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/NabounaLab/dev-environment/blob/main/contracts/configuration-profile.schema.json",
+  "title": "BounaDevEnvironment Configuration Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "profileId",
+    "components",
+    "policies",
+    "preferences"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "profileId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/component"
+      },
+      "uniqueItems": false
+    },
+    "policies": {
+      "$ref": "#/$defs/policies"
+    },
+    "preferences": {
+      "$ref": "#/$defs/preferences"
+    },
+    "compatibility": {
+      "$ref": "#/$defs/compatibility"
+    }
+  },
+  "$defs": {
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "version": {
+          "$ref": "#/$defs/versionPolicy"
+        }
+      }
+    },
+    "versionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "enum": ["latest", "exact", "minimum", "range", "channel"]
+        },
+        "value": {
+          "type": ["string", "null"],
+          "maxLength": 128
+        },
+        "channel": {
+          "type": ["string", "null"],
+          "maxLength": 64
+        }
+      }
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "network": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "enum": [
+                "unlimited",
+                "limited",
+                "paused"
+              ]
+            },
+            "maxDownloadBytesPerSecond": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1
+            },
+            "maxConcurrentDownloads": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "mode",
+            "maxConcurrentDownloads"
+          ]
+        }
+      }
+    },
+    "preferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "language": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        }
+      },
+      "required": [
+        "language"
+      ]
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "productVersion": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64
+        },
+        "minimumProductVersion": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64
+        }
+      }
+    }
+  }
+}
