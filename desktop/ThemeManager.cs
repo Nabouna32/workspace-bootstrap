@@ -17,11 +17,7 @@ public sealed class ThemeManager
 
     public ThemeManager()
     {
-        var stateRoot = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "WorkspaceBootstrap");
-        Directory.CreateDirectory(stateRoot);
-        _settingsPath = Path.Combine(stateRoot, "desktop-settings.json");
+        _settingsPath = Path.Combine(AppContext.BaseDirectory, "desktop-settings.json");
     }
 
     public ThemeMode LoadMode()
