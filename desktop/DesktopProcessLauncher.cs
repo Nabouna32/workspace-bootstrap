@@ -9,11 +9,11 @@ public sealed class DesktopProcessLauncher
         var executable = Environment.GetEnvironmentVariable("WORKSPACE_BOOTSTRAP_ENGINE");
         executable = !string.IsNullOrWhiteSpace(executable) && File.Exists(executable)
             ? executable
-            : Path.Combine(@"C:\Dev\WorkspaceBootstrap\app", "WorkspaceBootstrap.Cli.exe");
+            : Path.Combine(AppContext.BaseDirectory, "WorkspaceBootstrap.Cli.exe");
 
         if (!File.Exists(executable))
             throw new FileNotFoundException(
-                "WorkspaceBootstrap.Cli.exe introuvable. Publiez le CLI self-contained avant le lancement interactif.",
+                "WorkspaceBootstrap.Cli.exe introuvable dans le package de l’application.",
                 executable);
 
         Process.Start(new ProcessStartInfo
