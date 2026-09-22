@@ -112,3 +112,41 @@ public sealed class ProvisioningPlanContractTests
         }
     }
 }
+
+
+[TestClass]
+public sealed class InstallerEngineTests
+{
+    [TestMethod]
+    public async Task Cache_only_fails_when_no_verified_artifact_exists()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "workspace-bootstrap-tests", Guid.NewGuid().ToString("N"));
+        try
+        {
+            var paths = new WorkspacePaths(root);
+            var installer = new InstallerEngine(paths);
+            var component = new ComponentManifest(
+                "test-component",
+                "Test component",
+                null,
+                "Test.Package",
+                null,
+                "exe",
+                null,
+                "x64",
+                null,
+                [],
+                "winget");
+
+            var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(
+                () => installer.InstallAsync(component, cacheOnly: true, CancellationToken.None));
+
+            StringAssert.Contains(exception.Message, "cache");
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+                Directory.Delete(root, recursive: true);
+        }
+    }
+}
