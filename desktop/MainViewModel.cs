@@ -41,7 +41,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private readonly string _repositoryRoot;
     private readonly DesktopDialogService _dialogService;
     private readonly JobStore _jobStore;
-    private readonly JobScheduler _jobScheduler;\n    private readonly ThemeManager _themeManager;
+    private readonly JobScheduler _jobScheduler;
+    private readonly ThemeManager _themeManager;
     private readonly InventoryScanner _inventoryScanner;
     private InventorySnapshot? _inventorySnapshot;
     private IReadOnlyList<InventoryCleanupRecommendation> _inventoryRecommendations = Array.Empty<InventoryCleanupRecommendation>();
@@ -67,7 +68,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private IReadOnlyList<ProvisioningOperationHistoryItemViewModel> _provisioningHistory = Array.Empty<ProvisioningOperationHistoryItemViewModel>();
     private ProvisioningOperationHistoryItemViewModel? _selectedProvisioningHistoryItem;
     private ProvisioningOperationDetail? _provisioningOperationDetail;
-    private JobSchedulerSnapshot? _jobQueueSnapshot;\n    private ThemeOption _selectedTheme = new(ThemeMode.System, "Système");
+    private JobSchedulerSnapshot? _jobQueueSnapshot;
+    private ThemeOption _selectedTheme = new(ThemeMode.System, "Système");
 
     public MainViewModel(
         string repositoryRoot,
@@ -82,7 +84,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
         _processLauncher = processLauncher;
         _dialogService = dialogService;
         _jobStore = jobStore;
-        _jobScheduler = jobScheduler;\n        _themeManager = new ThemeManager();\n        SelectedTheme = ThemeOptions.First(option => option.Mode == _themeManager.LoadMode());
+        _jobScheduler = jobScheduler;
+        _themeManager = new ThemeManager();
+        SelectedTheme = ThemeOptions.First(option => option.Mode == _themeManager.LoadMode());
         _inventoryScanner = new InventoryScanner([
             new WindowsRegistryUninstallInventoryProvider(),
             new WinGetInventoryProvider()
