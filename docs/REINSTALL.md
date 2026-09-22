@@ -1,35 +1,28 @@
-# Clean Windows reinstall runbook
+# Windows clean-install runbook
 
 ## Before formatting
 
-Run the backup script to a non-system destination:
+1. Push all repository work and verify the exact branch/commit is on GitHub.
+2. Export `C:\DevCache` to a non-system disk if you want offline reinstallation after formatting.
+3. Back up personal files, SSH keys and any application data outside the repository.
+4. Export any WSL data separately if it is still needed; WSL is not managed by Workspace Bootstrap.
 
-    .\bootstrap\windows\00-backup-before-reinstall.ps1 -BackupRoot "E:\dev-environment-backup" -ExportWsl
+Never commit secrets or private backup data to this repository.
 
-Check that it contains the SSH directory, Git configuration, WSL inventory, Windows package inventory and optional Ubuntu export.
-
-Never upload that backup directory to GitHub.
-
-Also verify that every local project with uncommitted work is pushed or separately backed up.
-
-## After Windows 11 Pro 64-bit installation
+## After Windows 11 Pro installation
 
 1. Fully update Windows.
-2. Verify WinGet.
-3. Create `C:\dev` and clone this repository.
-4. Open **PowerShell as Administrator**.
-5. Run `.\bootstrap\windows\bootstrap.ps1`.
-6. Restart Windows if WSL or Windows components request it.
-7. Run `.\bootstrap\windows\90-verify.ps1`.
-8. Recreate/configure WSL2 Ubuntu and run the WSL bootstrap.
-9. Restore tracked WSL configuration.
-10. Register the self-hosted runner with a fresh token.
-11. Restore SSH keys outside the repository.
-12. Validate GitHub SSH and `gh auth`.
-13. Run all verification scripts.
-14. Clone application repositories.
-15. Run real Android and Windows builds.
+2. Install the current supported .NET 10 SDK/runtime as required for development. The published Workspace Bootstrap CLI is self-contained.
+3. Install or verify WinGet, because it is used as an explicit fallback for selected components.
+4. Clone `Nabouna32/workspace-bootstrap`.
+5. Build or obtain the self-contained Windows x64 CLI.
+6. Start the Workspace Bootstrap desktop application.
+7. Select the desired profile.
+8. Review the dry-run plan.
+9. Restore or attach the exported `C:\DevCache` when offline installation is required.
+10. Run provisioning and monitor the operation history.
+11. Restart Windows when an operation explicitly requires it, then use the application's recovery/resume flow.
+12. Run diagnostics and verify the installed-state inventory.
+13. Reinstall application repositories and run their own project-specific validation.
 
-The machine is disposable; the repository is the reconstruction plan.
-
-See `docs/VERSION-POLICY.md` for the toolchain update policy.
+The repository is the reconstruction plan; the local cache is the recovery asset.
