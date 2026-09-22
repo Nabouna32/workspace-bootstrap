@@ -75,6 +75,7 @@ jobs:
 
   publish:
     name: Publish Windows artifacts
+    if: github.event_name != 'pull_request'
     needs: build-test
     runs-on: windows-latest
     timeout-minutes: 30
