@@ -40,8 +40,9 @@ public sealed class ProvisioningEngine
                 {
                     component.Id,
                     component.Name,
-                    Status = "PENDING",
-                    Action = "INSTALL_OR_VERIFY"
+                    StateCode = "UNKNOWN",
+                    ActionCode = "version-unverified",
+                    Message = "L'état installé doit encore être vérifié sur cette machine."
                 };
             }).ToArray()
         };

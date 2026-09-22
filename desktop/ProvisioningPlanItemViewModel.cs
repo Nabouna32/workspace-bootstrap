@@ -14,7 +14,8 @@ public sealed class ProvisioningPlanItemViewModel
             "OUTDATED" => "Mise à jour disponible",
             "CONFIG-INCOMPLETE" => "Configuration incomplète",
             "REPAIRABLE" => "Réparation possible",
-            _ => "Échec du contrôle"
+            "UNKNOWN" => "État non vérifié",
+            _ => "État inconnu"
         };
         ActionLabel = item.ActionCode switch
         {
@@ -23,8 +24,8 @@ public sealed class ProvisioningPlanItemViewModel
             "repair-config" => "Réparer la configuration",
             "repair" => "Réparer",
             "none" => "Aucune action",
-            "version-unverified" => "Présence confirmée",
-            _ => "Bloqué"
+            "version-unverified" => "Vérifier avant installation",
+            _ => "À vérifier"
         };
     }
 
