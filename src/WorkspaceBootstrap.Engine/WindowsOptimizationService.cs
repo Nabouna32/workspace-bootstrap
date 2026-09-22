@@ -3,15 +3,6 @@ using System.Text.Json;
 
 namespace WorkspaceBootstrap;
 
-public sealed record OptimizationPlanItem(
-    string Id,
-    string Name,
-    string StatusCode,
-    string Impact,
-    string Risk,
-    bool Reversible,
-    string Description);
-
 public sealed class WindowsOptimizationService
 {
     private readonly string _statePath = Path.Combine(new WorkspacePaths().StateRoot, "optimization.json");
