@@ -6,11 +6,11 @@ GitHub is the source of truth. Development work happens on feature branches and 
 
 ## Runner policy
 
-All repository workflows run on the project's self-hosted Windows x64 runner:
+All repository workflows run on the project's GitHub-hosted Windows runner:
 
-`[self-hosted, windows, x64]`
+`windows-latest`
 
-There are no GitHub-hosted runner dependencies.
+Validation uses GitHub-hosted runners.
 
 ## Local build
 
