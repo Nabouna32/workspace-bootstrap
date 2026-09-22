@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -361,26 +361,115 @@ public sealed class InstallerEngine
             throw new PlatformNotSupportedException(
                 "Authenticode n'est disponible que sur Windows.");
 
-        try
-        {
-            using var certificate = X509CertificateLoader.LoadCertificateFromFile(path);
-            using var chain = new X509Chain();
+        var fileInfo = new WinTrustFileInfo(path);
+        var trustData = new WinTrustData(fileInfo);
 
-            if (!chain.Build(certificate))
-            {
-                var status = string.Join(
-                    "; ",
-                    chain.ChainStatus.Select(x => x.StatusInformation.Trim()));
-                throw new CryptographicException(
-                    $"Chaîne de signature Authenticode invalide : {status}");
-            }
-        }
-        catch (CryptographicException ex)
+        var action = WinTrustVerifyActionGenericVerifyV2;
+        var status = WinVerifyTrust(IntPtr.Zero, ref action, ref trustData.Native);
+
+        if (status != 0)
         {
             throw new InvalidOperationException(
-                $"Signature Authenticode invalide : {path}",
-                ex);
+                $"Signature Authenticode invalide ou non approuvée : {path} (HRESULT 0x{status:X8}).");
         }
+
+        trustData.Native.dwStateAction = WinTrustStateAction.Close;
+        _ = WinVerifyTrust(IntPtr.Zero, ref action, ref trustData.Native);
+    }
+
+    private static readonly Guid WinTrustVerifyActionGenericVerifyV2 =
+        new("00AAC56B-CD44-11d0-8CC2-00C04FC295EE");
+
+    private const uint WinTrustUiChoiceNone = 2;
+    private const uint WinTrustRevocationCheckNone = 0;
+    private const uint WinTrustUnionChoiceFile = 1;
+    private const uint WinTrustStateActionIgnore = 0;
+    private const uint WinTrustStateActionClose = 2;
+    private const uint WinTrustProviderFlagsSafer = 0x00000100;
+    private const uint WinTrustSignatureSettingsNoUi = 0;
+
+    [DllImport("wintrust.dll", ExactSpelling = true, SetLastError = true)]
+    private static extern uint WinVerifyTrust(
+        IntPtr hwnd,
+        ref Guid pgActionID,
+        ref WinTrustDataNative pWvtData);
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct WinTrustDataNative
+    {
+        public uint cbStruct;
+        public IntPtr pPolicyCallbackData;
+        public IntPtr pSIPClientData;
+        public uint dwUIChoice;
+        public uint fdwRevocationChecks;
+        public uint dwUnionChoice;
+        public IntPtr pFile;
+        public uint dwStateAction;
+        public IntPtr hWvtStateData;
+        public IntPtr pwszUrlReference;
+        public uint dwProvFlags;
+        public uint dwUiContext;
+        public IntPtr pSignatureSettings;
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct WinTrustFileInfoNative
+    {
+        public uint cbStruct;
+        public IntPtr pcwszFilePath;
+        public IntPtr hFile;
+        public IntPtr pgKnownSubject;
+    }
+
+    private sealed class WinTrustFileInfo : IDisposable
+    {
+        public IntPtr NativePointer { get; }
+        private IntPtr _pathPointer;
+
+        public WinTrustFileInfo(string path)
+        {
+            _pathPointer = Marshal.StringToCoTaskMemUni(path);
+            var native = new WinTrustFileInfoNative
+            {
+                cbStruct = (uint)Marshal.SizeOf<WinTrustFileInfoNative>(),
+                pcwszFilePath = _pathPointer
+            };
+            NativePointer = Marshal.AllocCoTaskMem(Marshal.SizeOf<WinTrustFileInfoNative>());
+            Marshal.StructureToPtr(native, NativePointer, fDeleteOld: false);
+        }
+
+        public void Dispose()
+        {
+            if (NativePointer != IntPtr.Zero)
+                Marshal.FreeCoTaskMem(NativePointer);
+            if (_pathPointer != IntPtr.Zero)
+                Marshal.FreeCoTaskMem(_pathPointer);
+        }
+    }
+
+    private sealed class WinTrustData : IDisposable
+    {
+        private readonly WinTrustFileInfo _fileInfo;
+
+        public WinTrustDataNative Native;
+
+        public WinTrustData(WinTrustFileInfo fileInfo)
+        {
+            _fileInfo = fileInfo;
+            Native = new WinTrustDataNative
+            {
+                cbStruct = (uint)Marshal.SizeOf<WinTrustDataNative>(),
+                dwUIChoice = WinTrustUiChoiceNone,
+                fdwRevocationChecks = WinTrustRevocationCheckNone,
+                dwUnionChoice = WinTrustUnionChoiceFile,
+                pFile = fileInfo.NativePointer,
+                dwStateAction = WinTrustStateActionIgnore,
+                dwProvFlags = WinTrustProviderFlagsSafer,
+                dwUiContext = WinTrustSignatureSettingsNoUi
+            };
+        }
+
+        public void Dispose() => _fileInfo.Dispose();
     }
 
     private static string ComputeSha256(string path)
