@@ -20,25 +20,8 @@ env:
   Configuration: Release
 
 jobs:
-  policy:
-    name: Repository policy
-    runs-on: windows-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: 10.0.401
-
-      - name: Validate repository tests
-        run: dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration Release --verbosity normal --logger "trx;LogFileName=policy.trx"
-
   build-test:
     name: Build and test (${{ matrix.configuration }})
-    needs: policy
     strategy:
       fail-fast: false
       matrix:
@@ -54,7 +37,16 @@ jobs:
         with:
           dotnet-version: 10.0.401
 
-      - name: Restore
+      - name: Restore engine
+        run: dotnet restore src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj
+
+      - name: Restore desktop
+        run: dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj
+
+      - name: Restore CLI
+        run: dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj
+
+      - name: Restore tests
         run: dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
 
       - name: Build engine
@@ -95,7 +87,10 @@ jobs:
         with:
           dotnet-version: 10.0.401
 
-      - name: Restore
+      - name: Restore desktop
+        run: dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj
+
+      - name: Restore CLI
         run: dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj
 
       - name: Publish self-contained CLI
@@ -104,11 +99,15 @@ jobs:
       - name: Publish desktop
         run: dotnet publish desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output artifacts/desktop
 
+      - name: Bundle CLI with desktop
+        run: dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output artifacts/desktop
+
       - name: Verify CLI artifact
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           if (-not (Test-Path 'artifacts/cli/WorkspaceBootstrap.Cli.exe')) { throw 'CLI executable was not published.' }
+          if (-not (Test-Path 'artifacts/desktop/WorkspaceBootstrap.Cli.exe')) { throw 'CLI executable is missing from the portable desktop package.' }
 
       - name: Verify desktop artifact
         shell: pwsh
