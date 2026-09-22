@@ -1,7 +1,37 @@
 {
-  "id":"powertoys","name":"Microsoft PowerToys","category":"utility","profiles": ["development"],"platforms":["windows"],
-  "versionPolicy":"latest-stable","packageManager":"winget","packageId":"Microsoft.PowerToys","source":"winget",
-  "installerType":"exe","installer":"Install-WingetPackage.ps1","installerParameters":["-PackageId","Microsoft.PowerToys"],
-  "dependencies":[],"prerequisites":[{"type":"admin"},{"type":"windows-build","minimum":22000},{"type":"command","name":"winget"}],
-  "checks":[{"type":"file-any","paths":["C:\\Program Files\\PowerToys\\PowerToys.exe"]}]
+  "id": "powertoys",
+  "name": "Microsoft PowerToys",
+  "category": "utility",
+  "profiles": [
+    "development"
+  ],
+  "platforms": [
+    "windows"
+  ],
+  "versionPolicy": "latest-stable",
+  "packageId": "Microsoft.PowerToys",
+  "installerType": "exe",
+  "dependencies": [],
+  "prerequisites": [
+    {
+      "type": "admin"
+    },
+    {
+      "type": "windows-build",
+      "minimum": 22000
+    },
+    {
+      "type": "command",
+      "name": "winget"
+    }
+  ],
+  "checks": [
+    {
+      "type": "file-any",
+      "paths": [
+        "C:\\Program Files\\PowerToys\\PowerToys.exe"
+      ]
+    }
+  ],
+  "fallbackPackageManager": "winget"
 }
