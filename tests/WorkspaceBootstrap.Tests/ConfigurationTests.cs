@@ -127,6 +127,21 @@ public sealed class ProvisioningPlanContractTests
             Assert.IsTrue(state.GetString() is "MISSING" or "INSTALLED" or "OUTDATED");
         }
     }
+
+    private static string FindRepositoryRoot()
+    {
+        var current = new DirectoryInfo(AppContext.BaseDirectory);
+        while (current is not null)
+        {
+            if (File.Exists(Path.Combine(current.FullName, "bootstrap", "windows", "components", "catalog.json")))
+                return current.FullName;
+
+            current = current.Parent;
+        }
+
+        Assert.Fail("Repository content root could not be located for the configuration contract test.");
+        return string.Empty;
+    }
 }
 
 
