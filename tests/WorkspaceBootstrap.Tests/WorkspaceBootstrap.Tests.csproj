@@ -13,5 +13,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\WorkspaceBootstrap.Engine\WorkspaceBootstrap.Engine.csproj" />
+    <ProjectReference Include="..\..\src\WorkspaceControl.Application\WorkspaceControl.Application.csproj" />
   </ItemGroup>
 </Project>

@@ -1,3 +1,4 @@
+using WorkspaceControl.Domain;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WorkspaceBootstrap;
 

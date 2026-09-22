@@ -1,53 +1,74 @@
+using WorkspaceControl.Application;
+using WorkspaceControl.Domain;
+
 namespace WorkspaceBootstrap;
 
 public sealed class EngineFacade
 {
-    private readonly WorkspacePaths _paths = new();
-    private readonly ConfigurationStore _configuration;
-    private readonly InstallerEngine _installer;
-    private readonly ProvisioningEngine _provisioning;
-    private readonly WindowsSystemService _system = new();
-    private readonly WindowsOptimizationService _optimization = new();
-    private readonly InventoryScanner _inventory;
+    private readonly IWorkspaceControlApplication _application;
 
     public EngineFacade()
     {
-        _configuration = new ConfigurationStore();
-        _installer = new InstallerEngine(_paths);
-        _inventory = new InventoryScanner([
+        var paths = new WorkspacePaths();
+        var configuration = new ConfigurationStore();
+        var installer = new InstallerEngine(paths);
+        var inventory = new InventoryScanner([
             new WindowsRegistryUninstallInventoryProvider(),
             new WinGetInventoryProvider()
         ]);
-        _provisioning = new ProvisioningEngine(_configuration, _installer, _paths, _inventory);
+        var provisioning = new ProvisioningEngine(configuration, installer, paths, inventory);
+
+        _application = new WorkspaceControlApplication(
+            new Application.ProvisioningServiceAdapter(provisioning),
+            new Application.InventoryServiceAdapter(inventory),
+            new SoftwareInventoryService([new Infrastructure.RegistrySoftwareInventorySource()]),
+            new Application.WindowsAdministrationServiceAdapter(),
+            new Application.OptimizationServiceAdapter());
     }
 
-    public IReadOnlyList<ProfileManifest> GetProfiles() => _provisioning.Profiles();
+    public IReadOnlyList<ProfileManifest> GetProfiles() => _application.GetProfiles();
+
     public Task<object> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
-        _provisioning.PlanAsync(profileId, cancellationToken);
-    public string StartProvisioning(string profileId, bool cacheOnly = false) => _provisioning.Start(profileId, cacheOnly);
-    public Task RunProvisioningAsync(string operationId, bool cacheOnly = false, CancellationToken cancellationToken = default) =>
-        _provisioning.RunAsync(operationId, cacheOnly, cancellationToken);
-    public ProvisioningOperation? GetProvisioningStatus(string operationId) => _provisioning.Get(operationId);
-    public string ResumeProvisioning(string operationId, bool cacheOnly = false) => _provisioning.Resume(operationId, cacheOnly);
-    public IReadOnlyList<ProvisioningOperation> GetProvisioningHistory() => _provisioning.History().ToArray();
+        _application.GetPlanAsync(profileId, cancellationToken);
 
-    public ProvisioningOperation? GetProvisioningRecovery()
-    {
-        var latest = _provisioning.History()
-            .OrderByDescending(x => x.UpdatedAt)
-            .FirstOrDefault();
+    public string StartProvisioning(string profileId, bool cacheOnly = false) =>
+        _application.StartProvisioning(profileId, cacheOnly);
 
-        return latest?.Status is "starting" or "running" or "failed"
-            ? latest
-            : null;
-    }
+    public Task RunProvisioningAsync(
+        string operationId,
+        bool cacheOnly = false,
+        CancellationToken cancellationToken = default) =>
+        _application.RunProvisioningAsync(operationId, cacheOnly, cancellationToken);
+
+    public ProvisioningOperation? GetProvisioningStatus(string operationId) =>
+        _application.GetProvisioningStatus(operationId);
+
+    public string ResumeProvisioning(string operationId, bool cacheOnly = false) =>
+        _application.ResumeProvisioning(operationId, cacheOnly);
+
+    public IReadOnlyList<ProvisioningOperation> GetProvisioningHistory() =>
+        _application.GetProvisioningHistory();
+
+    public ProvisioningOperation? GetProvisioningRecovery() =>
+        _application.GetProvisioningRecovery();
 
     public ProvisioningOperation? GetProvisioningDetail(string operationId) =>
-        _provisioning.Get(operationId);
+        _application.GetProvisioningDetail(operationId);
+
     public Task<InventorySnapshot> GetInventoryAsync(CancellationToken cancellationToken = default) =>
-        _inventory.ScanAsync(cancellationToken);
-    public BaselineSnapshot GetBaseline() => _system.GetBaseline();
-    public IReadOnlyList<OptimizationPlanItem> GetSafeOptimizationPlan() => _optimization.GetSafePlan();
-    public IReadOnlyList<string> ApplySafeOptimization() => _optimization.ApplySafe();
-    public IReadOnlyList<string> RollbackOptimization() => _optimization.Rollback();
+        _application.GetInventoryAsync(cancellationToken);
+
+    public Task<SoftwareInventorySnapshot> GetSoftwareInventoryAsync(CancellationToken cancellationToken = default) =>
+        _application.GetSoftwareInventoryAsync(cancellationToken);
+
+    public BaselineSnapshot GetBaseline() => _application.GetBaseline();
+
+    public IReadOnlyList<OptimizationPlanItem> GetSafeOptimizationPlan() =>
+        _application.GetSafeOptimizationPlan();
+
+    public IReadOnlyList<string> ApplySafeOptimization() =>
+        _application.ApplySafeOptimization();
+
+    public IReadOnlyList<string> RollbackOptimization() =>
+        _application.RollbackOptimization();
 }

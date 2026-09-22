@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace WorkspaceBootstrap;
+namespace WorkspaceControl.Domain;
 
 public sealed record ComponentManifest(
     string Id,
