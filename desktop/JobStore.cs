@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Data.Sqlite;
 
-namespace BounaDevEnvironment;
+namespace WorkspaceBootstrap.Desktop;
 
 public sealed class JobStore : IJobExecutionStateWriter
 {
@@ -18,7 +18,7 @@ public sealed class JobStore : IJobExecutionStateWriter
     {
         var path = databasePath ?? Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "BounaDevEnvironment",
+            "WorkspaceBootstrap.Desktop",
             "jobs",
             "jobs.db");
 
