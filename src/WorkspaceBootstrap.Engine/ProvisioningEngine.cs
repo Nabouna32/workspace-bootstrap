@@ -73,6 +73,17 @@ public sealed class ProvisioningEngine
         if (operation.Status is "completed")
             return;
 
+        await using var operationLock = await AcquireOperationLockAsync(token);
+
+        // A worker may have been queued while another operation was running.
+        // Re-read the operation after acquiring the process-wide lock so a stale
+        // worker cannot overwrite the final state written by the active worker.
+        operation = Get(operationId)
+            ?? throw new InvalidOperationException("Opération introuvable.");
+
+        if (operation.Status is "completed")
+            return;
+
         var profile = GetProfile(operation.ProfileId);
         var components = _config.LoadComponents();
 
@@ -216,6 +227,31 @@ public sealed class ProvisioningEngine
                 "Impossible de démarrer le worker de provisioning.");
 
         worker.Dispose();
+    }
+
+    private async Task<FileStream> AcquireOperationLockAsync(CancellationToken token)
+    {
+        var path = Path.Combine(_paths.StateRoot, "provisioning.lock");
+
+        while (true)
+        {
+            token.ThrowIfCancellationRequested();
+
+            try
+            {
+                return new FileStream(
+                    path,
+                    FileMode.OpenOrCreate,
+                    FileAccess.ReadWrite,
+                    FileShare.None,
+                    bufferSize: 1,
+                    options: FileOptions.WriteThrough);
+            }
+            catch (IOException)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(250), token);
+            }
+        }
     }
 
     private ProfileManifest GetProfile(string id) =>
