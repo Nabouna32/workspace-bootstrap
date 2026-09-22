@@ -108,7 +108,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish portable package for scheduled smoke test
-        if: matrix.configuration == 'Release'
+        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && matrix.configuration == 'Release'
         shell: pwsh
         run: |
           $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-package"
@@ -117,7 +117,7 @@ jobs:
           dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
 
       - name: Smoke-test scheduled portable package
-        if: matrix.configuration == 'Release'
+        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && matrix.configuration == 'Release'
         shell: pwsh
         run: |
           $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-package"
