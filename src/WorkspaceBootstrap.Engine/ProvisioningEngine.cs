@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace WorkspaceBootstrap;
@@ -8,7 +9,10 @@ public sealed class ProvisioningEngine
     private readonly InstallerEngine _installer;
     private readonly WorkspacePaths _paths;
 
-    public ProvisioningEngine(ConfigurationStore config, InstallerEngine installer, WorkspacePaths paths)
+    public ProvisioningEngine(
+        ConfigurationStore config,
+        InstallerEngine installer,
+        WorkspacePaths paths)
     {
         _config = config;
         _installer = installer;
@@ -31,6 +35,7 @@ public sealed class ProvisioningEngine
                 var component = components.TryGetValue(id, out var value)
                     ? value
                     : throw new InvalidOperationException($"Composant inconnu : {id}");
+
                 return new
                 {
                     component.Id,
@@ -48,81 +53,168 @@ public sealed class ProvisioningEngine
         var operation = new ProvisioningOperation
         {
             ProfileId = profile.Id,
-            Status = "starting",
+            Status = "queued",
             Total = profile.Components.Length
         };
 
         Save(operation);
+        LaunchWorker(operation.OperationId, cacheOnly);
+        return operation.OperationId;
+    }
 
-        _ = Task.Run(async () =>
+    public async Task RunAsync(
+        string operationId,
+        bool cacheOnly,
+        CancellationToken token)
+    {
+        var operation = Get(operationId)
+            ?? throw new InvalidOperationException("Opération introuvable.");
+
+        if (operation.Status is "completed")
+            return;
+
+        var profile = GetProfile(operation.ProfileId);
+        var components = _config.LoadComponents();
+
+        try
         {
-            try
+            operation.Status = "running";
+            operation.Error = null;
+            operation.CanResume = true;
+            Save(operation);
+
+            for (var index = operation.Completed; index < profile.Components.Length; index++)
             {
-                var components = _config.LoadComponents();
-                foreach (var componentId in profile.Components)
+                token.ThrowIfCancellationRequested();
+
+                var componentId = profile.Components[index];
+                if (!components.TryGetValue(componentId, out var component))
+                    throw new InvalidOperationException($"Composant inconnu : {componentId}");
+
+                operation.CurrentComponentName = component.Name;
+                Save(operation);
+
+                try
                 {
-                    var component = components[componentId];
-                    operation.Status = "running";
-                    operation.CurrentComponentName = component.Name;
-                    Save(operation);
-
-                    try
-                    {
-                        await _installer.InstallAsync(component, cacheOnly, CancellationToken.None);
-                        operation.Steps.Add(new ProvisioningStep(component.Id, component.Name, "completed"));
-                        operation.Completed++;
-                    }
-                    catch (Exception ex)
-                    {
-                        operation.Steps.Add(new ProvisioningStep(component.Id, component.Name, "failed", ex.Message));
-                        operation.Error = ex.Message;
-                        operation.Status = "failed";
-                        operation.CanResume = true;
-                        Save(operation);
-                        return;
-                    }
-
+                    await _installer.InstallAsync(component, cacheOnly, token);
+                    operation.Steps.Add(
+                        new ProvisioningStep(component.Id, component.Name, "completed"));
+                    operation.Completed = index + 1;
+                    operation.Error = null;
                     Save(operation);
                 }
-
-                operation.Status = "completed";
-                operation.CurrentComponentName = null;
-                operation.CanResume = false;
-                Save(operation);
+                catch (Exception ex)
+                {
+                    operation.Steps.Add(
+                        new ProvisioningStep(component.Id, component.Name, "failed", ex.Message));
+                    operation.Error = ex.Message;
+                    operation.Status = "failed";
+                    operation.CanResume = true;
+                    Save(operation);
+                    return;
+                }
             }
-            catch (Exception ex)
-            {
-                operation.Status = "failed";
-                operation.Error = ex.Message;
-                Save(operation);
-            }
-        });
 
-        return operation.OperationId;
+            operation.Status = "completed";
+            operation.CurrentComponentName = null;
+            operation.CanResume = false;
+            operation.Error = null;
+            Save(operation);
+        }
+        catch (OperationCanceledException)
+        {
+            operation.Status = "failed";
+            operation.Error = "Opération annulée.";
+            operation.CanResume = true;
+            Save(operation);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            operation.Status = "failed";
+            operation.Error = ex.Message;
+            operation.CanResume = true;
+            Save(operation);
+            throw;
+        }
     }
 
     public ProvisioningOperation? Get(string id)
     {
         var path = OperationPath(id);
         return File.Exists(path)
-            ? JsonSerializer.Deserialize<ProvisioningOperation>(File.ReadAllText(path), JsonDefaults.Options)
+            ? JsonSerializer.Deserialize<ProvisioningOperation>(
+                File.ReadAllText(path),
+                JsonDefaults.Options)
             : null;
     }
 
     public IEnumerable<ProvisioningOperation> History() =>
         Directory.EnumerateFiles(_paths.StateRoot, "operation-*.json")
             .Select(path => JsonSerializer.Deserialize<ProvisioningOperation>(
-                File.ReadAllText(path), JsonDefaults.Options))
+                File.ReadAllText(path),
+                JsonDefaults.Options))
             .Where(x => x is not null)!
             .OrderByDescending(x => x!.UpdatedAt);
 
     public string Resume(string id, bool cacheOnly)
     {
-        var previous = Get(id) ?? throw new InvalidOperationException("Opération introuvable.");
-        if (previous.Status != "failed" || !previous.CanResume)
-            throw new InvalidOperationException("Cette opération ne peut pas être reprise.");
+        var operation = Get(id)
+            ?? throw new InvalidOperationException("Opération introuvable.");
 
-        return Start(previous.ProfileId, cacheOnly);
+        if (operation.Status != "failed" || !operation.CanResume)
+            throw new InvalidOperationException(
+                "Cette opération ne peut pas être reprise.");
+
+        LaunchWorker(operation.OperationId, cacheOnly);
+        return operation.OperationId;
+    }
+
+    private void LaunchWorker(string operationId, bool cacheOnly)
+    {
+        var processPath = Environment.ProcessPath
+            ?? throw new InvalidOperationException(
+                "Impossible de déterminer le processus Workspace Bootstrap.");
+
+        var currentAssembly = Environment.ProcessPath;
+        var entryAssembly = System.Reflection.Assembly.GetEntryAssembly()?.Location;
+
+        ProcessStartInfo psi;
+        if (Path.GetFileNameWithoutExtension(processPath)
+            .Equals("dotnet", StringComparison.OrdinalIgnoreCase))
+        {
+            if (string.IsNullOrWhiteSpace(entryAssembly))
+                throw new InvalidOperationException(
+                    "Le chemin de l'assembly CLI est introuvable pour le worker de développement.");
+
+            psi = new ProcessStartInfo
+            {
+                FileName = processPath,
+                Arguments = $"\"{entryAssembly}\" provisioning-worker --operation \"{operationId}\""
+                    + (cacheOnly ? " --cache-only" : ""),
+                WorkingDirectory = AppContext.BaseDirectory,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+        }
+        else
+        {
+            psi = new ProcessStartInfo
+            {
+                FileName = currentAssembly,
+                Arguments = $"provisioning-worker --operation \"{operationId}\""
+                    + (cacheOnly ? " --cache-only" : ""),
+                WorkingDirectory = AppContext.BaseDirectory,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+        }
+
+        var worker = Process.Start(psi)
+            ?? throw new InvalidOperationException(
+                "Impossible de démarrer le worker de provisioning.");
+
+        worker.Dispose();
     }
 
     private ProfileManifest GetProfile(string id) =>
@@ -133,9 +225,15 @@ public sealed class ProvisioningEngine
     private void Save(ProvisioningOperation operation)
     {
         operation.UpdatedAt = DateTimeOffset.UtcNow;
+
+        var path = OperationPath(operation.OperationId);
+        var temporary = $"{path}.{Guid.NewGuid():N}.tmp";
+
         File.WriteAllText(
-            OperationPath(operation.OperationId),
+            temporary,
             JsonSerializer.Serialize(operation, JsonDefaults.Options));
+
+        File.Move(temporary, path, overwrite: true);
     }
 
     private string OperationPath(string id) =>
