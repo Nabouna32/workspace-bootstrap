@@ -27,6 +27,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Enforce GitHub-hosted runner policy
+        shell: pwsh
+        run: |
+          $forbiddenRunnerLabel = 'self' + '-hosted'
+          $matches = Get-ChildItem .github/workflows -File -Filter '*.yml' |
+            Select-String -Pattern ("(?i)" + [regex]::Escape($forbiddenRunnerLabel))
+          if ($matches) {
+            $matches | ForEach-Object { $_.ToString() } | Write-Error
+            throw "CI policy violation: unsupported runner label detected."
+          }
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
@@ -44,7 +55,7 @@ jobs:
         shell: pwsh
         run: |
           dotnet restore src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj
-          dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj --runtime win-x64
+          dotnet restore src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj --runtime win-x64
           dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
           dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
 
@@ -52,7 +63,10 @@ jobs:
         shell: pwsh
         run: |
           dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release --no-restore --warnaserror
-          dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --no-restore --warnaserror
+          $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe | Select-Object -First 1
+          if (-not $msbuild) { throw "Visual Studio MSBuild could not be located." }
+          & $msbuild src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj /t:Build /p:Configuration=Release /p:Platform=x64 /warnAsError
+          if ($LASTEXITCODE -ne 0) { throw "WinUI desktop build failed with exit code $LASTEXITCODE." }
           dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --no-restore --warnaserror
 
       - name: Test
@@ -99,7 +113,7 @@ jobs:
         shell: pwsh
         run: |
           dotnet restore src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj
-          dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj --runtime win-x64
+          dotnet restore src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj --runtime win-x64
           dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
           dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
 
@@ -107,7 +121,10 @@ jobs:
         shell: pwsh
         run: |
           dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
-          dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
+          $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe | Select-Object -First 1
+          if (-not $msbuild) { throw "Visual Studio MSBuild could not be located." }
+          & $msbuild src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj /restore /t:Build /p:Configuration=${{ matrix.configuration }} /p:Platform=x64 /warnAsError
+          if ($LASTEXITCODE -ne 0) { throw "WinUI desktop build failed with exit code $LASTEXITCODE." }
           dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
 
       - name: Test
@@ -131,7 +148,10 @@ jobs:
         run: |
           $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-weekly"
           New-Item -ItemType Directory -Force -Path $package | Out-Null
-          dotnet publish desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
+          $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe | Select-Object -First 1
+          if (-not $msbuild) { throw "Visual Studio MSBuild could not be located." }
+          & $msbuild src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj /restore /t:Publish /p:Configuration=Release /p:Platform=x64 /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishDir="$package\WorkspaceControl\"
+          if ($LASTEXITCODE -ne 0) { throw "Workspace Control publish failed with exit code $LASTEXITCODE." }
           dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
 
       - name: Smoke-test weekly package
@@ -139,13 +159,13 @@ jobs:
         shell: pwsh
         run: |
           $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-weekly"
-          $desktop = Join-Path $package "WorkspaceBootstrap.exe"
+          $desktop = Join-Path $package "WorkspaceControl/WorkspaceControl.exe"
           $cli = Join-Path $package "WorkspaceBootstrap.Cli.exe"
           $catalog = Join-Path $package "bootstrap/windows/components/catalog.json"
           $profiles = Join-Path $package "bootstrap/windows/profiles"
           $readme = Join-Path $package "README.md"
 
-          if (-not (Test-Path $desktop)) { throw "Desktop executable is missing: $desktop" }
+          if (-not (Test-Path $desktop)) { throw "Workspace Control executable is missing: $desktop" }
           if (-not (Test-Path $cli)) { throw "CLI executable is missing: $cli" }
           if (-not (Test-Path $catalog)) { throw "Bundled component catalog is missing: $catalog" }
           if (-not (Test-Path $profiles -PathType Container)) { throw "Bundled profiles directory is missing: $profiles" }

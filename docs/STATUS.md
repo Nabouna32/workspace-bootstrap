@@ -17,7 +17,15 @@ The product is now **Workspace Control**, a permanent Windows 11 control center.
 - Providers/plugins are planned.
 - Normal interactive mode never mutates without explicit confirmation.
 - Elevated session is optional; least privilege remains the architecture.
-- GitHub-hosted CI only; self-hosted runners are abandoned.
+- GitHub-hosted CI only; self-hosted runners are abandoned and must not be reintroduced.
+
+## Current migration state
+The architecture migration is now active in code:
+- a native WinUI 3 shell exists under `src/WorkspaceControl.Desktop`;
+- inventory contracts have moved into `WorkspaceControl.Domain`;
+- mutable cache/state/log data no longer defaults to the application installation directory;
+- packaged configuration is resolved from the application's content root rather than searching the repository tree;
+- the legacy WPF desktop remains temporarily for incremental migration and is not the target UI.
 
 ## Existing foundations worth migrating
 - inventory providers and evidence/ownership;
@@ -31,11 +39,11 @@ The product is now **Workspace Control**, a permanent Windows 11 control center.
 These are reusable foundations, not proof that the current architecture is final.
 
 ## Migration order
-1. Documentation and architectural contracts.
-2. New domain/application boundaries.
-3. WinUI 3 shell.
+1. Documentation and architectural contracts. **Done.**
+2. New domain/application boundaries. **In progress.**
+3. WinUI 3 shell. **Started.**
 4. Migrate inventory, software, cache and operations.
-5. Remove legacy WPF/WorkspaceBootstrap desktop code.
+5. Replace and remove legacy WPF/WorkspaceBootstrap desktop code.
 6. Expand Windows administration, optimization, drivers and WSL.
 7. Build desired-state profiles.
 8. Add plugin boundary.

@@ -1,3 +1,4 @@
+using WorkspaceControl.Domain;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 

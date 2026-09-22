@@ -46,8 +46,13 @@ jobs:
       - name: Build engine
         run: dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release
 
-      - name: Build desktop
-        run: dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release
+      - name: Build WinUI desktop
+        shell: pwsh
+        run: |
+          $msbuild = & "$env:ProgramFiles(x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe | Select-Object -First 1
+          if (-not $msbuild) { throw "Visual Studio MSBuild could not be located." }
+          & $msbuild src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj /t:Build /p:Configuration=Release /p:Platform=x64 /warnAsError
+          if ($LASTEXITCODE -ne 0) { throw "WinUI desktop build failed with exit code $LASTEXITCODE." }
 
       - name: Build CLI
         run: dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release
