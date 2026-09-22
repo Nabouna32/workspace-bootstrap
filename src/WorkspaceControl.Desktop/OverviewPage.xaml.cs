@@ -8,7 +8,7 @@ public sealed partial class OverviewPage : Page
     public OverviewPage()
     {
         InitializeComponent();
-        DataContext = ((App)Application.Current).ViewModel;
+        DataContext = ((App)Microsoft.UI.Xaml.Application.Current).ViewModel;
     }
 
     private async void Refresh_Click(object sender, RoutedEventArgs e) =>
