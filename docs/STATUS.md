@@ -19,11 +19,13 @@ Catalog → Resolver → Cache → Verification → Provisioning → State/Recov
 - Native C#/.NET 10 architecture is established.
 - WPF desktop and self-contained Windows x64 CLI share the Engine.
 - Provisioning has durable state, a serialized worker lock and recoverable worker startup failures.
+- Provisioning plans are inventory-aware and distinguish missing, installed and update-available components.
 - Installer artifacts use isolated staging, SHA-256 verification and Authenticode validation.
 - Cache metadata is revalidated before an artifact is trusted.
+- Cache-only provisioning fails explicitly when a verified artifact is unavailable.
 - Windows optimization state is package-local and persisted atomically.
 - The desktop has an explicit WPF exception boundary with diagnostic logging.
-- GitHub Actions uses fast PR validation; full packaging/security validation is scheduled or explicit.
+- GitHub Actions validates pull requests on Windows-hosted runners; full packaging/security validation is scheduled or explicit.
 - Windows releases are explicit via manual dispatch or `v*` tags.
 
 ## Validation cadence
@@ -58,8 +60,8 @@ CodeQL remains a separate scheduled/manual validation rather than part of the fa
 ## Next product focus
 
 1. Complete the desktop information architecture and component/profile experience.
-2. Replace placeholder provisioning plan states with real inventory-aware states.
-3. Strengthen installer cache lifecycle, retention and recovery UX.
-4. Expand provisioning/job integration tests.
-5. Add Windows published-artifact smoke/integration coverage.
-6. Continue dead-code and retired-script cleanup.
+2. Strengthen installer cache lifecycle, retention and recovery UX.
+3. Expand provisioning/job integration tests.
+4. Add Windows published-artifact integration coverage.
+5. Improve localization and accessibility.
+6. Package the desktop application for repeatable distribution.
