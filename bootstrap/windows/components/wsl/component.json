@@ -1,0 +1,6 @@
+{
+  "id":"wsl","name":"WSL2 / Ubuntu","category":"development","profiles":["development"],"platforms":["windows"],
+  "versionPolicy":"platform","dependencies":[],"installer":"native-wsl",
+  "prerequisites":[{"type":"admin"},{"type":"windows-build","minimum":22000}],
+  "checks":[{"type":"wsl-distro","name":"Ubuntu"}]
+}

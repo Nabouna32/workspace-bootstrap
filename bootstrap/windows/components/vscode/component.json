@@ -1,0 +1,17 @@
+{
+  "id": "vscode",
+  "name": "Visual Studio Code",
+  "category": "development",
+  "profiles": ["development"],
+  "platforms": ["windows"],
+  "versionPolicy": "latest-stable",
+  "packageManager": "winget",
+  "packageId": "Microsoft.VisualStudioCode",
+  "source": "winget",
+  "installerType": "exe",
+  "installer": "Install-WingetPackage.ps1",
+  "installerParameters": ["-PackageId", "Microsoft.VisualStudioCode"],
+  "dependencies": [],
+  "prerequisites": [{"type": "admin"}, {"type": "command", "name": "winget"}],
+  "checks": [{"type": "winget-package", "id": "Microsoft.VisualStudioCode"}]
+}
