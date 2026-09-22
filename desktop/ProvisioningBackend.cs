@@ -1,6 +1,6 @@
-using BounaDevEnvironment;
+using WorkspaceBootstrap.Desktop;
 
-namespace DevEnvironment.Execution;
+namespace WorkspaceBootstrap.Desktop.Execution;
 
 public sealed record ProvisioningExecutionStart(
     string OperationId,
