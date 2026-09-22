@@ -1,6 +1,8 @@
 name: Repository validation
 
 on:
+  push:
+    branches: [main]
   pull_request:
   schedule:
     - cron: '17 4 * * 0'
@@ -19,8 +21,8 @@ env:
 
 jobs:
   validate:
-    name: PR validation
-    if: github.event_name == 'pull_request'
+    name: Core validation
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
