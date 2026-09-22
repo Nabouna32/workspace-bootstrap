@@ -2,20 +2,15 @@
   "id": "kodi",
   "name": "Kodi",
   "category": "media",
-  "profiles": ["base"],
+  "profiles": [
+    "base"
+  ],
   "platforms": [
     "windows"
   ],
   "versionPolicy": "latest-stable",
-  "packageManager": "winget",
   "packageId": "XBMCFoundation.Kodi",
-  "source": "winget",
   "installerType": "exe",
-  "installer": "Install-WingetPackage.ps1",
-  "installerParameters": [
-    "-PackageId",
-    "XBMCFoundation.Kodi"
-  ],
   "dependencies": [],
   "prerequisites": [
     {
@@ -38,5 +33,6 @@
         "C:\\Program Files (x86)\\Kodi\\kodi.exe"
       ]
     }
-  ]
+  ],
+  "fallbackPackageManager": "winget"
 }
