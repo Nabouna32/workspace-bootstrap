@@ -28,7 +28,7 @@ main
   │       ├── local/runtime validation
   │       └── Draft PR
   │              ↓
-  │           GitHub CI
+  │        self-hosted CI
   │              ↓
   │        review / correction
   │              ↓
@@ -50,8 +50,8 @@ Commits describe coherent milestones. Do not artificially limit commit count, bu
 ## PR policy
 
 - Open substantial work as Draft early.
-- Keep CI on GitHub-hosted runners for this repository.
-- Do not merge with failing or unverified required CI.
+- Keep CI on the project's self-hosted Windows runner.
+- Do not merge with failing, unavailable or unverified required CI.
 - Prefer one PR per coherent product change.
 - Avoid PR-per-tiny-fix overhead.
 - After merge, delete the feature branch and start from the new `main`.
@@ -63,12 +63,10 @@ The repository follows the current architecture documented in the repository sta
 
 ## CI and local-build rule
 
-Public repositories use standard GitHub-hosted runners for CI. Do not make a PR depend on the personal PC being online.
+The repository is intentionally validated on the developer-owned Windows self-hosted runner. This keeps the full test/build loop local, avoids GitHub-hosted runner usage, and lets the project use the installed Windows/.NET toolchain for richer validation.
 
-Local builds remain supported and intentional: they are useful when the developer wants immediate feedback or wants to avoid repeatedly downloading large APK/AAB/EXE artifacts from GitHub. A local build is a convenience and diagnostic tool, not a substitute for CI.
-
+Local builds remain supported and intentional. A local build is useful for immediate feedback; the same checks must still be represented in the repository workflows so the source of truth is reproducible.
 
 ## Release principle
-
 
 A branch merge is not automatically a product release. Introduce tagging/releases once V2 reaches a stable real-PC validation point.
