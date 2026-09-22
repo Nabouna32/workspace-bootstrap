@@ -1,44 +1,64 @@
-# Dev Environment
+# Workspace Bootstrap
 
-Reproducible Windows development-environment bootstrap and maintenance tooling.
+**Workspace Bootstrap** is a native Windows 11 application for rebuilding, provisioning, maintaining and recovering a workstation after a clean Windows installation.
 
-The project provides a declarative component/profile model, interactive provisioning, diagnostics, maintenance, optimization, a persistent local installer cache, and a native desktop management application.
+The product is implemented in **C#/.NET 10** with a WPF desktop application and a self-contained Windows CLI sharing the same engine. There is no PowerShell or batch execution layer.
+
+## What it does
+
+- Detects the current Windows state and installed applications.
+- Lets you choose workstation profiles and individual components.
+- Resolves current installers from official vendor sources.
+- Keeps verified installers in the persistent local cache at `C:\DevCache`.
+- Reuses verified cached installers instead of downloading them again.
+- Keeps older verified versions for rollback and reinstallation.
+- Verifies SHA-256 and Authenticode where applicable.
+- Uses WinGet only as an explicit fallback declared by a component.
+- Provides dry-run plans, progress, operation history, diagnostics, maintenance and guarded optimization.
+- Produces a self-contained Windows x64 application suitable for a fresh Windows installation.
 
 ## Quick start
 
-On a fresh Windows 11 installation, run the bootstrap launcher from an elevated PowerShell session:
+Build the product on Windows:
 
-    .\bootstrap\windows\dev-env.ps1
+```text
+dotnet restore src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj
+dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release
+dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release
+dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release
+```
 
-Preview the provisioning plan without installing or changing anything:
+Publish the self-contained CLI:
 
-    .\bootstrap\windows\dev-env.ps1 -PlanOnly
+```text
+dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true
+```
 
-Export the local installer cache before reinstalling Windows:
+The desktop application and CLI use the same native engine; neither requires PowerShell 7.
 
-    .\bootstrap\windows\dev-env.ps1 -ExportCacheTo E:\DevCache
+## Local installer cache
 
-The installer cache is a local recovery/reinstallation asset. It is not a GitHub Actions cache.
+`C:\DevCache` is a persistent recovery/reinstallation asset, not a CI cache.
+
+The cache uses component-specific version metadata and verified immutable artifacts. Downloads are staged under unique temporary names, verified, then promoted into the cache. Failed downloads never invalidate an existing verified artifact.
+
+Before reinstalling Windows, export the cache to a non-system drive and restore it afterward.
 
 ## Profiles
 
-- **Base** — general Windows workstation foundation.
-- **Development** — Windows/WSL development toolchain.
-- **Development Extended** — additional IDEs, languages and tooling.
-- **Gaming** — gaming-related applications and configuration.
+Profiles are declarative collections of components under `bootstrap/windows/profiles`.
 
 ## Design principles
 
 - Root-cause fixes over workarounds.
-- Reproducible, idempotent provisioning.
-- Official vendor sources preferred for installer resolution and download.
-- Verified local installer cache with immutable versioned entries.
-- SHA-256 verification when an upstream digest is published.
-- Authenticode validation for cached EXE/MSI installers.
-- WinGet used only as an explicit fallback when no automated official source is declared.
+- Reproducible and idempotent provisioning.
+- Official vendor sources first.
+- Verified local cache with immutable versioned entries.
+- SHA-256 and Authenticode verification.
+- WinGet only as an explicit fallback.
 - Reversible changes keep their previous state.
 - Irreversible changes require explicit confirmation.
-- GitHub-hosted standard runners provide the authoritative CI validation.
+- CI runs exclusively on the project's self-hosted Windows runner.
 - Credentials and secrets are never stored in ordinary configuration bundles.
 
 ## Documentation
@@ -49,7 +69,7 @@ The installer cache is a local recovery/reinstallation asset. It is not a GitHub
 - [Current status](docs/STATUS.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Configuration](docs/CONFIGURATION.md)
-- [WSL development](docs/WSL-DEVELOPMENT.md)
+- [Reinstallation](docs/REINSTALL.md)
 - [CI and local builds](docs/CI-LOCAL-BUILD.md)
 
 ## License
