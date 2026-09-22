@@ -113,6 +113,17 @@ public sealed class WorkspaceControlApplicationTests
             Task.FromResult(new SoftwareInventorySnapshot("software", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, [], []));
     }
 
+    private sealed class FakeSoftwareInventoryService(SoftwareInventorySnapshot snapshot) : ISoftwareInventoryService
+    {
+        public FakeSoftwareInventoryService()
+            : this(new SoftwareInventorySnapshot("empty", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, [], []))
+        {
+        }
+
+        public Task<SoftwareInventorySnapshot> ScanAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(snapshot);
+    }
+
     private sealed class FakeWindowsAdministrationService : IWindowsAdministrationService
     {
         public BaselineSnapshot GetBaseline() =>
