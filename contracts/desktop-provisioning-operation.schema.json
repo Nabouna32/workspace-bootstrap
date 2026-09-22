@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Bouna Dev Environment Desktop Provisioning Operation",
+  "title": "Workspace Bootstrap Desktop Provisioning Operation",
   "type": "object",
   "required": [
     "schemaVersion",
