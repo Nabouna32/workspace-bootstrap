@@ -1,14 +1,12 @@
 {
   "schemaVersion": 2,
   "components": [
-    "powershell",
     "git",
     "github-cli",
     "chrome",
     "edge",
     "firefox",
     "visual-studio",
-    "wsl",
     "flutter",
     "winrar",
     "notepadpp",
