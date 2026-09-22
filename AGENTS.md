@@ -8,12 +8,12 @@
 - Persistent installer cache: `C:\DevCache`.
 
 ## Strategic architecture
-- C#/.NET 10 is the single product and orchestration technology.
+- C#/.NET 10 is the single application and orchestration technology.
 - The native .NET engine owns provisioning, installer resolution, cache, verification, profiles, operation state, diagnostics, maintenance, optimization and Windows integration.
-- The WPF desktop application and self-contained CLI consume the same engine.
+- The desktop application and self-contained CLI consume the same engine.
+- The desktop presentation is a native Windows UI; WPF is the current presentation framework, not a second application architecture.
 - There is one product architecture, not parallel script and native implementations.
-- PowerShell, batch files and shell scripts are not product dependencies or execution backends.
-- Do not add new PowerShell, batch or shell product code.
+- PowerShell, batch files, shell scripts and WSL are not product dependencies or execution backends.
 - WinGet is an explicit package-manager fallback only where a component declares it; official vendor sources take precedence.
 - C++/Rust are reserved for a concrete native requirement that cannot be implemented cleanly in .NET.
 
@@ -30,21 +30,21 @@
 - Failed staging must be cleaned without deleting valid cache entries.
 - Destructive or irreversible actions require explicit confirmation.
 - Optimization changes must have a rollback story where declared reversible.
+- The UI must remain presentation-focused; provisioning and system mutation belong to the Engine.
 
 ## Git workflow
 - GitHub is the source of truth.
 - Work on feature branches and use PRs.
-- **All GitHub Actions jobs must run on the user's self-hosted runner. No GitHub-hosted runner is permitted.**
-- Workflows must use explicit self-hosted Windows labels matching the registered runner.
-- The repository must not depend on Ubuntu/macOS hosted infrastructure.
+- **All GitHub Actions jobs run on GitHub-hosted runners. Self-hosted runners are forbidden.**
+- The repository must not depend on a personal machine, WSL environment or self-hosted infrastructure for CI.
 - Never claim CI green without checking the exact commit.
 
 ## Execution-first
 When the user authorizes implementation with `continue`, `vas-y`, `feu vert` or equivalent, execute repository changes before reporting them.
 
 ## Migration cleanup
-The historical PowerShell/batch implementation is retired. Native .NET is the only product implementation.
+The historical PowerShell/batch/WSL product implementation is retired. Native .NET is the only product implementation.
 
-Cleanup is complete only when the native engine and desktop are active, official-source/cache behavior and provisioning use C#, self-contained publish and fresh-Windows smoke validation are covered, all legacy `.ps1`, `.bat`, `.cmd` and product `.sh` paths are removed, and tests/workflows/docs no longer invoke script implementations.
+Cleanup is complete only when the native engine and desktop are active, official-source/cache behavior and provisioning use C#, self-contained publish and Windows smoke validation are covered, legacy script/product paths are removed, and tests/workflows/docs no longer invoke retired implementations.
 
 Do not leave a PowerShell compatibility layer behind.
