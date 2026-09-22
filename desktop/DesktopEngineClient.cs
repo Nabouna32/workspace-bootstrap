@@ -177,4 +177,3 @@ public sealed class DesktopEngineClient
         return response;
     }
 }
-}
