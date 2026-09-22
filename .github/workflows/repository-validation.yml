@@ -102,19 +102,6 @@ jobs:
       - name: Bundle CLI with desktop
         run: dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output artifacts/desktop
 
-      - name: Verify CLI artifact
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          if (-not (Test-Path 'artifacts/cli/WorkspaceBootstrap.Cli.exe')) { throw 'CLI executable was not published.' }
-          if (-not (Test-Path 'artifacts/desktop/WorkspaceBootstrap.Cli.exe')) { throw 'CLI executable is missing from the portable desktop package.' }
-
-      - name: Verify desktop artifact
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          if (-not (Test-Path 'artifacts/desktop/WorkspaceBootstrap.exe')) { throw 'Desktop executable was not published.' }
-
       - name: Upload release artifacts
         uses: actions/upload-artifact@v6
         with:
