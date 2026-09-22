@@ -39,7 +39,8 @@ public partial class MainWindow : Window
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            if (Directory.Exists(Path.Combine(directory.FullName, "bootstrap", "windows"))\n                && File.Exists(Path.Combine(directory.FullName, "README.md")))
+            if (Directory.Exists(Path.Combine(directory.FullName, "bootstrap", "windows"))
+                && File.Exists(Path.Combine(directory.FullName, "README.md")))
             {
                 return directory.FullName;
             }
