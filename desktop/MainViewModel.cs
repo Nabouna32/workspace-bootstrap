@@ -37,7 +37,6 @@ public sealed class ProvisioningOperationHistoryItemViewModel
 public sealed class MainViewModel : INotifyPropertyChanged
 {
     private readonly DesktopEngineClient _engineClient;
-    private readonly string _repositoryRoot;
     private readonly DesktopDialogService _dialogService;
     private readonly JobStore _jobStore;
     private readonly JobScheduler _jobScheduler;
@@ -71,13 +70,11 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private ThemeOption _selectedTheme = new(ThemeMode.System, "Système");
 
     public MainViewModel(
-        string repositoryRoot,
         DesktopEngineClient engineClient,
         DesktopDialogService dialogService,
         JobStore jobStore,
         JobScheduler jobScheduler)
     {
-        _repositoryRoot = repositoryRoot;
         _engineClient = engineClient;
         _dialogService = dialogService;
         _jobStore = jobStore;
