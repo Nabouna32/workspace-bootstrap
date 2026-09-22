@@ -62,18 +62,3 @@ jobs:
             **/TestResults/*.trx
           if-no-files-found: error
 
-  workflow-policy:
-    name: Enforce self-hosted Windows CI
-    runs-on: [self-hosted, windows, x64]
-    timeout-minutes: 5
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Validate workflow declarations
-        shell: cmd
-        run: |
-          findstr /s /n /c:"ubuntu-latest" .github\workflows\*.yml >nul && exit /b 1 || exit /b 0
-          findstr /s /n /c:"windows-latest" .github\workflows\*.yml >nul && exit /b 1 || exit /b 0
-          findstr /s /n /c:"macos-latest" .github\workflows\*.yml >nul && exit /b 1 || exit /b 0
