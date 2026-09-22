@@ -14,11 +14,14 @@
             <TextBlock Text="Provider and discovery signals collected during the latest scan." Opacity="0.72" />
         </StackPanel>
 
-        <InfoBar Grid.Row="1" Margin="0,20,0,12"
-                 IsOpen="{Binding Error, Converter={StaticResource StringToBooleanConverter}}"
-                 Severity="Error"
-                 Title="Refresh error"
-                 Message="{Binding Error}" />
+        <Border Grid.Row="1"
+                Margin="0,20,0,12"
+                Padding="12"
+                CornerRadius="8"
+                Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
+                Visibility="{Binding Error, Converter={StaticResource NullToVisibilityConverter}}">
+            <TextBlock Text="{Binding Error}" TextWrapping="Wrap" />
+        </Border>
 
         <ListView Grid.Row="2" ItemsSource="{Binding Diagnostics}" SelectionMode="None" />
     </Grid>
