@@ -1,0 +1,42 @@
+{
+  "id": "notepadpp",
+  "name": "Notepad++",
+  "category": "editor",
+  "profiles": ["base", "development"],
+  "platforms": [
+    "windows"
+  ],
+  "versionPolicy": "latest-stable",
+  "packageManager": "winget",
+  "packageId": "Notepad++.Notepad++",
+  "source": "winget",
+  "installerType": "exe",
+  "installer": "Install-WingetPackage.ps1",
+  "installerParameters": [
+    "-PackageId",
+    "Notepad++.Notepad++"
+  ],
+  "dependencies": [],
+  "prerequisites": [
+    {
+      "type": "admin"
+    },
+    {
+      "type": "windows-build",
+      "minimum": 22000
+    },
+    {
+      "type": "command",
+      "name": "winget"
+    }
+  ],
+  "checks": [
+    {
+      "type": "file-any",
+      "paths": [
+        "C:\\Program Files\\Notepad++\\notepad++.exe",
+        "C:\\Program Files (x86)\\Notepad++\\notepad++.exe"
+      ]
+    }
+  ]
+}
