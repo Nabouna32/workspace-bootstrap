@@ -1,49 +1,21 @@
-# Windows bootstrap
+# Workspace Bootstrap — Windows package
 
-Le bootstrap Windows prépare les capacités natives Windows et WSL.
+Ce dossier contient les ressources déclaratives du produit Windows : catalogue des composants et profils de provisioning.
 
-## Entrée principale
+## Structure
 
-    .\bootstrap\windows\dev-env.ps1
+- `components/catalog.json` : catalogue des composants disponibles ;
+- `components/<id>/component.json` : manifeste de chaque composant ;
+- `profiles/*.json` : profils composés de composants déclarés dans le catalogue.
 
-Le menu interactif propose Base, Développement, Développement étendu, Gaming, Vérification, Réparation, Optimisation et Maintenance.
-
-## Arborescence locale
-
-Le bootstrap utilise `C:\\dev` comme racine de développement :
-
-- `C:\\dev\\Projects` : dépôts Git et projets ;
-- `C:\\dev\\SDK` : SDK locaux, dont `C:\\dev\\SDK\\flutter` ;
-- `C:\\dev\\Tools` : outils portables ou outillage local lorsqu'un composant en a besoin.
-
-Les applications installées par WinGet restent dans leurs emplacements système officiels. Le SDK Android reste géré exclusivement dans WSL (`~/Android/Sdk`).
-
-## Développement Windows
-
-Le profil développement installe GitHub CLI, Visual Studio Build Tools, WSL2/Ubuntu, Flutter pour Windows, PowerToys, Everything et ShareX.
-
-Le profil développement étendu ajoute VS Code, IntelliJ IDEA Community, Python, Rust, Go, LLVM/Clang et JDK 21 pour les projets plus larges, notamment le modding Minecraft.
-
-Visual Studio Build Tools utilise config/windows/buildtools.vsconfig. Cette configuration définit la toolchain C++ nécessaire : MSVC x64/x86, CMake, outils de test et Windows SDK.
-
-## Maintenance et optimisation
-
-Maintenance.ps1 fournit le centre interactif Windows Update, DISM/SFC, Component Store, stockage, santé WSL/Docker/Android/Flutter, réseau et rapport diagnostic.
-
-Optimization.ps1 fournit Safe, Advanced, Aggressive et le debloat AppX par allowlist explicite. Les changements réversibles sont enregistrés pour rollback.
-
-## Frontière Windows / WSL
-
-Android n'est pas installé par le bootstrap Windows.
-
-Le SDK Android, l'émulateur, Java Android/Gradle, Flutter Android, Node.js, Playwright et Docker sont gérés dans WSL.
-
-Flutter Windows reste natif Windows afin de produire et tester l'application Windows avec la toolchain Windows.
+Le moteur .NET charge ces ressources depuis le répertoire du package. Elles sont incluses dans les publications Windows du CLI et restent donc disponibles en mode portable.
 
 ## Provisioning
 
-Le provisioning est online-first. Il n'existe pas de cache d'artefacts personnalisé dans le bootstrap.
+Le provisioning est orchestré exclusivement par le moteur C#/.NET 10. Les composants privilégient leurs sources officielles ; WinGet n'est utilisé qu'en fallback lorsqu'il est explicitement déclaré dans le manifeste.
 
-## Logs
+Les opérations prennent en charge la planification, la vérification des artefacts, le cache local, la reprise et l'historique. Une modification destructive ou irréversible doit faire l'objet d'une confirmation explicite dans l'interface.
 
-Chaque exécution crée un journal sous bootstrap\windows\logs\<run-id>\. Les erreurs restent visibles.
+## Évolution
+
+Les anciennes implémentations scriptées et les dépendances Linux/WSL ne font plus partie du produit. Toute nouvelle capacité Windows doit être intégrée au moteur .NET partagé par le bureau et le CLI.
