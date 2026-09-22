@@ -161,13 +161,14 @@ public sealed class InventoryCleanupAnalyzer
 
             foreach (var candidate in versioned.Skip(1))
             {
-                if (desiredComponentIds.Contains(candidate.Id))
+                if (desiredComponentIds.Contains(candidate.Id)
+                    || candidate.Ownership is InventoryOwnership.ProductManaged or InventoryOwnership.System)
                 {
                     continue;
                 }
 
                 if (string.IsNullOrWhiteSpace(candidate.RemovalCommand) ||
-                    candidate.Ownership is InventoryOwnership.Unknown or InventoryOwnership.System)
+                    candidate.Ownership == InventoryOwnership.Unknown)
                 {
                     continue;
                 }
