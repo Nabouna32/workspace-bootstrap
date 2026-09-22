@@ -35,6 +35,7 @@
 - GitHub is the source of truth.
 - Work on feature branches and use PRs.
 - All GitHub Actions jobs use the project's **self-hosted Windows runner**; no product validation is intentionally delegated to GitHub-hosted execution.
+- Because the repository is public, untrusted fork pull requests must never execute on the persistent self-hosted runner.
 - CI must remain reproducible on the maintained development workstation.
 - Never claim CI green without checking the exact commit.
 
