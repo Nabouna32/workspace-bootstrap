@@ -30,6 +30,16 @@ public sealed class ConfigurationTests
             if (component.OfficialSource is not null)
             {
                 Assert.IsFalse(string.IsNullOrWhiteSpace(component.OfficialSource.Type));
+                CollectionAssert.Contains(
+                    new[] { "github-release", "rarlab-localized", "chrome-enterprise" },
+                    component.OfficialSource.Type,
+                    $"Unsupported official source type for {component.Id}: {component.OfficialSource.Type}");
+
+                if (component.OfficialSource.Type == "github-release")
+                {
+                    Assert.IsFalse(string.IsNullOrWhiteSpace(component.OfficialSource.Repository));
+                    Assert.IsFalse(string.IsNullOrWhiteSpace(component.OfficialSource.AssetRegex));
+                }
             }
         }
     }
@@ -52,6 +62,11 @@ public sealed class ConfigurationTests
             Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Name));
             Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Description));
             Assert.IsNotEmpty(profile.Components);
+
+            Assert.AreEqual(
+                profile.Components.Length,
+                profile.Components.Distinct(StringComparer.OrdinalIgnoreCase).Count(),
+                $"{profile.Id} contains duplicate components.");
 
             foreach (var componentId in profile.Components)
                 Assert.IsTrue(components.ContainsKey(componentId), $"{profile.Id} references unknown component {componentId}.");
