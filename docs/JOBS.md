@@ -9,13 +9,11 @@ planned -> queued -> running -> waiting-reboot -> completed
 
 ## Execution boundary
 
-The job executor invokes the native .NET provisioning engine. There is no PowerShell compatibility backend.
-
-A durable external operation identifier must be persisted before long-running work begins. Recovery reconnects to that operation rather than creating duplicate installation work.
+The job executor invokes the native .NET provisioning engine. A durable external operation identifier is persisted before long-running work begins.
 
 ## Resource safety
 
-Jobs declare the capabilities and resources they require. The scheduler must prevent conflicting operations from running concurrently and must revalidate machine capabilities before executing a mutation.
+Jobs declare the capabilities and resources they require. The scheduler prevents conflicting operations from running concurrently and revalidates machine capabilities before executing a mutation.
 
 ## Recovery
 
