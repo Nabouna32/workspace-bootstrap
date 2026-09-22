@@ -1,63 +1,24 @@
 # Roadmap
 
-## Completed foundation
+## Current direction
 
-- Native C#/.NET 10 engine.
-- Native WPF desktop shell.
+- Native C#/.NET 10 Engine.
+- Native Windows desktop application with a modern Windows 11 UX.
 - Self-contained Windows x64 CLI.
-- Declarative Windows component/profile catalog.
-- Official-source-first installer resolution.
-- Persistent local installer cache at C:\DevCache.
-- SHA-256 and Authenticode verification foundation.
-- WinGet explicit fallback.
-- Provisioning operation history and recovery foundation.
-- Windows inventory and optimization foundations.
-- Self-hosted Windows CI.
+- Official vendor sources first, explicit WinGet fallback.
+- Verified persistent installer cache with rollback/recovery semantics.
+- Idempotent provisioning with durable operation state.
+- Inventory, diagnostics, maintenance and guarded optimization.
+- Comprehensive GitHub-hosted CI and security validation.
 
-## Next engineering milestones
+## Next product work
 
-### 1. Provisioning reliability
-- durable worker process;
-- atomic operation claims;
-- checkpointed resume without duplicate installs;
-- reboot-aware recovery;
-- postcondition verification per component.
+1. Complete the desktop information architecture and navigation states.
+2. Add richer component cards, filtering and selection.
+3. Expose detailed diagnostics and operation logs.
+4. Add robust cache management and recovery UX.
+5. Add Windows smoke/integration coverage for real published artifacts.
+6. Improve localization and accessibility.
+7. Package the desktop application for repeatable distribution.
 
-### 2. Installer/cache hardening
-- authoritative upstream digest support;
-- stronger Authenticode publisher validation;
-- immutable cache records;
-- cache garbage-collection policy that preserves rollback versions;
-- offline restore/export/import.
-
-### 3. Component catalog
-- complete official-source resolvers;
-- authoritative version detection per component;
-- dependency graph validation;
-- schema validation;
-- explicit fallback declarations.
-
-### 4. Desktop UX
-- profile/component selection;
-- dry-run diff;
-- live progress;
-- operation detail and logs;
-- recovery center;
-- diagnostics;
-- maintenance and optimization workflows;
-- polished Windows 11 visual system.
-
-### 5. Validation
-- unit tests;
-- cache integration tests;
-- installer resolver tests with deterministic fixtures;
-- Windows integration tests;
-- self-contained startup smoke test;
-- isolated fresh-Windows smoke environment.
-
-## Explicit non-goals
-
-- Linux/WSL provisioning.
-- PowerShell or batch compatibility layers.
-- Parallel provisioning implementations.
-- Hidden destructive optimizations.
+Retired directions are not roadmap items: script backends, Linux provisioning and personal/self-hosted CI infrastructure.
