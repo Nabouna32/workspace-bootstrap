@@ -154,8 +154,9 @@ public sealed class ProvisioningEngine
             .Select(path => JsonSerializer.Deserialize<ProvisioningOperation>(
                 File.ReadAllText(path),
                 JsonDefaults.Options))
-            .Where(x => x is not null)!
-            .OrderByDescending(x => x!.UpdatedAt);
+            .Where(x => x is not null)
+            .Select(x => x!)
+            .OrderByDescending(x => x.UpdatedAt);
 
     public string Resume(string id, bool cacheOnly)
     {
