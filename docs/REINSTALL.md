@@ -1,28 +1,20 @@
-# Windows clean-install runbook
+# Reinstallation and recovery
 
-## Before formatting
+Workspace Bootstrap is designed to survive a clean Windows reinstall when the persistent cache is exported beforehand.
 
-1. Push all repository work and verify the exact branch/commit is on GitHub.
-2. Export `C:\DevCache` to a non-system disk if you want offline reinstallation after formatting.
-3. Back up personal files, SSH keys and any application data outside the repository.
-4. Export any WSL data separately if it is still needed; WSL is not managed by Workspace Bootstrap.
+## Before reinstalling
 
-Never commit secrets or private backup data to this repository.
+1. Export `C:\DevCache` to a non-system drive.
+2. Keep any user-owned configuration you explicitly want to restore.
+3. Record the selected Workspace Bootstrap profiles.
 
-## After Windows 11 Pro installation
+## After reinstalling
 
-1. Fully update Windows.
-2. Install the current supported .NET 10 SDK/runtime as required for development. The published Workspace Bootstrap CLI is self-contained.
-3. Install or verify WinGet, because it is used as an explicit fallback for selected components.
-4. Clone `Nabouna32/workspace-bootstrap`.
-5. Build or obtain the self-contained Windows x64 CLI.
-6. Start the Workspace Bootstrap desktop application.
-7. Select the desired profile.
-8. Review the dry-run plan.
-9. Restore or attach the exported `C:\DevCache` when offline installation is required.
-10. Run provisioning and monitor the operation history.
-11. Restart Windows when an operation explicitly requires it, then use the application's recovery/resume flow.
-12. Run diagnostics and verify the installed-state inventory.
-13. Reinstall application repositories and run their own project-specific validation.
+1. Restore the cache to `C:\DevCache`.
+2. Build or deploy the self-contained application.
+3. Run diagnostics.
+4. Import/select the desired profiles.
+5. Preview the provisioning plan.
+6. Apply the plan.
 
-The repository is the reconstruction plan; the local cache is the recovery asset.
+The Engine verifies cached artifacts before reuse. Invalid artifacts are ignored; a valid older version remains available when present.
