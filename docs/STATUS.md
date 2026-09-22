@@ -25,7 +25,7 @@ The architecture migration is now active in code:
 - inventory contracts have moved into `WorkspaceControl.Domain`;
 - mutable cache/state/log data no longer defaults to the application installation directory;
 - packaged configuration is resolved from the application's content root rather than searching the repository tree;
-- the legacy WPF desktop remains temporarily for incremental migration and is not the target UI.
+- Legacy WPF desktop removed; WinUI 3 is now the only desktop UI target.
 
 ## Existing foundations worth migrating
 - inventory providers and evidence/ownership;
