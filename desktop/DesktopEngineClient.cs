@@ -105,8 +105,7 @@ public sealed class DesktopEngineClient
         var candidates = new[]
         {
             installed,
-            Path.Combine(@"C:\Dev\WorkspaceBootstrap\app", "WorkspaceBootstrap.Cli.exe"),
-            Path.Combine(AppContext.BaseDirectory, "WorkspaceBootstrap.exe")
+            Path.Combine(AppContext.BaseDirectory, "WorkspaceBootstrap.Cli.exe")
         }.Where(x => !string.IsNullOrWhiteSpace(x)).Cast<string>();
 
         var executable = candidates.FirstOrDefault(File.Exists);
@@ -120,10 +119,10 @@ public sealed class DesktopEngineClient
             return (executable, args, Path.GetDirectoryName(executable)!);
         }
 
-        // Development-only fallback: the source tree may be used before publish.
+        // Development fallback: allow running the desktop directly from the source tree.
         var project = Path.Combine(_repositoryRoot, "src", "WorkspaceBootstrap.Cli", "WorkspaceBootstrap.Cli.csproj");
         if (!File.Exists(project))
-            throw new FileNotFoundException("WorkspaceBootstrap.exe introuvable et le projet CLI de développement est absent.", project);
+            throw new FileNotFoundException("WorkspaceBootstrap.Cli.exe introuvable et le projet CLI de développement est absent.", project);
 
         var runArgs = $"run --project \"{project}\" -- {command}";
         if (!string.IsNullOrWhiteSpace(profileId))
