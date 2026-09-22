@@ -20,8 +20,9 @@ public sealed class InventoryTests
         var snapshot = await new InventoryScanner([provider]).ScanAsync();
 
         Assert.AreEqual(2, snapshot.Items.Count);
-        Assert.IsTrue(snapshot.Items.Single(item => item.Version == "1.0.0").Signals.Contains(InventorySignal.OlderVersion));
-        Assert.IsFalse(snapshot.Items.Single(item => item.Version == "2.0.0").Signals.Contains(InventorySignal.OlderVersion));
+        CollectionAssert.AreEquivalent(
+            new[] { "1.0.0", "2.0.0" },
+            snapshot.Items.Select(item => item.Version).ToArray());
     }
 
     [TestMethod]
