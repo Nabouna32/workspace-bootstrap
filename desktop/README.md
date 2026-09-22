@@ -37,3 +37,20 @@ The desktop is a real Windows 11 management application:
 - dark/light-ready design tokens.
 
 The presentation layer must not duplicate Engine behavior.
+
+## Apparence et sémantique visuelle
+
+Le bureau propose trois modes persistants : **Système**, **Clair** et **Sombre**.
+
+- **Système** suit le thème des applications Windows au lancement.
+- **Clair** et **Sombre** forcent la palette correspondante.
+- La préférence est stockée dans `C:\Dev\WorkspaceBootstrap\desktop-settings.json`.
+- Les couleurs sont sémantiques et ne servent pas uniquement à décorer l'interface :
+  - vert : succès / état conforme ;
+  - jaune : avertissement / redémarrage requis ;
+  - rouge : erreur / échec ;
+  - bleu : information / action principale ;
+  - texte secondaire : métadonnées et informations non critiques.
+- Les mêmes rôles de couleur sont utilisés par les vues de provisioning afin qu'un état important reste identifiable sans dépendre uniquement du texte.
+
+Le changement de thème ne modifie aucune logique du moteur et ne nécessite aucun redémarrage.
