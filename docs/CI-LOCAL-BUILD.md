@@ -9,10 +9,12 @@ GitHub is the source of truth. Development work happens on feature branches and 
 All repository workflows run on the project's Windows self-hosted runner:
 
 ```yaml
-runs-on: [self-hosted, Windows, X64]
+runs-on: [self-hosted, Windows, X64, local-windows]
 ```
 
 No validation job intentionally uses `windows-latest` or another GitHub-hosted runner.
+
+The pull-request job only runs on PRs originating from this repository. Fork PRs are intentionally skipped so untrusted code cannot execute on the persistent workstation runner.
 
 The runner is expected to provide the pinned .NET SDK from `global.json`, Windows x64, Git, and the repository's normal build/test prerequisites. Workflows still execute setup/restore steps explicitly so the build remains deterministic.
 
