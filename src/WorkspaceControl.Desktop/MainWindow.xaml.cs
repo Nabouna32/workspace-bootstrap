@@ -19,7 +19,7 @@ public sealed partial class MainWindow : Window
 
         try
         {
-            await ((App)Application.Current).ViewModel.RefreshAsync();
+            await ((App)Microsoft.UI.Xaml.Application.Current).ViewModel.RefreshAsync();
             Navigate("overview");
         }
         catch (Exception ex)
