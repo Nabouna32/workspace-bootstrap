@@ -63,6 +63,7 @@ jobs:
         run: |
           $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-release"
           New-Item -ItemType Directory -Force -Path $package | Out-Null
+          dotnet publish src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output (Join-Path $package "WorkspaceControl")
           dotnet publish desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
           dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
 
