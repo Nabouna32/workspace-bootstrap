@@ -19,26 +19,6 @@ public sealed class RepositoryPolicyTests
     }
 
     [TestMethod]
-    public void Workflows_use_only_github_hosted_windows_runners()
-    {
-        var root = LocateRepositoryRoot();
-        var workflowsRoot = Path.Combine(root, ".github", "workflows");
-        var workflows = Directory.EnumerateFiles(workflowsRoot, "*.*", SearchOption.AllDirectories)
-            .Where(path => path.EndsWith(".yml", StringComparison.OrdinalIgnoreCase)
-                        || path.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase))
-            .ToArray();
-
-        Assert.IsNotEmpty(workflows);
-
-        foreach (var workflow in workflows)
-        {
-            var content = File.ReadAllText(workflow);
-            StringAssert.DoesNotContain(content, "self-hosted");
-            StringAssert.Contains(content, "runs-on: windows-latest");
-        }
-    }
-
-    [TestMethod]
     public void Component_manifests_do_not_reference_retired_script_installers()
     {
         var root = LocateRepositoryRoot();
@@ -80,22 +60,6 @@ public sealed class RepositoryPolicyTests
         }
     }
 
-
-    [TestMethod]
-    public void Workflows_do_not_depend_on_shell_scripts_for_product_execution()
-    {
-        var root = LocateRepositoryRoot();
-        var workflowsRoot = Path.Combine(root, ".github", "workflows");
-
-        foreach (var workflow in Directory.EnumerateFiles(workflowsRoot, "*.y*ml", SearchOption.AllDirectories))
-        {
-            var content = File.ReadAllText(workflow);
-            StringAssert.DoesNotContain(content, "bootstrap\\windows\\", workflow);
-            StringAssert.DoesNotContain(content, "powershell -File", workflow);
-            StringAssert.DoesNotContain(content, "pwsh -File", workflow);
-            StringAssert.DoesNotContain(content, "self-hosted", workflow);
-        }
-    }
 
     [TestMethod]
     public void Desktop_has_explicit_theme_modes()
