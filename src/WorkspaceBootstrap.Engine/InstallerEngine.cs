@@ -361,20 +361,25 @@ public sealed class InstallerEngine
             throw new PlatformNotSupportedException(
                 "Authenticode n'est disponible que sur Windows.");
 
-        var fileInfo = new WinTrustFileInfo(path);
-        var trustData = new WinTrustData(fileInfo);
+        using var fileInfo = new WinTrustFileInfo(path);
+        using var trustData = new WinTrustData(fileInfo);
 
         var action = WinTrustVerifyActionGenericVerifyV2;
-        var status = WinVerifyTrust(IntPtr.Zero, ref action, ref trustData.Native);
-
-        if (status != 0)
+        try
         {
-            throw new InvalidOperationException(
-                $"Signature Authenticode invalide ou non approuvée : {path} (HRESULT 0x{status:X8}).");
-        }
+            var status = WinVerifyTrust(IntPtr.Zero, ref action, ref trustData.Native);
 
-        trustData.Native.dwStateAction = WinTrustStateAction.Close;
-        _ = WinVerifyTrust(IntPtr.Zero, ref action, ref trustData.Native);
+            if (status != 0)
+            {
+                throw new InvalidOperationException(
+                    $"Signature Authenticode invalide ou non approuvée : {path} (HRESULT 0x{status:X8}).");
+            }
+        }
+        finally
+        {
+            trustData.Native.dwStateAction = WinTrustStateActionClose;
+            _ = WinVerifyTrust(IntPtr.Zero, ref action, ref trustData.Native);
+        }
     }
 
     private static readonly Guid WinTrustVerifyActionGenericVerifyV2 =
