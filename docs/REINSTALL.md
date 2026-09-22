@@ -1,35 +1,20 @@
-# Clean Windows reinstall runbook
+# Reinstallation and recovery
 
-## Before formatting
+Workspace Bootstrap is portable. The application package contains the executable, bundled manifests and local application data needed to resume normal operation.
 
-Run the backup script to a non-system destination:
+## Before reinstalling Windows
 
-    .\bootstrap\windows\00-backup-before-reinstall.ps1 -BackupRoot "E:\dev-environment-backup" -ExportWsl
+1. Copy the complete Workspace Bootstrap application directory if you want to preserve its local state.
+2. Keep the complete application directory if you want to preserve the verified installer cache and local state.
+3. Keep any external configuration you explicitly want to restore.
 
-Check that it contains the SSH directory, Git configuration, WSL inventory, Windows package inventory and optional Ubuntu export.
+## After reinstalling Windows
 
-Never upload that backup directory to GitHub.
+1. Restore the application directory.
+2. No external cache restoration is required; the package contains its cache.
+3. Launch the application.
+4. Run diagnostics.
+5. Preview the provisioning plan.
+6. Apply the plan.
 
-Also verify that every local project with uncommitted work is pushed or separately backed up.
-
-## After Windows 11 Pro 64-bit installation
-
-1. Fully update Windows.
-2. Verify WinGet.
-3. Create `C:\dev` and clone this repository.
-4. Open **PowerShell as Administrator**.
-5. Run `.\bootstrap\windows\bootstrap.ps1`.
-6. Restart Windows if WSL or Windows components request it.
-7. Run `.\bootstrap\windows\90-verify.ps1`.
-8. Recreate/configure WSL2 Ubuntu and run the WSL bootstrap.
-9. Restore tracked WSL configuration.
-10. Register the self-hosted runner with a fresh token.
-11. Restore SSH keys outside the repository.
-12. Validate GitHub SSH and `gh auth`.
-13. Run all verification scripts.
-14. Clone application repositories.
-15. Run real Android and Windows builds.
-
-The machine is disposable; the repository is the reconstruction plan.
-
-See `docs/VERSION-POLICY.md` for the toolchain update policy.
+The Engine verifies cached artifacts before reuse. Invalid artifacts are ignored; a valid older version remains available when present.

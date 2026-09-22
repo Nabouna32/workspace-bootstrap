@@ -1,6 +1,6 @@
-using DevEnvironment.Execution;
+using WorkspaceBootstrap.Desktop.Execution;
 
-namespace BounaDevEnvironment;
+namespace WorkspaceBootstrap.Desktop;
 
 public sealed class ProvisioningJobExecutor : IJobExecutor
 {

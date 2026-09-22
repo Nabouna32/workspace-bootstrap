@@ -39,6 +39,13 @@ try
         case "provisioning-plan":
             data = MapPlan(engine.GetPlan(profile ?? throw new ArgumentException("--profile est requis.")));
             break;
+        case "provisioning-worker":
+            await engine.RunProvisioningAsync(
+                operation ?? throw new ArgumentException("--operation est requis."),
+                cacheOnly,
+                CancellationToken.None);
+            data = new { OperationId = operation, Status = "completed" };
+            break;
         case "provisioning-start":
             data = new
             {

@@ -5,137 +5,106 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: workspace-bootstrap-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  Configuration: Release
+
 jobs:
-  static-validation:
-    name: Static validation
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Validate Bash syntax
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          while IFS= read -r -d '' file; do
-            bash -n "$file"
-          done < <(find bootstrap/wsl -type f -name '*.sh' -print0)
-
-      - name: Run ShellCheck
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          shellcheck -x bootstrap/wsl/*.sh
-
-      - name: Validate PowerShell syntax
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          $files = Get-ChildItem bootstrap/windows -Recurse -Filter *.ps1 -File
-          $errors = @()
-          foreach ($file in $files) {
-            $tokens = $null
-            $parseErrors = $null
-            [void][System.Management.Automation.Language.Parser]::ParseFile(
-              $file.FullName,
-              [ref]$tokens,
-              [ref]$parseErrors
-            )
-            if ($parseErrors.Count -gt 0) {
-              $errors += $file.FullName
-              $parseErrors | ForEach-Object { Write-Error "$($file.FullName): $($_.Message)" }
-            }
-          }
-          if ($errors.Count -gt 0) { exit 1 }
-          Write-Host "PowerShell syntax validation: OK ($($files.Count) files)."
-
-      - name: Validate JSON manifests
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          while IFS= read -r -d '' file; do
-            jq empty "$file"
-          done < <(find config bootstrap/windows contracts -type f -name '*.json' -print0)
-
-      - name: Run PowerShell unit tests
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          & ./tests/Validate-WindowsOptimization.ps1
-          & ./tests/Validate-WindowsCatalog.ps1
-          & ./tests/Validate-WindowsMaintenance.ps1
-          & ./tests/Validate-WindowsComponentStates.ps1
-          & ./tests/Validate-ProductArchitecture.ps1
-          & ./tests/Validate-ProvisioningPlan.ps1
-          & ./tests/Validate-InstallerCache.ps1
-
-      - name: Validate workflow architecture
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          test -f config/wsl/wsl.conf
-          grep -qx 'systemd=true' config/wsl/wsl.conf
-          true
-
-  desktop-build:
-    name: Desktop WPF build
+  build-test:
+    name: Build and test (${{ matrix.configuration }})
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
     runs-on: windows-latest
-    timeout-minutes: 10
-
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Setup .NET 8
+      - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 10.0.401
 
-      - name: Build desktop application
-        run: dotnet build desktop/BounaDevEnvironment.Desktop.csproj --configuration Release
+      - name: Restore engine
+        run: dotnet restore src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj
 
-  desktop-contract-validation:
-    name: Desktop contract validation
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+      - name: Restore desktop
+        run: dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj --runtime win-x64
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - name: Restore CLI
+        run: dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
 
-      - name: Validate contract files
-        shell: pwsh
-        run: ./tests/Validate-DesktopCommandContract.ps1
+      - name: Restore tests
+        run: dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
 
-  windows-bootstrap-launcher:
-    name: Windows bootstrap launcher (PowerShell 5.1)
+      - name: Build engine
+        run: dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
+
+      - name: Build desktop
+        run: dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
+
+      - name: Build CLI
+        run: dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
+
+      - name: Run tests
+        run: dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration ${{ matrix.configuration }} --no-restore --logger "trx;LogFileName=tests-${{ matrix.configuration }}.trx"
+
+      - name: Verify formatting
+        if: matrix.configuration == 'Release'
+        run: dotnet format tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --no-restore --verify-no-changes
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-results-${{ matrix.configuration }}-${{ github.run_id }}
+          path: '**/TestResults/*.trx'
+          if-no-files-found: warn
+
+  publish:
+    name: Publish Windows artifacts
+    needs: build-test
     runs-on: windows-latest
-    timeout-minutes: 10
-
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Validate bootstrap launcher syntax with Windows PowerShell 5.1
-        shell: powershell
-        run: |
-          $ErrorActionPreference = "Stop"
-          $file = Join-Path $PWD "bootstrap/windows/dev-env.ps1"
-          $tokens = $null
-          $parseErrors = $null
-          [void][System.Management.Automation.Language.Parser]::ParseFile(
-            $file,
-            [ref]$tokens,
-            [ref]$parseErrors
-          )
-          if ($parseErrors.Count -gt 0) {
-            $parseErrors | ForEach-Object { Write-Error "${file}: $($_.Message)" }
-            exit 1
-          }
-          Write-Host "Windows PowerShell 5.1 launcher syntax validation: OK."
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.401
+
+      - name: Restore desktop
+        run: dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj --runtime win-x64
+
+      - name: Restore CLI
+        run: dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
+
+      - name: Publish self-contained CLI
+        run: dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output artifacts/cli
+
+      - name: Publish desktop
+        run: dotnet publish desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output artifacts/desktop
+
+      - name: Bundle CLI with desktop
+        run: dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output artifacts/desktop
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: workspace-bootstrap-win-x64-${{ github.sha }}
+          path: artifacts/**
+          if-no-files-found: error

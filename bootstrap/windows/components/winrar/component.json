@@ -1,7 +1,37 @@
 {
-  "id":"winrar","name":"WinRAR","category":"utility","profiles":["base"],"platforms":["windows"],
-  "versionPolicy":"latest-stable","fallbackPackageManager":"winget","packageId":"RARLab.WinRAR","source":"official",
-  "installerType":"exe","locale":"fr-FR","architecture":"x64","officialSource":{"type":"rarlab-localized"},
-  "installer":"Install-WingetPackage.ps1","installerParameters":["-PackageId","RARLab.WinRAR"],"dependencies":[],
-  "prerequisites":[{"type":"admin"},{"type":"windows-build","minimum":22000}],"checks":[{"type":"command","name":"winrar"}]
+  "id": "winrar",
+  "name": "WinRAR",
+  "category": "utility",
+  "profiles": [
+    "base"
+  ],
+  "platforms": [
+    "windows"
+  ],
+  "versionPolicy": "latest-stable",
+  "fallbackPackageManager": "winget",
+  "packageId": "RARLab.WinRAR",
+  "source": "official",
+  "installerType": "exe",
+  "locale": "fr-FR",
+  "architecture": "x64",
+  "officialSource": {
+    "type": "rarlab-localized"
+  },
+  "dependencies": [],
+  "prerequisites": [
+    {
+      "type": "admin"
+    },
+    {
+      "type": "windows-build",
+      "minimum": 22000
+    }
+  ],
+  "checks": [
+    {
+      "type": "command",
+      "name": "winrar"
+    }
+  ]
 }

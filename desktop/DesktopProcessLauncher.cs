@@ -1,19 +1,17 @@
+using System.IO;
 using System.Diagnostics;
 
-namespace BounaDevEnvironment;
+namespace WorkspaceBootstrap.Desktop;
 
 public sealed class DesktopProcessLauncher
 {
     public void LaunchInteractiveProvisioning(string repositoryRoot)
     {
-        var executable = Environment.GetEnvironmentVariable("WORKSPACE_BOOTSTRAP_ENGINE");
-        executable = !string.IsNullOrWhiteSpace(executable) && File.Exists(executable)
-            ? executable
-            : Path.Combine(@"C:\Dev\WorkspaceBootstrap\app", "WorkspaceBootstrap.exe");
+        var executable = Path.Combine(AppContext.BaseDirectory, "WorkspaceBootstrap.Cli.exe");
 
         if (!File.Exists(executable))
             throw new FileNotFoundException(
-                "WorkspaceBootstrap.exe introuvable. Publiez le CLI self-contained avant le lancement interactif.",
+                "WorkspaceBootstrap.Cli.exe introuvable dans le package de l’application.",
                 executable);
 
         Process.Start(new ProcessStartInfo

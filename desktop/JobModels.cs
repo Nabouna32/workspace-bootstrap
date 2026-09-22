@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace BounaDevEnvironment;
+namespace WorkspaceBootstrap.Desktop;
 
 public enum JobStatus
 {

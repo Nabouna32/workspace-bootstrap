@@ -1,39 +1,33 @@
-# Development Environment Architecture
+# Architecture
 
-GitHub repository `NabounaLab/dev-environment` is the source of truth.
+Workspace Bootstrap is a Windows 11 workstation provisioning and recovery application.
 
-## Windows 11 Pro
+## Runtime
 
-- Windows-native Flutter builds
-- MSVC / Windows SDK / MSBuild
-- Windows smoke tests
-- WSL lifecycle
+- C# / .NET 10 is the application technology.
+- The shared Engine owns domain logic, Windows integration, provisioning, installer resolution, cache, verification, diagnostics, maintenance, optimization and operation recovery.
+- The desktop application is a native Windows presentation layer over the Engine.
+- The CLI is a self-contained Windows x64 entry point over the same Engine.
+- There is no script-based product backend.
 
-## WSL2 Ubuntu
+## Boundaries
 
-- Node.js / npm / pnpm / Yarn
-- Flutter Android
-- Android SDK/emulator
-- Docker Engine / Compose / BuildKit
-- Playwright browsers
-- Git / GitHub CLI
-- self-hosted GitHub Actions runner
+```
+Desktop / CLI
+     │
+     ▼
+WorkspaceBootstrap.Engine
+     ├── Configuration
+     ├── Catalog / Profiles
+     ├── Inventory / Diagnostics
+     ├── Installer resolution
+     ├── Cache / Verification
+     ├── Provisioning / Recovery
+     └── Windows integration
+```
+
+External vendor installers, WinGet, Windows APIs, Registry and filesystem access are infrastructure boundaries. Their use is orchestrated by C#.
 
 ## CI
 
-```
-Git push -> GitHub -> self-hosted runner -> quality -> integration
-         -> Android -> Windows -> Playwright E2E -> security -> artifacts
-```
-
-Vercel remains useful for production deployment, but daily development validation should run locally/self-hosted.
-
-## Principles
-
-- reproducible
-- idempotent
-- root-cause fixes
-- stable toolchains
-- explicit secrets handling
-- branches/PRs
-- verification after installation
+GitHub Actions is used for repository validation, testing, publishing and security analysis on GitHub-hosted Windows runners.

@@ -1,6 +1,6 @@
 using System.Windows.Input;
 
-namespace BounaDevEnvironment;
+namespace WorkspaceBootstrap.Desktop;
 
 public sealed class AsyncCommand : ICommand
 {

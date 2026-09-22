@@ -2,20 +2,15 @@
   "id": "edge",
   "name": "Microsoft Edge",
   "category": "browser",
-  "profiles": ["base"],
+  "profiles": [
+    "base"
+  ],
   "platforms": [
     "windows"
   ],
   "versionPolicy": "latest-stable",
-  "packageManager": "winget",
   "packageId": "Microsoft.Edge",
-  "source": "winget",
   "installerType": "exe",
-  "installer": "Install-WingetPackage.ps1",
-  "installerParameters": [
-    "-PackageId",
-    "Microsoft.Edge"
-  ],
   "dependencies": [],
   "prerequisites": [
     {
@@ -38,5 +33,6 @@
         "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe"
       ]
     }
-  ]
+  ],
+  "fallbackPackageManager": "winget"
 }

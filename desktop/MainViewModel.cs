@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace BounaDevEnvironment;
+namespace WorkspaceBootstrap.Desktop;
 
 public enum DesktopPage
 {
@@ -42,6 +42,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private readonly DesktopDialogService _dialogService;
     private readonly JobStore _jobStore;
     private readonly JobScheduler _jobScheduler;
+    private readonly ThemeManager _themeManager;
     private readonly InventoryScanner _inventoryScanner;
     private InventorySnapshot? _inventorySnapshot;
     private IReadOnlyList<InventoryCleanupRecommendation> _inventoryRecommendations = Array.Empty<InventoryCleanupRecommendation>();
@@ -68,6 +69,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private ProvisioningOperationHistoryItemViewModel? _selectedProvisioningHistoryItem;
     private ProvisioningOperationDetail? _provisioningOperationDetail;
     private JobSchedulerSnapshot? _jobQueueSnapshot;
+    private ThemeOption _selectedTheme = new(ThemeMode.System, "Système");
 
     public MainViewModel(
         string repositoryRoot,
@@ -83,6 +85,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
         _dialogService = dialogService;
         _jobStore = jobStore;
         _jobScheduler = jobScheduler;
+        _themeManager = new ThemeManager();
+        SelectedTheme = ThemeOptions.First(option => option.Mode == _themeManager.LoadMode());
         _inventoryScanner = new InventoryScanner([
             new WindowsRegistryUninstallInventoryProvider(),
             new WinGetInventoryProvider()
@@ -134,6 +138,23 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public AsyncCommand ProvisioningDetailCommand { get; }
     public AsyncCommand InventoryCommand { get; }
     public AsyncCommand InventoryScanCommand { get; }
+
+    public IReadOnlyList<ThemeOption> ThemeOptions { get; } =
+    [
+        new(ThemeMode.System, "Système"),
+        new(ThemeMode.Light, "Clair"),
+        new(ThemeMode.Dark, "Sombre")
+    ];
+
+    public ThemeOption SelectedTheme
+    {
+        get => _selectedTheme;
+        set
+        {
+            if (!SetProperty(ref _selectedTheme, value)) return;
+            _themeManager.Apply(value.Mode);
+        }
+    }
 
     public bool IsBusy
     {
@@ -765,3 +786,6 @@ public sealed class InventoryCleanupRecommendationViewModel
         ? "Suppression uniquement après validation explicite."
         : "Action sans approbation explicite.";
 }
+
+
+public sealed record ThemeOption(ThemeMode Mode, string Label);

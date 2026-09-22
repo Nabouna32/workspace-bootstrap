@@ -1,7 +1,7 @@
 using System.IO;
 using System.Windows;
 
-namespace BounaDevEnvironment;
+namespace WorkspaceBootstrap.Desktop;
 
 public partial class MainWindow : Window
 {
@@ -39,7 +39,8 @@ public partial class MainWindow : Window
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            if (File.Exists(Path.Combine(directory.FullName, "dev-env.bat")))
+            if (Directory.Exists(Path.Combine(directory.FullName, "bootstrap", "windows"))
+                && File.Exists(Path.Combine(directory.FullName, "README.md")))
             {
                 return directory.FullName;
             }

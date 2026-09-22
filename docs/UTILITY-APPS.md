@@ -1,38 +1,13 @@
-# Applications et outils
+# Utility applications
 
-## Windows
+Workspace Bootstrap manages Windows workstation applications and development tooling through declarative component manifests.
 
-| Composant | Rôle | Étape |
-|---|---|---|
-| Git | Versionnement du dépôt | Base |
-| 7-Zip | Archives | Base |
-| Notepad++ | Édition texte | Base + développement |
-| VLC | Multimédia | Base |
-| Kodi | Media center | Base |
-| Chrome | Navigateur | Base |
-| Edge | Navigateur Windows | Base |
-| Firefox | Navigateur alternatif | Base |
-| PowerToys | Productivité Windows | Développement |
-| Everything | Recherche de fichiers | Développement |
-| ShareX | Capture/OCR/annotations | Développement |
-| Steam | Jeux | Gaming |
-| Prism Launcher | Minecraft/mods | Gaming |
+## Source policy
 
-## WSL
+Official vendor installers are preferred. WinGet is used only where a component explicitly declares it as a fallback.
 
-- Node.js 24 LTS
-- npm / pnpm / Yarn
-- GitHub CLI
-- Java 17
-- Android SDK / Emulator
-- Flutter / Dart
-- Playwright
-- Docker Engine / Compose / Buildx
-- CMake / Ninja / Clang
-- outils Python et shell
+## Application state
 
-Android est exclusivement dans WSL. Visual Studio Build Tools fournit la toolchain Windows et le Windows SDK.
+The Engine records detected versions and evidence so the desktop UI can distinguish installed, missing, outdated and unknown states.
 
-## Politique
-
-Documentation officielle vérifiée avant chaque nouvel ajout, installation contrôlée, contrôle post-installation réel et validation runtime sur le PC avant fusion.
+All installation and removal operations remain idempotent where technically possible and destructive operations require explicit confirmation.

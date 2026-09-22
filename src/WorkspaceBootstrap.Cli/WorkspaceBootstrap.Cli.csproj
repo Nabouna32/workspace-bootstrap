@@ -4,7 +4,7 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>WorkspaceBootstrap</AssemblyName>
+    <AssemblyName>WorkspaceBootstrap.Cli</AssemblyName>
     <RootNamespace>WorkspaceBootstrap.Cli</RootNamespace>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>

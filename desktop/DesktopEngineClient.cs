@@ -1,8 +1,9 @@
+using System.IO;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
-namespace BounaDevEnvironment;
+namespace WorkspaceBootstrap.Desktop;
 
 public sealed class DesktopEngineClient
 {
@@ -101,16 +102,8 @@ public sealed class DesktopEngineClient
 
     private (string FileName, string Arguments, string WorkingDirectory) ResolveEngine(string command, string? profileId, string? operationId)
     {
-        var installed = Environment.GetEnvironmentVariable("WORKSPACE_BOOTSTRAP_ENGINE");
-        var candidates = new[]
-        {
-            installed,
-            Path.Combine(@"C:\Dev\WorkspaceBootstrap\app", "WorkspaceBootstrap.exe"),
-            Path.Combine(AppContext.BaseDirectory, "WorkspaceBootstrap.exe")
-        }.Where(x => !string.IsNullOrWhiteSpace(x)).Cast<string>();
-
-        var executable = candidates.FirstOrDefault(File.Exists);
-        if (executable is not null)
+        var executable = Path.Combine(AppContext.BaseDirectory, "WorkspaceBootstrap.Cli.exe");
+        if (File.Exists(executable))
         {
             var args = command;
             if (!string.IsNullOrWhiteSpace(profileId))
@@ -120,10 +113,10 @@ public sealed class DesktopEngineClient
             return (executable, args, Path.GetDirectoryName(executable)!);
         }
 
-        // Development-only fallback: the source tree may be used before publish.
+        // Development fallback: allow running the desktop directly from the source tree.
         var project = Path.Combine(_repositoryRoot, "src", "WorkspaceBootstrap.Cli", "WorkspaceBootstrap.Cli.csproj");
         if (!File.Exists(project))
-            throw new FileNotFoundException("WorkspaceBootstrap.exe introuvable et le projet CLI de développement est absent.", project);
+            throw new FileNotFoundException("WorkspaceBootstrap.Cli.exe introuvable et le projet CLI de développement est absent.", project);
 
         var runArgs = $"run --project \"{project}\" -- {command}";
         if (!string.IsNullOrWhiteSpace(profileId))

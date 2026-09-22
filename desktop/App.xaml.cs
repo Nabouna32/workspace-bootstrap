@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace BounaDevEnvironment;
+namespace WorkspaceBootstrap.Desktop;
 
 public partial class App : Application
 {

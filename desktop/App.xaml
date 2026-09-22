@@ -1,34 +1,107 @@
-<Application x:Class="BounaDevEnvironment.App"
+<Application x:Class="WorkspaceBootstrap.Desktop.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <SolidColorBrush x:Key="WindowBackground" Color="#0F1115"/>
-        <SolidColorBrush x:Key="SidebarBackground" Color="#151820"/>
-        <SolidColorBrush x:Key="CardBackground" Color="#191D26"/>
-        <SolidColorBrush x:Key="CardBorder" Color="#2A3040"/>
-        <SolidColorBrush x:Key="PrimaryText" Color="#F4F7FB"/>
-        <SolidColorBrush x:Key="SecondaryText" Color="#9DA7B8"/>
-        <SolidColorBrush x:Key="Accent" Color="#7C9CFF"/>
-        <SolidColorBrush x:Key="Success" Color="#5ED49A"/>
-        <SolidColorBrush x:Key="Warning" Color="#F5C86B"/>
+        <SolidColorBrush x:Key="WindowBackground" Color="#0B0D10"/>
+        <SolidColorBrush x:Key="SidebarBackground" Color="#11151A"/>
+        <SolidColorBrush x:Key="SidebarSelected" Color="#1D2633"/>
+        <SolidColorBrush x:Key="CardBackground" Color="#14191F"/>
+        <SolidColorBrush x:Key="CardBackgroundElevated" Color="#181E26"/>
+        <SolidColorBrush x:Key="CardBorder" Color="#28313C"/>
+        <SolidColorBrush x:Key="PrimaryText" Color="#F5F7FA"/>
+        <SolidColorBrush x:Key="SecondaryText" Color="#9AA6B2"/>
+        <SolidColorBrush x:Key="Accent" Color="#78A9FF"/>
+        <SolidColorBrush x:Key="AccentSoft" Color="#20334F"/>
+        <SolidColorBrush x:Key="Success" Color="#63D6A0"/>
+        <SolidColorBrush x:Key="SuccessSoft" Color="#173A2D"/>
+        <SolidColorBrush x:Key="Warning" Color="#F3C969"/>
+        <SolidColorBrush x:Key="WarningSoft" Color="#423618"/>
+        <SolidColorBrush x:Key="Danger" Color="#FF7D86"/>
+        <SolidColorBrush x:Key="DangerSoft" Color="#452028"/>
+        <SolidColorBrush x:Key="Info" Color="#78A9FF"/>
+        <SolidColorBrush x:Key="InfoSoft" Color="#20334F"/>
+
         <Style x:Key="CardBorderStyle" TargetType="Border">
             <Setter Property="Background" Value="{StaticResource CardBackground}"/>
             <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="CornerRadius" Value="14"/>
         </Style>
+
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="{StaticResource PrimaryText}"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
         </Style>
+
         <Style TargetType="Button">
             <Setter Property="Foreground" Value="{StaticResource PrimaryText}"/>
-            <Setter Property="Background" Value="#202633"/>
-            <Setter Property="BorderBrush" Value="#30384A"/>
+            <Setter Property="Background" Value="{StaticResource CardBackgroundElevated}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="Padding" Value="14,9"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonChrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="{StaticResource AccentSoft}"/>
+                                <Setter TargetName="ButtonChrome" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="{StaticResource Accent}"/>
+                                <Setter Property="Foreground" Value="{StaticResource WindowBackground}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonChrome" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="NavigationButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="14,12"/>
+            <Setter Property="Margin" Value="0,2,0,2"/>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="{StaticResource CardBackgroundElevated}"/>
+            <Setter Property="Foreground" Value="{StaticResource PrimaryText}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="StatusTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource SecondaryText}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding}" Value="Terminé"><Setter Property="Foreground" Value="{StaticResource Success}"/></DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="Échec"><Setter Property="Foreground" Value="{StaticResource Danger}"/></DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="Redémarrage requis"><Setter Property="Foreground" Value="{StaticResource Warning}"/></DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="En cours"><Setter Property="Foreground" Value="{StaticResource Info}"/></DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="Démarrage"><Setter Property="Foreground" Value="{StaticResource Info}"/></DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="ProgressBar">
+            <Setter Property="Height" Value="7"/>
         </Style>
     </Application.Resources>
 </Application>

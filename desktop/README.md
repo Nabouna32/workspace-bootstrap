@@ -1,20 +1,50 @@
-# Bouna Dev Environment — application desktop
+# Workspace Bootstrap Desktop
 
-Cette application WPF constitue l'interface graphique native de `dev-environment`.
+Native Windows desktop application for Workspace Bootstrap.
 
-## Principe architectural
+## Architecture
 
-- Le moteur PowerShell reste la source de vérité pour le provisioning, les diagnostics et les optimisations.
-- L'application graphique n'implémente pas une seconde logique système : elle appelle des commandes non interactives exposées par le moteur.
-- Les commandes graphiques doivent rester idempotentes, explicites et journalisées.
-- L'interface est pensée pour évoluer vers un vrai dashboard : état du PC, provisioning, diagnostic, optimisation, historique et reprise après redémarrage.
+- UI: WPF on .NET 10.
+- Application logic: shared `WorkspaceBootstrap.Engine`.
+- Provisioning: Engine-owned.
+- CLI and desktop share the same domain and provisioning implementation.
+- Local state and cache live inside the portable application package.
 
-## Développement local
+## Development
 
-Depuis `desktop/` avec le SDK .NET installé :
+From the repository root:
 
-`dotnet build .\\BounaDevEnvironment.Desktop.csproj`
+```text
+dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj
+dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Debug
+dotnet run --project desktop/WorkspaceBootstrap.Desktop.csproj --configuration Debug
+```
 
-`dotnet run --project .\\BounaDevEnvironment.Desktop.csproj`
+## UX direction
 
-Le dépôt ne télécharge aucun SDK ou runtime. Le provisioning de la machine décidera officiellement de la façon de fournir le toolchain .NET nécessaire.
+- dashboard-first navigation;
+- consistent cards and state indicators;
+- profile/component selection;
+- plan preview before mutation;
+- visible progress and recovery;
+- operation history;
+- diagnostics and inventory;
+- guarded maintenance/optimization;
+- keyboard-friendly, accessible controls;
+- system/light/dark theme.
+
+The presentation layer must not duplicate Engine behavior.
+
+## Apparence et sémantique visuelle
+
+Le bureau propose trois modes : **Système**, **Clair** et **Sombre**.
+
+- **Système** suit le thème des applications Windows au lancement.
+- **Clair** et **Sombre** forcent la palette correspondante.
+- La préférence est stockée dans `desktop-settings.json` à côté de l'application.
+- vert : succès / état conforme ;
+- jaune : avertissement / redémarrage requis ;
+- rouge : erreur / échec ;
+- bleu : information / action principale.
+
+Le changement de thème ne modifie aucune logique du moteur.

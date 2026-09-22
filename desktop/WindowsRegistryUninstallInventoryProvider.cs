@@ -1,6 +1,6 @@
 using Microsoft.Win32;
 
-namespace BounaDevEnvironment;
+namespace WorkspaceBootstrap.Desktop;
 
 public sealed class WindowsRegistryUninstallInventoryProvider : IInventoryProvider
 {

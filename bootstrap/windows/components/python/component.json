@@ -2,16 +2,30 @@
   "id": "python",
   "name": "Python",
   "category": "development",
-  "profiles": ["development"],
-  "platforms": ["windows"],
+  "profiles": [
+    "development"
+  ],
+  "platforms": [
+    "windows"
+  ],
   "versionPolicy": "latest-stable",
-  "packageManager": "winget",
   "packageId": "Python.Python.3.13",
-  "source": "winget",
   "installerType": "exe",
-  "installer": "Install-WingetPackage.ps1",
-  "installerParameters": ["-PackageId", "Python.Python.3.13"],
   "dependencies": [],
-  "prerequisites": [{"type": "admin"}, {"type": "command", "name": "winget"}],
-  "checks": [{"type": "winget-package", "id": "Python.Python.3.13"}]
+  "prerequisites": [
+    {
+      "type": "admin"
+    },
+    {
+      "type": "command",
+      "name": "winget"
+    }
+  ],
+  "checks": [
+    {
+      "type": "winget-package",
+      "id": "Python.Python.3.13"
+    }
+  ],
+  "fallbackPackageManager": "winget"
 }

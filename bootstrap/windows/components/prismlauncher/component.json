@@ -2,16 +2,37 @@
   "id": "prismlauncher",
   "name": "Prism Launcher",
   "category": "gaming",
-  "profiles": ["gaming"],
-  "platforms": ["windows"],
+  "profiles": [
+    "gaming"
+  ],
+  "platforms": [
+    "windows"
+  ],
   "versionPolicy": "latest-stable",
-  "packageManager": "winget",
   "packageId": "PrismLauncher.PrismLauncher",
-  "source": "winget",
   "installerType": "exe",
-  "installer": "Install-WingetPackage.ps1",
-  "installerParameters": ["-PackageId", "PrismLauncher.PrismLauncher"],
   "dependencies": [],
-  "prerequisites": [{"type": "admin"}, {"type": "windows-build", "minimum": 22000}, {"type": "command", "name": "winget"}],
-  "checks": [{"type": "file-any", "paths": ["C:\\Program Files\\PrismLauncher\\prismlauncher.exe", "C:\\Program Files (x86)\\PrismLauncher\\prismlauncher.exe"]}]
+  "prerequisites": [
+    {
+      "type": "admin"
+    },
+    {
+      "type": "windows-build",
+      "minimum": 22000
+    },
+    {
+      "type": "command",
+      "name": "winget"
+    }
+  ],
+  "checks": [
+    {
+      "type": "file-any",
+      "paths": [
+        "C:\\Program Files\\PrismLauncher\\prismlauncher.exe",
+        "C:\\Program Files (x86)\\PrismLauncher\\prismlauncher.exe"
+      ]
+    }
+  ],
+  "fallbackPackageManager": "winget"
 }
