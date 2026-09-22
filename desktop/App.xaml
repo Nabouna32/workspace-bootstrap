@@ -1,0 +1,34 @@
+<Application x:Class="BounaDevEnvironment.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <SolidColorBrush x:Key="WindowBackground" Color="#0F1115"/>
+        <SolidColorBrush x:Key="SidebarBackground" Color="#151820"/>
+        <SolidColorBrush x:Key="CardBackground" Color="#191D26"/>
+        <SolidColorBrush x:Key="CardBorder" Color="#2A3040"/>
+        <SolidColorBrush x:Key="PrimaryText" Color="#F4F7FB"/>
+        <SolidColorBrush x:Key="SecondaryText" Color="#9DA7B8"/>
+        <SolidColorBrush x:Key="Accent" Color="#7C9CFF"/>
+        <SolidColorBrush x:Key="Success" Color="#5ED49A"/>
+        <SolidColorBrush x:Key="Warning" Color="#F5C86B"/>
+        <Style x:Key="CardBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource PrimaryText}"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource PrimaryText}"/>
+            <Setter Property="Background" Value="#202633"/>
+            <Setter Property="BorderBrush" Value="#30384A"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Application.Resources>
+</Application>
