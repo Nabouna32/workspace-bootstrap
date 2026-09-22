@@ -46,7 +46,7 @@
                 Margin="24,0,0,0"
                 Padding="32"
                 CornerRadius="12"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                Background="Transparent">
                 <StackPanel Spacing="16">
                     <TextBlock
                         Text="Ready"
