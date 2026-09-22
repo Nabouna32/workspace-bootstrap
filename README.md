@@ -1,98 +1,55 @@
-# Workspace Bootstrap
+# Workspace Control
 
-Workspace Bootstrap is a portable Windows 11 application for rebuilding, provisioning, maintaining and recovering a workstation after a clean Windows installation.
+**Workspace Control** is a permanent Windows 11 control center for managing a PC throughout its lifetime.
 
-The product is built entirely with **C#/.NET 10**. The native Windows desktop UI and self-contained Windows CLI share the same Engine. The UI is a presentation layer; system changes, provisioning, cache management and recovery remain in the Engine.
+It brings software management, Windows configuration, diagnostics, maintenance, optimization, drivers, WSL, profiles and offline cache into one understandable application.
 
-## What it does
+## Main capabilities
 
-- Detects the current Windows state and installed applications.
-- Lets you choose workstation profiles and individual components.
-- Resolves current installers from official vendor sources.
-- Stores verified installers in the application package cache.
-- Reuses verified cached installers instead of downloading them again.
-- Keeps older verified versions for rollback and reinstallation.
-- Verifies SHA-256 and Authenticode where applicable.
-- Uses WinGet only as an explicit fallback declared by a component.
-- Provides dry-run plans, progress, operation history, diagnostics, maintenance and guarded optimization.
-- Produces a self-contained Windows x64 application package.
+- Install, update and uninstall applications.
+- Discover applications even without a curated definition.
+- Identify residuals conservatively.
+- Maintain a verified offline software cache.
+- Choose the appropriate installation source/provider, including interactive vendor installers.
+- Inspect and configure supported Windows settings and policies.
+- Recommend and apply documented optimizations.
+- Diagnose Windows and application problems.
+- Inspect and manage drivers with appropriate caution.
+- Install and configure WSL.
+- Create, import, export and apply desired-state profiles.
+- Use the same capabilities from the CLI.
+- Extend the product through providers/plugins.
 
-## Portable application
+Workspace Control is not an antivirus, VPN, password manager or generic endpoint-security suite.
 
-The published package is self-contained:
+## User control
 
-```text
-Workspace Bootstrap/
-├── WorkspaceBootstrap.exe
-├── WorkspaceBootstrap.Cli.exe
-├── bootstrap/
-├── cache/
-├── state/
-├── logs/
-└── desktop-settings.json
-```
+Normal interactive mode never silently changes the system. Every meaningful mutation explains what changes, why, scope, risk, reversibility and restart requirements. Irreversible actions are explicitly identified and require stronger confirmation.
 
-The application does not require installation into a system directory and does not use a per-user application-data directory. Copying the package directory preserves the application and its local state.
+## Technology
 
-## Desktop application
+C#/.NET 10, WinUI 3 / Windows App SDK and Windows 11 x64. The CLI shares the same application/domain engine.
 
-- Dashboard with workstation health and quick actions.
-- Component/profile provisioning with plan preview before changes.
-- Visible operation progress, recovery and history.
-- Inventory and cleanup recommendations with explicit confirmation.
-- Diagnostics and maintenance surfaces.
-- System/light/dark theme selection.
-- Consistent semantic status colors.
-- Engine-driven operations so the UI never becomes a second provisioning implementation.
-
-The current presentation framework is WPF on .NET 10. WPF is only the UI layer; application/domain/infrastructure logic remains ordinary C# in the shared Engine.
-
-## Build
-
-From the repository root on Windows:
-
-```text
-dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
-dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj
-dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj
-
-dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release
-dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release
-dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration Release
-```
-
-## Publish
-
-The release workflow produces a portable Windows x64 package containing both the desktop application and CLI.
-
-## Profiles
-
-Profiles are declarative collections of components under `bootstrap/windows/profiles`.
-
-## Design principles
-
-- Root-cause fixes over workarounds.
-- Reproducible and idempotent provisioning.
-- Official vendor sources first.
-- Verified local cache with immutable versioned entries.
-- SHA-256 and Authenticode verification.
-- WinGet only as an explicit fallback.
-- Reversible changes keep their previous state.
-- Irreversible changes require explicit confirmation.
-- CI is validated on GitHub-hosted Windows runners.
-- Credentials and secrets are never stored in ordinary configuration bundles.
+The GitHub repository name `workspace-bootstrap` is historical; the product identity is **Workspace Control**.
 
 ## Documentation
 
-- [Architecture](docs/ARCHITECTURE-V2.md)
-- [Provisioning](docs/PROVISIONING.md)
-- [Git workflow](docs/GIT-WORKFLOW.md)
-- [Current status](docs/STATUS.md)
+The complete documentation index is in [docs/README.md](docs/README.md).
+
+Start with:
+
+- [Product vision](docs/PRODUCT-VISION.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [UX design](docs/UX-DESIGN.md)
+- [Profiles](docs/PROFILES.md)
+- [Software management](docs/SOFTWARE.md)
+- [Security](docs/SECURITY.md)
 - [Roadmap](docs/ROADMAP.md)
-- [Configuration](docs/CONFIGURATION.md)
-- [Reinstallation](docs/REINSTALL.md)
-- [CI and local builds](docs/CI-LOCAL-BUILD.md)
+
+## Development
+
+GitHub is the source of truth. CI uses GitHub-hosted Windows runners. Self-hosted runners are not part of the project.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT.

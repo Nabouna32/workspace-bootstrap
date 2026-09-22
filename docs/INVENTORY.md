@@ -1,30 +1,48 @@
-# Inventory
+# Workspace Control — Inventory
 
-Inventory describes the Windows workstation as observed by the Engine.
+Inventory is the factual observation layer for the Windows machine. It is not a cleanup engine and it never changes the machine by itself.
 
-## Providers
+## What can be inventoried
 
-The initial providers cover:
+- installed applications and versions;
+- installation source and provenance;
+- Windows capabilities and configuration;
+- drivers and hardware information;
+- WSL distributions and configuration;
+- services, scheduled tasks and other supported system resources;
+- Workspace Control-managed desired state;
+- update availability where a provider can establish it.
 
-- WinGet installed package metadata;
-- MSI uninstall registry entries;
-- AppX/package metadata where authoritative;
-- Windows system capabilities;
-- Workspace Bootstrap component state.
+The catalog is not a hard limit. Unknown software can remain visible and may be handled through generic evidence-based providers.
 
-Providers must report evidence and ownership rather than guessing.
+## Evidence and ownership
 
-## Inventory item
+Every observation should retain its provider, evidence, scope and confidence where applicable.
 
-Each item should expose:
+Ownership is explicit:
 
-- stable identifier;
-- display name;
-- publisher;
-- installed version;
-- source/evidence;
-- ownership;
-- installation scope;
-- related component when known.
+- System;
+- Product-managed;
+- Package-manager-managed;
+- Manual;
+- Unknown.
 
-Cleanup recommendations are informational until the user explicitly confirms a destructive action.
+Unknown does not mean broken and must never be treated as permission to remove an item.
+
+## Versioning
+
+Inventory distinguishes installed version, available version and desired version. Version comparison is provider-aware and must not assume every application follows the same scheme.
+
+## Cleanup
+
+Residuals and orphan candidates are recommendations, not automatic deletion targets. Shared files, uncertain ownership and ambiguous evidence require additional review.
+
+## Desired state
+
+Inventory is compared with profiles to produce a read-only diff and plan:
+
+`Observed → Desired → Diff → Plan → Confirmation → Operation → Verify`
+
+## Extensibility
+
+Providers may add application, driver, Windows, WSL or hardware observations. Providers return structured evidence; product policy remains outside the provider.

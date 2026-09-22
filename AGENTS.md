@@ -1,41 +1,88 @@
-# Workspace Bootstrap — Agent Instructions
+# Workspace Control — Agent Instructions
 
 ## Product identity
-- Product-facing name: **Workspace Bootstrap**.
-- Canonical technical identity: **WorkspaceBootstrap**.
-- Windows-only product.
-- The application is portable: executable, bundled assets and local mutable state live with the application package.
-- Installer cache is kept inside the application package under `cache`.
+- Product: **Workspace Control**.
+- Repository: `workspace-bootstrap` until a deliberate repository rename.
+- Target: **Windows 11 x64**.
+- This is a permanent Windows control center, not a one-time bootstrapper.
+- Core domains: software, Windows configuration, diagnostics, cleanup, optimization, drivers, WSL, profiles, cache/offline workflows and future fleet configuration.
+- Local operation must remain useful without an account or cloud service.
 
-## Strategic architecture
-- C#/.NET 10 is the single application and orchestration technology.
-- The native .NET engine owns provisioning, installer resolution, cache, verification, profiles, operation state, diagnostics, maintenance, optimization and Windows integration.
-- The desktop application and self-contained CLI consume the same engine.
-- The desktop presentation is a native Windows UI; WPF is the current presentation framework, not a second application architecture.
-- There is one product architecture, not parallel implementations.
-- WinGet is an explicit package-manager fallback only where a component declares it; official vendor sources take precedence.
-- C++/Rust are reserved for a concrete native requirement that cannot be implemented cleanly in .NET.
+## Non-negotiable product principles
+1. User control first: normal interactive mode never mutates silently.
+2. Explain before changing: show what, why, scope, risk, reversibility and restart impact.
+3. Prefer root-cause fixes over workarounds, suppression or hacks.
+4. Local-first: core local workflows work offline where their providers/data permit.
+5. Capability-driven: desktop, CLI and future API/cloud consume the same capabilities.
+6. Provider-neutral: WinGet is a provider, never the architecture.
+7. Evidence-based inventory: unknown software is still inventory; never guess.
+8. Risk-aware mutation: reversible, risky and irreversible actions are explicitly classified.
+9. Least privilege by default; a user may explicitly launch an elevated session as a convenience.
+10. Automation is explicit and auditable.
+11. Windows 11 is the only supported target unless product direction explicitly changes.
+12. Open-source local client first; future paid services remain optional.
 
-## Engineering rules
-- Prefer root-cause fixes over workarounds.
-- Never suppress warnings/errors merely to make validation green.
-- Keep installers idempotent and safe to re-run.
-- Download to unique staging paths, validate, then atomically promote into the cache.
-- Verify SHA-256 for cached artifacts and validate Authenticode for signed EXE/MSI artifacts.
-- Keep older verified versions for rollback/reinstall.
-- Never persist secrets or registration tokens.
-- Version checks must be component-specific.
-- Failed staging must be cleaned without deleting valid cache entries.
-- Destructive or irreversible actions require explicit confirmation.
-- Optimization changes must have a rollback story where declared reversible.
-- The UI must remain presentation-focused; provisioning and system mutation belong to the Engine.
+## Target technology
+- C# / .NET 10.
+- WinUI 3 / Windows App SDK for the desktop.
+- .NET CLI sharing the same application/domain engine.
+- No hybrid PowerShell architecture. PowerShell may be invoked as an external Windows mechanism when appropriate, but business logic remains C#.
+- C++/Rust only for a demonstrated native requirement that .NET cannot satisfy cleanly.
+
+## Target architecture
+```text
+Workspace Control
+├── Desktop (WinUI 3)
+├── CLI
+├── Core / Domain
+├── Application / Use cases
+├── Engine
+├── Windows integration
+├── Software providers
+├── Drivers
+├── WSL
+├── Optimization / Policies
+├── Diagnostics
+├── Profiles / Desired state
+├── Cache / Offline
+├── Security / Privileged operations
+└── Plugins
+```
+
+Presentation, application orchestration, domain rules and OS/provider adapters stay separated.
+
+## UX rules
+- Modern Windows 11 Fluent-inspired experience.
+- System / Light / Dark themes.
+- Semantic colors: green success, blue information/primary action, amber warning, orange high impact, red error/danger, purple advanced/automation.
+- Never use color alone to communicate state.
+- Simple, Advanced and Expert are presentation levels over the same engine.
+- Technical details are available through progressive disclosure.
+- Destructive or irreversible actions require contextual confirmation.
+- Interactive installers are first-class: launch vendor UI, wait, rescan and verify postconditions.
+
+## Mutation contract
+Every mutation should have a stable operation id, capability, target, evidence, desired state, plan, risk, reversibility, confirmation requirement, elevation requirement, progress, logs and result/recovery state.
+
+## Profiles and future fleet
+Profiles are declarative desired-state documents. They may contain applications, Windows policies/settings, registry-backed settings, drivers, WSL, optimizations and machine conditions. The model must support future machine groups, per-machine overrides and cloud synchronization without a second execution engine.
+
+## Security
+- Verify downloaded artifacts with SHA-256 and Authenticode where applicable.
+- Never store secrets in ordinary profiles or logs.
+- Keep privileged execution narrow, structured and auditable.
+- Never present an undocumented registry tweak as an official Windows policy.
+
+## Testing and CI
+- Unit, provider-contract, Windows integration, provisioning, cache/offline, CLI, published-artifact, UI/accessibility and security tests.
+- Fast validation on PRs; heavy Windows/E2E suites on main, scheduled/manual workflows and releases as appropriate.
+- GitHub-hosted Windows runners only. **Self-hosted runners are not part of this project.**
+- Never claim CI green without checking the exact commit.
 
 ## Git workflow
 - GitHub is the source of truth.
-- Work on feature branches and use PRs.
-- GitHub Actions uses standard GitHub-hosted runners.
-- CI must not depend on a developer workstation.
-- Never claim CI green without checking the exact commit.
+- Use feature branches and PRs.
+- The tech lead may merge a coherent PR autonomously once exact required CI is green and the change is safe.
 
 ## Execution-first
-When the user authorizes implementation with `continue`, `vas-y`, `feu vert` or equivalent, execute repository changes before reporting them.
+When the user says `continue`, `vas-y`, `feu vert`, `carte blanche` or equivalent, execute repository work autonomously. Ask only when a decision materially affects product direction, safety, data loss, legal/security boundaries or cannot safely be inferred.

@@ -1,26 +1,15 @@
 # Configuration
 
-Configuration is declarative and versioned.
+Product settings and desired-state profiles are separate concepts.
 
-## Bundle
+## Product settings
+Theme, language, interface level, logging, cache retention, notifications and provider preferences are local preferences. They never silently authorize dangerous system mutations.
 
-A configuration bundle may contain:
+## Profiles
+Profiles are versioned declarative desired-state documents containing applications, Windows policies/settings, drivers, WSL, optimizations and conditions.
 
-- profile selection;
-- component selection;
-- supported version policies;
-- maintenance preferences;
-- optimization preferences;
-- scheduler/resource preferences;
-- language preferences;
-- project/toolchain preferences.
+## Portable configuration
+Profiles can be imported/exported and used offline. Exports contain no secrets.
 
-Version selection is explicit per component. Supported policies include `latest`, `exact`, `minimum`, `range` and `channel` where declared.
-
-An exact version is a desired-state constraint. If it is unavailable or incompatible, the operation reports a visible conflict rather than silently selecting another version.
-
-## Local state
-
-Mutable application state, operation history, logs and the installer cache are stored inside the portable application package.
-
-Secrets and registration tokens are never stored in configuration bundles.
+## Cloud-ready
+The local engine treats a profile as data regardless of whether it originated locally, from an import or from future cloud synchronization.

@@ -1,20 +1,19 @@
-# Reinstallation and recovery
+# Reinstall and recovery
 
-Workspace Bootstrap is portable. The application package contains the executable, bundled manifests and local application data needed to resume normal operation.
+Workspace Control is designed to remain useful after Windows maintenance or a fresh installation.
+
+Important user-controlled data includes profiles, exported configuration, retained cache artifacts and selected operation history.
 
 ## Before reinstalling Windows
+Export or copy the profiles and cache artifacts you want to preserve.
 
-1. Copy the complete Workspace Bootstrap application directory if you want to preserve its local state.
-2. Keep the complete application directory if you want to preserve the verified installer cache and local state.
-3. Keep any external configuration you explicitly want to restore.
+## After reinstalling
+1. Install/restore Workspace Control.
+2. Import profiles/configuration.
+3. Restore/import cache when desired.
+4. Run inventory.
+5. Review the desired-state diff.
+6. Confirm the desired operations.
+7. Apply and verify.
 
-## After reinstalling Windows
-
-1. Restore the application directory.
-2. No external cache restoration is required; the package contains its cache.
-3. Launch the application.
-4. Run diagnostics.
-5. Preview the provisioning plan.
-6. Apply the plan.
-
-The Engine verifies cached artifacts before reuse. Invalid artifacts are ignored; a valid older version remains available when present.
+The final packaging design must not assume that mutable application state can safely live inside a protected Program Files directory.

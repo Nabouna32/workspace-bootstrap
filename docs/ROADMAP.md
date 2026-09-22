@@ -1,22 +1,48 @@
 # Roadmap
 
-## Current direction
+## Foundation
+- Establish Workspace Control identity and contracts.
+- Replace bootstrapper-centric architecture with a permanent control-center model.
+- Establish WinUI 3 desktop target.
+- Separate domain, application, infrastructure and providers.
+- Preserve proven inventory, cache, verification and operation concepts.
+- Remove obsolete bootstrapper/job/WPF assumptions.
 
-- Native C#/.NET 10 Engine.
-- Native Windows desktop application with a modern Windows 11 UX.
-- Self-contained Windows x64 CLI.
-- Official vendor sources first, explicit WinGet fallback.
-- Verified package-local installer cache with rollback/recovery semantics.
-- Idempotent provisioning with durable operation state.
-- Inventory, diagnostics, maintenance and guarded optimization.
-- Comprehensive CI and security validation.
+## Phase 1 — Local control center
+- Modern WinUI 3 shell.
+- Application inventory.
+- Install/update/uninstall.
+- Provider selection and interactive installers.
+- Cache/offline workflows.
+- Diagnostics and operation history.
+- Theme, localization and accessibility foundations.
 
-## Next product work
+## Phase 2 — Windows management
+- Windows configuration inventory.
+- Policy/GPO-oriented UI.
+- Documented registry-backed settings.
+- Services and scheduled tasks where appropriate.
+- Optimization catalog with risk/reversibility.
+- Conservative cleanup/residual analysis.
 
-1. Complete the desktop information architecture and navigation states.
-2. Add richer component cards, filtering and selection.
-3. Expose detailed diagnostics and operation logs.
-4. Add robust cache management and recovery UX.
-5. Add Windows smoke/integration coverage for real published artifacts.
-6. Improve localization and accessibility.
-7. Package the desktop application for repeatable distribution.
+## Phase 3 — Hardware and WSL
+- Driver inventory and update discovery.
+- Hardware diagnostics.
+- WSL installation/configuration.
+- WSL-aware profiles.
+
+## Phase 4 — Profiles and extensibility
+- Desired-state profile editor.
+- Conditions and heterogeneous-machine support.
+- Import/export.
+- Plugin SDK boundary and trust model.
+
+## Phase 5 — Optional cloud/fleet
+- Accounts and synchronized profiles.
+- Machine groups and per-machine overrides.
+- Fleet inventory.
+- Remote orchestration.
+- Reports and alerts.
+
+## 1.0 quality bar
+Reliable, understandable, safe, tested on real Windows 11 machines, recoverable, offline-capable, maintainable and accessible.
