@@ -6,10 +6,10 @@
 - Native Windows desktop application with a modern Windows 11 UX.
 - Self-contained Windows x64 CLI.
 - Official vendor sources first, explicit WinGet fallback.
-- Verified persistent installer cache with rollback/recovery semantics.
+- Verified package-local installer cache with rollback/recovery semantics.
 - Idempotent provisioning with durable operation state.
 - Inventory, diagnostics, maintenance and guarded optimization.
-- Comprehensive GitHub-hosted CI and security validation.
+- Comprehensive CI and security validation.
 
 ## Next product work
 
@@ -20,5 +20,3 @@
 5. Add Windows smoke/integration coverage for real published artifacts.
 6. Improve localization and accessibility.
 7. Package the desktop application for repeatable distribution.
-
-Retired directions are not roadmap items: script backends, Linux provisioning and personal/self-hosted CI infrastructure.
