@@ -2,20 +2,16 @@
   "id": "notepadpp",
   "name": "Notepad++",
   "category": "editor",
-  "profiles": ["base", "development"],
+  "profiles": [
+    "base",
+    "development"
+  ],
   "platforms": [
     "windows"
   ],
   "versionPolicy": "latest-stable",
-  "packageManager": "winget",
   "packageId": "Notepad++.Notepad++",
-  "source": "winget",
   "installerType": "exe",
-  "installer": "Install-WingetPackage.ps1",
-  "installerParameters": [
-    "-PackageId",
-    "Notepad++.Notepad++"
-  ],
   "dependencies": [],
   "prerequisites": [
     {
@@ -38,5 +34,6 @@
         "C:\\Program Files (x86)\\Notepad++\\notepad++.exe"
       ]
     }
-  ]
+  ],
+  "fallbackPackageManager": "winget"
 }
