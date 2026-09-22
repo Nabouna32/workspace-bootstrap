@@ -1,12 +1,22 @@
-# Workspace Control desktop
+# Legacy desktop
 
-The desktop client is being migrated from legacy WPF to **WinUI 3 / Windows App SDK** on .NET 10.
+This directory contains the **temporary WPF compatibility desktop** from the previous Workspace Bootstrap implementation.
 
-## UX
-Modern Windows 11 Fluent-inspired interface, System/Light/Dark themes, semantic colors, Simple/Advanced/Expert presentation levels, progressive disclosure, accessibility and clear operation recovery.
+It is being replaced by the native WinUI 3 application in `src/WorkspaceControl.Desktop`.
 
-## Architecture
-The desktop is presentation only. It consumes the same application/domain capabilities as the CLI and future API. It must not implement registry, installer, inventory or provisioning logic.
+## Rules during migration
 
-## Migration rule
-Do not add new product capabilities to the legacy WPF shell. New UI work targets WinUI 3.
+- Do not add new product capabilities to this WPF application.
+- New UI work targets WinUI 3 / Windows App SDK.
+- Shared product behavior belongs in the engine/domain layers, not in either UI.
+- The WPF project remains buildable only to support incremental migration and rollback.
+- Remove this project once the WinUI application reaches functional parity.
+
+## Target desktop
+
+```text
+src/WorkspaceControl.Desktop
+    └── WinUI 3 / Windows App SDK
+             │
+             └── shared Workspace Control engine/domain
+```
