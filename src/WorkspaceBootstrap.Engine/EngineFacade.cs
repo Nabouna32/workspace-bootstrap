@@ -18,8 +18,8 @@ public sealed class EngineFacade
         var provisioning = new ProvisioningEngine(configuration, installer, paths, inventory);
 
         _application = new WorkspaceControlApplication(
-            new Application.InventoryServiceAdapter(inventory),
             new Application.ProvisioningServiceAdapter(provisioning),
+            new Application.InventoryServiceAdapter(inventory),
             new Application.WindowsAdministrationServiceAdapter(),
             new Application.OptimizationServiceAdapter());
     }
