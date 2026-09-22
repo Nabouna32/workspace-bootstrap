@@ -11,15 +11,10 @@ public partial class MainWindow : Window
 
         var repositoryRoot = FindRepositoryRoot();
         var engineClient = new DesktopEngineClient(repositoryRoot);
-        var jobStore = new JobStore();
-        var capabilityProvider = new DesktopCapabilitySnapshotProvider(engineClient);
-        var jobScheduler = new JobScheduler(jobStore, capabilityProvider);
 
         DataContext = new MainViewModel(
             engineClient,
-            new DesktopDialogService(),
-            jobStore,
-            jobScheduler);
+            new DesktopDialogService());
 
         Loaded += MainWindow_Loaded;
     }
