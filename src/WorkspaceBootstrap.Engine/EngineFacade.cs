@@ -19,6 +19,8 @@ public sealed class EngineFacade
     public IReadOnlyList<ProfileManifest> GetProfiles() => _provisioning.Profiles();
     public object GetPlan(string profileId) => _provisioning.Plan(profileId);
     public string StartProvisioning(string profileId, bool cacheOnly = false) => _provisioning.Start(profileId, cacheOnly);
+    public Task RunProvisioningAsync(string operationId, bool cacheOnly = false, CancellationToken cancellationToken = default) =>
+        _provisioning.RunAsync(operationId, cacheOnly, cancellationToken);
     public ProvisioningOperation? GetProvisioningStatus(string operationId) => _provisioning.Get(operationId);
     public string ResumeProvisioning(string operationId, bool cacheOnly = false) => _provisioning.Resume(operationId, cacheOnly);
     public IReadOnlyList<ProvisioningOperation> GetProvisioningHistory() => _provisioning.History().ToArray();
