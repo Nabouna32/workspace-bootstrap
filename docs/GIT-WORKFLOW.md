@@ -51,6 +51,7 @@ Commits describe coherent milestones. Do not artificially limit commit count, bu
 
 - Open substantial work as Draft early.
 - Keep CI on the project's self-hosted Windows runner.
+- Never execute untrusted fork pull-request code on the persistent self-hosted runner; fork PR validation is intentionally gated.
 - Do not merge with failing, unavailable or unverified required CI.
 - Prefer one PR per coherent product change.
 - Avoid PR-per-tiny-fix overhead.
