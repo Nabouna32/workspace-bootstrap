@@ -122,7 +122,6 @@ jobs:
         run: |
           dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
           dotnet build src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
-          dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
           dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
 
       - name: Test
