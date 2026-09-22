@@ -1,0 +1,20 @@
+{
+  "id": "git",
+  "name": "Git",
+  "category": "development",
+  "profiles": ["base"],
+  "platforms": ["windows"],
+  "versionPolicy": "latest-stable",
+  "fallbackPackageManager": "winget",
+  "packageId": "Git.Git",
+  "source": "official",
+  "installerType": "inno",
+  "locale": "fr-FR",
+  "architecture": "x64",
+  "officialSource": {"type":"github-release","repository":"git-for-windows/git","assetRegex":"^Git-[0-9.]+-64-bit\\.exe$","versionRegex":"^v(.+)$"},
+  "installArguments":["/SP-","/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART"],
+  "versionCommand":"git","versionArguments":["--version"],"dependencies":[],
+  "prerequisites":[{"type":"admin"},{"type":"windows-build","minimum":22000}],
+  "checks":[{"type":"command","name":"git"}],
+  "installer":"Install-WingetPackage.ps1","installerParameters":["-PackageId","Git.Git"]
+}

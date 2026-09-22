@@ -1,0 +1,9 @@
+{
+  "id":"chrome","name":"Google Chrome","category":"desktop","profiles":["base"],"platforms":["windows"],
+  "versionPolicy":"latest-stable","fallbackPackageManager":"winget","packageId":"Google.Chrome","source":"official",
+  "installerType":"msi","locale":"fr-FR","architecture":"x64","installArguments":["/qn","/norestart"],
+  "installerParameters":["-PackageId","Google.Chrome"],"dependencies":[],
+  "prerequisites":[{"type":"admin"},{"type":"windows-build","minimum":22000}],
+  "checks":[{"type":"file-any","paths":["C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe","C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"]}],
+  "installer":"Install-WingetPackage.ps1","officialSource":{"type":"chrome-enterprise"}
+}

@@ -1,0 +1,6 @@
+{
+  "id":"flutter","name":"Flutter","category":"development","profiles":["development"],"platforms":["windows"],
+  "versionPolicy":"latest-stable","dependencies":["visual-studio"],"installer":"native-flutter",
+  "prerequisites":[{"type":"admin"},{"type":"component","name":"visual-studio"}],
+  "checks":[{"type":"command","name":"flutter"}]
+}
