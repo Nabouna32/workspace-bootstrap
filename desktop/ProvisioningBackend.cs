@@ -22,15 +22,15 @@ public interface IProvisioningBackend
 }
 
 /// <summary>
-/// Compatibility backend for the existing PowerShell provisioning engine.
+/// Native provisioning backend backed by the Workspace Bootstrap CLI.
 /// The application layer depends on IProvisioningBackend rather than directly
-/// coupling provisioning jobs to PowerShell command details.
+/// coupling provisioning jobs to a script-based execution layer.
 /// </summary>
-public sealed class PowerShellProvisioningBackend : IProvisioningBackend
+public sealed class NativeProvisioningBackend : IProvisioningBackend
 {
     private readonly DesktopEngineClient _client;
 
-    public PowerShellProvisioningBackend(DesktopEngineClient client)
+    public NativeProvisioningBackend(DesktopEngineClient client)
     {
         _client = client;
     }
