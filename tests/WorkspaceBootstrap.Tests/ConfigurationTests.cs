@@ -108,7 +108,7 @@ public sealed class ProvisioningPlanContractTests
 
             Assert.IsTrue(item.TryGetProperty("Message", out var message));
             Assert.IsFalse(string.IsNullOrWhiteSpace(message.GetString()));
-            StringAssert.Contains("MISSING|INSTALLED|OUTDATED", state.GetString() ?? "");
+            Assert.IsTrue(state.GetString() is "MISSING" or "INSTALLED" or "OUTDATED");
         }
     }
 }
