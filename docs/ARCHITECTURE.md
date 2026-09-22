@@ -12,7 +12,7 @@ Workspace Bootstrap is a Windows 11 workstation provisioning and recovery applic
 
 ## Boundaries
 
-```text
+```
 Desktop / CLI
      │
      ▼
@@ -30,4 +30,4 @@ External vendor installers, WinGet, Windows APIs, Registry and filesystem access
 
 ## CI
 
-GitHub Actions is the source of truth for validation. All jobs use standard GitHub-hosted runners.
+GitHub Actions is used for repository validation, testing, publishing and security analysis on GitHub-hosted Windows runners.
