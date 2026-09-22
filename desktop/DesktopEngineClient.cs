@@ -101,15 +101,8 @@ public sealed class DesktopEngineClient
 
     private (string FileName, string Arguments, string WorkingDirectory) ResolveEngine(string command, string? profileId, string? operationId)
     {
-        var installed = Environment.GetEnvironmentVariable("WORKSPACE_BOOTSTRAP_ENGINE");
-        var candidates = new[]
-        {
-            installed,
-            Path.Combine(AppContext.BaseDirectory, "WorkspaceBootstrap.Cli.exe")
-        }.Where(x => !string.IsNullOrWhiteSpace(x)).Cast<string>();
-
-        var executable = candidates.FirstOrDefault(File.Exists);
-        if (executable is not null)
+        var executable = Path.Combine(AppContext.BaseDirectory, "WorkspaceBootstrap.Cli.exe");
+        if (File.Exists(executable))
         {
             var args = command;
             if (!string.IsNullOrWhiteSpace(profileId))
