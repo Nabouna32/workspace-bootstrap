@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace BounaDevEnvironment;
+namespace WorkspaceBootstrap.Desktop;
 
 public enum DesktopPage
 {
