@@ -120,7 +120,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          if (-not (Test-Path 'artifacts/cli/WorkspaceBootstrap.exe')) { throw 'CLI executable was not published.' }
+          if (-not (Test-Path 'artifacts/cli/WorkspaceBootstrap.Cli.exe')) { throw 'CLI executable was not published.' }
 
       - name: Verify desktop artifact
         shell: pwsh
