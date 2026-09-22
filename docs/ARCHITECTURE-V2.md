@@ -65,4 +65,4 @@ Provisioning is idempotent and observable. Destructive operations require explic
 
 ## CI architecture
 
-All GitHub Actions jobs run on the project's self-hosted Windows x64 runner. Repository validation must never depend on GitHub-hosted operating systems.
+All GitHub Actions jobs run on the project's GitHub-hosted Windows runner. Repository validation must never depend on GitHub-hosted operating systems.
