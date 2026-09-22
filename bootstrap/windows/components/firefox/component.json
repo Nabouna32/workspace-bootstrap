@@ -2,20 +2,15 @@
   "id": "firefox",
   "name": "Mozilla Firefox",
   "category": "browser",
-  "profiles": ["base"],
+  "profiles": [
+    "base"
+  ],
   "platforms": [
     "windows"
   ],
   "versionPolicy": "latest-stable",
-  "packageManager": "winget",
   "packageId": "Mozilla.Firefox",
-  "source": "winget",
   "installerType": "exe",
-  "installer": "Install-WingetPackage.ps1",
-  "installerParameters": [
-    "-PackageId",
-    "Mozilla.Firefox"
-  ],
   "dependencies": [],
   "prerequisites": [
     {
@@ -38,5 +33,6 @@
         "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe"
       ]
     }
-  ]
+  ],
+  "fallbackPackageManager": "winget"
 }
