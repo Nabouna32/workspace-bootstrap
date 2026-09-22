@@ -16,6 +16,4 @@ Le provisioning est orchestré exclusivement par le moteur C#/.NET 10. Les compo
 
 Les opérations prennent en charge la planification, la vérification des artefacts, le cache local, la reprise et l'historique. Une modification destructive ou irréversible doit faire l'objet d'une confirmation explicite dans l'interface.
 
-## Évolution
-
-Les anciennes implémentations scriptées et les dépendances Linux/WSL ne font plus partie du produit. Toute nouvelle capacité Windows doit être intégrée au moteur .NET partagé par le bureau et le CLI.
+Toute nouvelle capacité Windows doit être intégrée au moteur .NET partagé par le bureau et le CLI.

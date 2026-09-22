@@ -3,9 +3,9 @@
 ## Product identity
 - Product-facing name: **Workspace Bootstrap**.
 - Canonical technical identity: **WorkspaceBootstrap**.
-- Windows-only product. Linux/WSL tooling is outside product scope.
-- The application is designed to be portable: executable, bundled assets and local mutable state live with the application package.
-- Installer cache is kept inside the application package under `cache`. 
+- Windows-only product.
+- The application is portable: executable, bundled assets and local mutable state live with the application package.
+- Installer cache is kept inside the application package under `cache`.
 
 ## Strategic architecture
 - C#/.NET 10 is the single application and orchestration technology.
@@ -13,7 +13,6 @@
 - The desktop application and self-contained CLI consume the same engine.
 - The desktop presentation is a native Windows UI; WPF is the current presentation framework, not a second application architecture.
 - There is one product architecture, not parallel implementations.
-- PowerShell, batch files, shell scripts and WSL are not product dependencies or execution backends.
 - WinGet is an explicit package-manager fallback only where a component declares it; official vendor sources take precedence.
 - C++/Rust are reserved for a concrete native requirement that cannot be implemented cleanly in .NET.
 
@@ -40,7 +39,3 @@
 
 ## Execution-first
 When the user authorizes implementation with `continue`, `vas-y`, `feu vert` or equivalent, execute repository changes before reporting them.
-
-## Migration cleanup
-The historical script/WSL product implementation is retired. Native .NET is the only product implementation.
-Remove retired paths completely; do not keep compatibility layers, migration checks or documentation for them.
