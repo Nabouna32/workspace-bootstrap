@@ -44,9 +44,10 @@ internal sealed class RegistrySoftwareInventorySource : ISoftwareInventorySource
             [],
             observation.Evidence.Select(evidence =>
                 new SoftwareEvidence(
+                    evidence.Source ?? evidence.Kind,
                     evidence.Kind,
                     evidence.Description,
-                    evidence.IsStrong,
-                    evidence.Source))
+                    DateTimeOffset.UtcNow,
+                    evidence.IsStrong))
             .ToArray());
 }
