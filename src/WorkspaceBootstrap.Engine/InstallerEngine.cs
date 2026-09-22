@@ -103,6 +103,10 @@ public sealed class InstallerEngine
             {
                 // A corrupt or invalidly signed cache entry is not trusted.
             }
+            catch (InvalidOperationException)
+            {
+                // A cache entry with invalid Authenticode is not trusted.
+            }
             catch (IOException)
             {
                 // A transiently unavailable cache entry is skipped.
