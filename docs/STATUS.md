@@ -11,19 +11,20 @@ Windows UI / CLI
       ↓
 C# Engine
       ↓
-Catalog → Resolver → Cache → Verification → Provisioning → State/Recovery
+Catalog → Resolver → Cache → Verification → Inventory → Provisioning → State/Recovery
 ```
 
 ## Current development state
 
 - Native C#/.NET 10 architecture is established.
 - WPF desktop and self-contained Windows x64 CLI share the Engine.
+- Provisioning plans now consume live Windows inventory and expose Installed/Missing/Outdated states.
 - Provisioning has durable state, a serialized worker lock and recoverable worker startup failures.
 - Installer artifacts use isolated staging, SHA-256 verification and Authenticode validation.
 - Cache metadata is revalidated before an artifact is trusted.
 - Windows optimization state is package-local and persisted atomically.
 - The desktop has an explicit WPF exception boundary with diagnostic logging.
-- GitHub Actions uses fast PR validation; full packaging/security validation is scheduled or explicit.
+- GitHub Actions is configured to execute validation on the project's self-hosted Windows runner.
 - Windows releases are explicit via manual dispatch or `v*` tags.
 
 ## Validation cadence
@@ -31,7 +32,7 @@ Catalog → Resolver → Cache → Verification → Provisioning → State/Recov
 ### Every pull request
 
 - NuGet restore with cache;
-- Release compilation;
+- Release compilation with warnings treated as errors;
 - automated tests;
 - formatting verification.
 
@@ -58,8 +59,8 @@ CodeQL remains a separate scheduled/manual validation rather than part of the fa
 ## Next product focus
 
 1. Complete the desktop information architecture and component/profile experience.
-2. Replace placeholder provisioning plan states with real inventory-aware states.
-3. Strengthen installer cache lifecycle, retention and recovery UX.
-4. Expand provisioning/job integration tests.
-5. Add Windows published-artifact smoke/integration coverage.
-6. Continue dead-code and retired-script cleanup.
+2. Strengthen installer cache lifecycle, retention and recovery UX.
+3. Expand provisioning/job integration tests around cancellation, resume, reboot and failure recovery.
+4. Add published-artifact startup/integration coverage beyond the CLI contract smoke test.
+5. Continue dead-code and retired-script cleanup.
+6. Improve inventory matching and version comparison for components whose installers expose richer version metadata.
