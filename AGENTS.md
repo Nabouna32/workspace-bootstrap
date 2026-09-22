@@ -4,7 +4,7 @@
 - Product-facing name: **Workspace Bootstrap**.
 - Canonical technical identity: **WorkspaceBootstrap**.
 - Windows-only product. Linux/WSL tooling is outside product scope.
-- Primary application/state root: `C:\Dev\WorkspaceBootstrap`.
+- The application is designed to be portable: executable, bundled assets and local mutable state live with the application package.
 - Persistent installer cache: `C:\DevCache`.
 
 ## Strategic architecture
@@ -12,7 +12,7 @@
 - The native .NET engine owns provisioning, installer resolution, cache, verification, profiles, operation state, diagnostics, maintenance, optimization and Windows integration.
 - The desktop application and self-contained CLI consume the same engine.
 - The desktop presentation is a native Windows UI; WPF is the current presentation framework, not a second application architecture.
-- There is one product architecture, not parallel script and native implementations.
+- There is one product architecture, not parallel implementations.
 - PowerShell, batch files, shell scripts and WSL are not product dependencies or execution backends.
 - WinGet is an explicit package-manager fallback only where a component declares it; official vendor sources take precedence.
 - C++/Rust are reserved for a concrete native requirement that cannot be implemented cleanly in .NET.
@@ -24,7 +24,6 @@
 - Download to unique staging paths, validate, then atomically promote into the cache.
 - Verify SHA-256 for cached artifacts and validate Authenticode for signed EXE/MSI artifacts.
 - Keep older verified versions for rollback/reinstall.
-- Do not store primary application state in `C:\ProgramData` or `%LOCALAPPDATA%`.
 - Never persist secrets or registration tokens.
 - Version checks must be component-specific.
 - Failed staging must be cleaned without deleting valid cache entries.
@@ -35,16 +34,13 @@
 ## Git workflow
 - GitHub is the source of truth.
 - Work on feature branches and use PRs.
-- **All GitHub Actions jobs run on GitHub-hosted runners. Self-hosted runners are forbidden.**
-- The repository must not depend on a personal machine, WSL environment or self-hosted infrastructure for CI.
+- GitHub Actions uses standard GitHub-hosted runners.
+- CI must not depend on a developer workstation.
 - Never claim CI green without checking the exact commit.
 
 ## Execution-first
 When the user authorizes implementation with `continue`, `vas-y`, `feu vert` or equivalent, execute repository changes before reporting them.
 
 ## Migration cleanup
-The historical PowerShell/batch/WSL product implementation is retired. Native .NET is the only product implementation.
-
-Cleanup is complete only when the native engine and desktop are active, official-source/cache behavior and provisioning use C#, self-contained publish and Windows smoke validation are covered, legacy script/product paths are removed, and tests/workflows/docs no longer invoke retired implementations.
-
-Do not leave a PowerShell compatibility layer behind.
+The historical script/WSL product implementation is retired. Native .NET is the only product implementation.
+Remove retired paths completely; do not keep compatibility layers, migration checks or documentation for them.
