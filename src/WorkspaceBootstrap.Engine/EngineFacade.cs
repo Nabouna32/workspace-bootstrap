@@ -17,10 +17,15 @@ public sealed class EngineFacade
             new WinGetInventoryProvider()
         ]);
         var provisioning = new ProvisioningEngine(configuration, installer, paths, inventory);
+        var softwareInventory = new SoftwareInventoryService([
+            new Infrastructure.InventoryProviderSoftwareSource(new WindowsRegistryUninstallInventoryProvider()),
+            new Infrastructure.InventoryProviderSoftwareSource(new WinGetInventoryProvider())
+        ]);
 
         _application = new WorkspaceControlApplication(
             new Application.ProvisioningServiceAdapter(provisioning),
             new Application.InventoryServiceAdapter(inventory),
+            softwareInventory,
             new SoftwareInventoryService([new Infrastructure.RegistrySoftwareInventorySource()]),
             new Application.WindowsAdministrationServiceAdapter(),
             new Application.OptimizationServiceAdapter());
@@ -57,6 +62,9 @@ public sealed class EngineFacade
 
     public Task<InventorySnapshot> GetInventoryAsync(CancellationToken cancellationToken = default) =>
         _application.GetInventoryAsync(cancellationToken);
+
+    public Task<SoftwareInventorySnapshot> GetSoftwareInventoryAsync(CancellationToken cancellationToken = default) =>
+        _application.GetSoftwareInventoryAsync(cancellationToken);
 
     public Task<SoftwareInventorySnapshot> GetSoftwareInventoryAsync(CancellationToken cancellationToken = default) =>
         _application.GetSoftwareInventoryAsync(cancellationToken);
