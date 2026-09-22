@@ -19,6 +19,12 @@
         <Border Grid.Column="0" Background="{StaticResource SidebarBackground}" Padding="18">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Bottom">
+                    <TextBlock Text="Apparence" FontSize="11" Foreground="{StaticResource SecondaryText}" Margin="4,0,4,6"/>
+                    <ComboBox ItemsSource="{Binding ThemeOptions}"
+                              DisplayMemberPath="Label"
+                              SelectedItem="{Binding SelectedTheme, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              Margin="4,0,4,14"
+                              Padding="7"/>
                     <TextBlock Text="Workspace Bootstrap" FontSize="12" Foreground="{StaticResource SecondaryText}"/>
                     <TextBlock Text="Windows 11 • local-first" FontSize="11" Foreground="{StaticResource SecondaryText}" Margin="0,4,0,0"/>
                 </StackPanel>
