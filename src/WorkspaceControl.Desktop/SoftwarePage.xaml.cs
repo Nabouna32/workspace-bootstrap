@@ -8,7 +8,7 @@ public sealed partial class SoftwarePage : Page
     public SoftwarePage()
     {
         InitializeComponent();
-        DataContext = ((App)Application.Current).ViewModel;
+        DataContext = ((App)Microsoft.UI.Xaml.Application.Current).ViewModel;
     }
 
     private async void Refresh_Click(object sender, RoutedEventArgs e) =>
