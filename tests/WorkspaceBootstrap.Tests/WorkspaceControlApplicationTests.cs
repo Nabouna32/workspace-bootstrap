@@ -77,6 +77,7 @@ public sealed class WorkspaceControlApplicationTests
         return new WorkspaceControlApplication(
             provisioning ?? new FakeProvisioningService(),
             inventory ?? new FakeInventoryService(),
+            new FakeSoftwareInventoryService(),
             new FakeWindowsAdministrationService(),
             new FakeOptimizationService());
     }
@@ -104,6 +105,12 @@ public sealed class WorkspaceControlApplicationTests
             history.FirstOrDefault(x => x.OperationId == operationId);
         public string Resume(string operationId, bool cacheOnly = false) => operationId;
         public IReadOnlyList<ProvisioningOperation> GetHistory() => history;
+    }
+
+    private sealed class FakeSoftwareInventoryService : ISoftwareInventoryService
+    {
+        public Task<SoftwareInventorySnapshot> ScanAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(new SoftwareInventorySnapshot("software", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, [], []));
     }
 
     private sealed class FakeWindowsAdministrationService : IWindowsAdministrationService
