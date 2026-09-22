@@ -27,7 +27,7 @@
                     <StackPanel Spacing="6">
                         <TextBlock Text="Hardware" Opacity="0.68" />
                         <TextBlock Text="{Binding Baseline.Cpu}" FontSize="20" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                        <TextBlock Text="{Binding Baseline.MemoryGB, StringFormat='{}{0:F1} GB RAM'}" Opacity="0.72" />
+                        <TextBlock Text="{Binding MemoryDisplay}" Opacity="0.72" />
                     </StackPanel>
                 </Border>
                 <Border Grid.Column="2" Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
