@@ -1,3 +1,4 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WorkspaceBootstrap;
 
 namespace WorkspaceBootstrap.Tests;
