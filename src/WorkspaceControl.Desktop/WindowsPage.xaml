@@ -1,0 +1,56 @@
+<Page
+    x:Class="WorkspaceControl.Desktop.WindowsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer>
+        <StackPanel Padding="28" Spacing="24">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Windows" FontSize="32" FontWeight="SemiBold" />
+                <TextBlock Text="Observed system state. No changes are made from this view." Opacity="0.72" />
+            </StackPanel>
+
+            <Grid ColumnSpacing="16" RowSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Processor" Opacity="0.68" />
+                        <TextBlock Text="{Binding Baseline.Cpu}" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding Baseline.CpuCores, StringFormat='{}{0} logical cores'}" />
+                        <TextBlock Text="{Binding Baseline.Architecture}" Opacity="0.72" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Runtime" Opacity="0.68" />
+                        <TextBlock Text="{Binding Baseline.UptimeHours, StringFormat='{}{0:F1} hours uptime'}" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding Baseline.MemoryGB, StringFormat='{}{0:F1} GB memory'}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Volumes" FontSize="20" FontWeight="SemiBold" />
+                    <ItemsControl ItemsSource="{Binding Baseline.Volumes}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding DriveLetter}" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Column="1" Text="{Binding HealthStatus}" Opacity="0.72" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
