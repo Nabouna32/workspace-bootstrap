@@ -2,7 +2,7 @@ using Microsoft.UI.Xaml;
 
 namespace WorkspaceControl.Desktop;
 
-public partial class App : Application
+public partial class App : Microsoft.UI.Xaml.Application
 {
     private Window? _window;
 
