@@ -22,7 +22,8 @@ public sealed class EngineFacade
     }
 
     public IReadOnlyList<ProfileManifest> GetProfiles() => _provisioning.Profiles();
-    public object GetPlan(string profileId) => _provisioning.Plan(profileId);
+    public Task<object> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
+        _provisioning.PlanAsync(profileId, cancellationToken);
     public string StartProvisioning(string profileId, bool cacheOnly = false) => _provisioning.Start(profileId, cacheOnly);
     public Task RunProvisioningAsync(string operationId, bool cacheOnly = false, CancellationToken cancellationToken = default) =>
         _provisioning.RunAsync(operationId, cacheOnly, cancellationToken);
@@ -38,7 +39,8 @@ public sealed class EngineFacade
 
     public ProvisioningOperation? GetProvisioningDetail(string operationId) =>
         _provisioning.Get(operationId);
-    public InventorySnapshot GetInventory() => _inventory.ScanAsync().GetAwaiter().GetResult();
+    public Task<InventorySnapshot> GetInventoryAsync(CancellationToken cancellationToken = default) =>
+        _inventory.ScanAsync(cancellationToken);
     public BaselineSnapshot GetBaseline() => _system.GetBaseline();
     public IReadOnlyList<OptimizationPlanItem> GetSafeOptimizationPlan() => _optimization.GetSafePlan();
     public IReadOnlyList<string> ApplySafeOptimization() => _optimization.ApplySafe();
