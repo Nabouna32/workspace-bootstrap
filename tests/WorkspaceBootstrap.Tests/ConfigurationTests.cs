@@ -47,7 +47,7 @@ public sealed class ConfigurationTests
     [TestMethod]
     public void Profiles_are_loadable_and_reference_known_components()
     {
-        var configuration = new ConfigurationStore();
+        var configuration = new ConfigurationStore(FindRepositoryRoot());
         var components = configuration.LoadComponents();
         var profiles = configuration.LoadProfiles();
 
@@ -78,6 +78,21 @@ public sealed class ConfigurationTests
                 Assert.IsTrue(profiles.ContainsKey(profileId), $"{component.Id} references unknown profile {profileId}.");
         }
     }
+
+    private static string FindRepositoryRoot()
+    {
+        var current = new DirectoryInfo(AppContext.BaseDirectory);
+        while (current is not null)
+        {
+            if (File.Exists(Path.Combine(current.FullName, "bootstrap", "windows", "components", "catalog.json")))
+                return current.FullName;
+
+            current = current.Parent;
+        }
+
+        Assert.Fail("Repository content root could not be located for the configuration contract test.");
+        return string.Empty;
+    }
 }
 
 
@@ -87,7 +102,7 @@ public sealed class ProvisioningPlanContractTests
     [TestMethod]
     public async Task Provisioning_plan_exposes_desktop_contract_fields()
     {
-        var configuration = new ConfigurationStore();
+        var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
         var engine = new ProvisioningEngine(
             configuration,
@@ -113,22 +128,6 @@ public sealed class ProvisioningPlanContractTests
         }
     }
 }
-
-
-    private static string FindRepositoryRoot()
-    {
-        var current = new DirectoryInfo(AppContext.BaseDirectory);
-        while (current is not null)
-        {
-            if (File.Exists(Path.Combine(current.FullName, "bootstrap", "windows", "components", "catalog.json")))
-                return current.FullName;
-
-            current = current.Parent;
-        }
-
-        Assert.Fail("Repository content root could not be located for the configuration contract test.");
-        return string.Empty;
-    }
 
 
 [TestClass]
