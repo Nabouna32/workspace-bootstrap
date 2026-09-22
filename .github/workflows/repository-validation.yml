@@ -41,10 +41,10 @@ jobs:
         run: dotnet restore src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj
 
       - name: Restore desktop
-        run: dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj
+        run: dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj --runtime win-x64
 
       - name: Restore CLI
-        run: dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj
+        run: dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
 
       - name: Restore tests
         run: dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
