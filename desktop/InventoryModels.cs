@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace BounaDevEnvironment;
+namespace WorkspaceBootstrap.Desktop;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum InventoryOwnership
