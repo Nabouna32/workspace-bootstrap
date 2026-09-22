@@ -2,7 +2,7 @@ namespace WorkspaceBootstrap;
 
 public sealed class WorkspacePaths
 {
-    public string Root { get; } = AppContext.BaseDirectory;
+    public string Root { get; }
     public string CacheRoot { get; }
     public string InstallersRoot => Path.Combine(CacheRoot, "installers");
     public string MetadataRoot => Path.Combine(CacheRoot, "metadata");
@@ -13,10 +13,26 @@ public sealed class WorkspacePaths
     public WorkspacePaths(string? root = null)
     {
         Root = Path.GetFullPath(
-            string.IsNullOrWhiteSpace(root) ? AppContext.BaseDirectory : root);
+            string.IsNullOrWhiteSpace(root)
+                ? Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "WorkspaceControl")
+                : root);
+
         CacheRoot = Path.Combine(Root, "cache");
 
-        foreach (var path in new[] { Root, CacheRoot, InstallersRoot, MetadataRoot, StagingRoot, StateRoot, LogsRoot })
+        foreach (var path in new[]
+        {
+            Root,
+            CacheRoot,
+            InstallersRoot,
+            MetadataRoot,
+            StagingRoot,
+            StateRoot,
+            LogsRoot
+        })
+        {
             Directory.CreateDirectory(path);
+        }
     }
 }
