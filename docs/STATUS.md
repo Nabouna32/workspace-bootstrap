@@ -39,9 +39,9 @@ The desktop UI and CLI consume the same engine. They must not reimplement provis
 
 ## CI
 
-CI is intentionally **self-hosted only**. Workflows must run on:
+CI is intentionally **GitHub-hosted only**. Workflows must run on:
 
-`[self-hosted, windows, x64]`
+`windows-latest`
 
 No `ubuntu-latest`, `windows-latest` or `macos-latest` job is part of the product validation strategy.
 
