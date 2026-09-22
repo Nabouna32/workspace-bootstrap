@@ -1,6 +1,6 @@
 # Provisioning
 
-Provisioning is implemented entirely in the native .NET engine.
+Provisioning is implemented in the native .NET engine.
 
 ## Desired state
 
@@ -28,15 +28,14 @@ WinGet is used only for components whose manifest explicitly declares `fallbackP
 
 ## Cache-only mode
 
-Cache-only provisioning never downloads. It succeeds only when a verified compatible installer is already present in the local cache.
+Cache-only provisioning never downloads. It succeeds only when a verified compatible installer is already present in the package cache.
 
 ## Recovery
 
-Every provisioning operation has a durable operation identifier and persistent state. Recovery must never create duplicate installation work. A resume operation must reconnect to the existing operation or continue from the persisted checkpoint.
+Every provisioning operation has a durable operation identifier and persistent state. Recovery must never create duplicate installation work. A resume operation continues from the persisted checkpoint.
 
 ## Safety
 
-- No script host is required.
 - Installer execution is explicit and logged.
 - Destructive operations require confirmation.
 - Failed downloads are cleaned from staging only.
