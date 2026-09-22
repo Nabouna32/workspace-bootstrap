@@ -20,7 +20,7 @@ env:
 jobs:
   release:
     name: Build and package Windows release
-    runs-on: windows-latest
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 35
     steps:
       - name: Checkout
