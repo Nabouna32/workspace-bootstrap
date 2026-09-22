@@ -1,4 +1,4 @@
-<Application x:Class="BounaDevEnvironment.App"
+<Application x:Class="WorkspaceBootstrap.Desktop.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
