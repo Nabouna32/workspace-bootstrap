@@ -30,6 +30,10 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         private set => SetField(ref _software, value);
     }
 
+    public string MemoryDisplay => Baseline is null ? "—" : $"{Baseline.MemoryGB:F1} GB RAM";
+    public string CpuCoresDisplay => Baseline is null ? "—" : $"{Baseline.CpuCores} logical cores";
+    public string UptimeDisplay => Baseline is null ? "—" : $"{Baseline.UptimeHours:F1} hours uptime";
+
     public ObservableCollection<SoftwareItem> SoftwareItems { get; } = [];
     public ObservableCollection<string> Diagnostics { get; } = [];
     public ObservableCollection<ProfileManifest> Profiles { get; } = [];
@@ -66,6 +70,9 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         try
         {
             Baseline = _engine.GetBaseline();
+            OnPropertyChanged(nameof(MemoryDisplay));
+            OnPropertyChanged(nameof(CpuCoresDisplay));
+            OnPropertyChanged(nameof(UptimeDisplay));
             Profiles.Clear();
             foreach (var profile in _engine.GetProfiles())
                 Profiles.Add(profile);
@@ -98,6 +105,9 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             IsBusy = false;
         }
     }
+
+    private void OnPropertyChanged(string propertyName) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
     private void SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
