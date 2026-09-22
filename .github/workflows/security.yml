@@ -36,7 +36,13 @@ jobs:
         with:
           dotnet-version: 10.0.401
 
-      - name: Build
+      - name: Build engine
+        run: dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release
+
+      - name: Build desktop
+        run: dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release
+
+      - name: Build CLI
         run: dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release
 
       - name: Analyze
