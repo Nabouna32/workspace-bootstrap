@@ -65,6 +65,32 @@ jobs:
         if: matrix.configuration == 'Release'
         run: dotnet format tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --no-restore --verify-no-changes
 
+      - name: Publish desktop package for smoke test
+        if: matrix.configuration == 'Release'
+        run: dotnet publish desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output "$env:RUNNER_TEMP\\workspace-bootstrap-package"
+
+      - name: Bundle CLI for smoke test
+        if: matrix.configuration == 'Release'
+        run: dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output "$env:RUNNER_TEMP\\workspace-bootstrap-package"
+
+      - name: Smoke-test portable package
+        if: matrix.configuration == 'Release'
+        shell: pwsh
+        run: |
+          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-package"
+          $desktop = Join-Path $package "WorkspaceBootstrap.exe"
+          $cli = Join-Path $package "WorkspaceBootstrap.Cli.exe"
+          $catalog = Join-Path $package "bootstrap/windows/components/catalog.json"
+          $profiles = Join-Path $package "bootstrap/windows/profiles"
+
+          if (-not (Test-Path $desktop)) { throw "Desktop executable is missing: $desktop" }
+          if (-not (Test-Path $cli)) { throw "CLI executable is missing: $cli" }
+          if (-not (Test-Path $catalog)) { throw "Bundled component catalog is missing: $catalog" }
+          if (-not (Test-Path $profiles -PathType Container)) { throw "Bundled profiles directory is missing: $profiles" }
+
+          & $cli capabilities
+          if ($LASTEXITCODE -ne 0) { throw "Portable CLI smoke test failed with exit code $LASTEXITCODE." }
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v6
@@ -102,22 +128,6 @@ jobs:
 
       - name: Bundle CLI with desktop
         run: dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output artifacts/desktop
-
-      - name: Smoke-test portable package
-        shell: pwsh
-        run: |
-          $desktop = "artifacts/desktop/WorkspaceBootstrap.exe"
-          $cli = "artifacts/desktop/WorkspaceBootstrap.Cli.exe"
-          $catalog = "artifacts/desktop/bootstrap/windows/components/catalog.json"
-          $profiles = "artifacts/desktop/bootstrap/windows/profiles"
-
-          if (-not (Test-Path $desktop)) { throw "Desktop executable is missing: $desktop" }
-          if (-not (Test-Path $cli)) { throw "CLI executable is missing: $cli" }
-          if (-not (Test-Path $catalog)) { throw "Bundled component catalog is missing: $catalog" }
-          if (-not (Test-Path $profiles -PathType Container)) { throw "Bundled profiles directory is missing: $profiles" }
-
-          & $cli capabilities
-          if ($LASTEXITCODE -ne 0) { throw "Portable CLI smoke test failed with exit code $LASTEXITCODE." }
 
       - name: Upload release artifacts
         uses: actions/upload-artifact@v6
