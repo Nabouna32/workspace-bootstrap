@@ -6,11 +6,15 @@ GitHub is the source of truth. Development work happens on feature branches and 
 
 ## Runner policy
 
-All repository workflows run on the project's GitHub-hosted Windows runner:
+All repository workflows run on the project's Windows self-hosted runner:
 
-`windows-latest`
+```yaml
+runs-on: [self-hosted, Windows, X64]
+```
 
-Validation uses GitHub-hosted runners.
+No validation job intentionally uses `windows-latest` or another GitHub-hosted runner.
+
+The runner is expected to provide the pinned .NET SDK from `global.json`, Windows x64, Git, and the repository's normal build/test prerequisites. Workflows still execute setup/restore steps explicitly so the build remains deterministic.
 
 ## Local build
 
@@ -21,9 +25,9 @@ dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
 dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj
 dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj
 
-dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release --no-restore
-dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --no-restore
-dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --no-restore
+dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release --no-restore --warnaserror
+dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --no-restore --warnaserror
+dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --no-restore --warnaserror
 
 dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration Release --no-restore
 dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore
@@ -44,4 +48,4 @@ The release workflow additionally verifies:
 - portable package startup through the CLI capabilities command;
 - SHA-256 checksum generation.
 
-Full Windows integration scenarios that require a real installed workstation remain a separate future test layer; they are not claimed by the current portable smoke test.
+Full Windows integration scenarios that require a real installed workstation remain a separate test layer. The current package smoke test verifies the published contract; it does not claim to install every component on the runner.
