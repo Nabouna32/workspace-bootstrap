@@ -37,11 +37,11 @@ Warnings and errors must be fixed at their source. Do not disable analyzers or s
 
 ## Release validation
 
-Release packaging should additionally verify:
+The release workflow additionally verifies:
 
-- self-contained Windows x64 startup;
-- component/profile catalog loading;
-- cache-only behavior;
-- installer signature validation;
-- recovery after interrupted provisioning;
-- clean Windows smoke installation in an isolated environment.
+- self-contained Windows x64 publication;
+- component/profile catalog presence;
+- portable package startup through the CLI capabilities command;
+- SHA-256 checksum generation.
+
+Full Windows integration scenarios that require a real installed workstation remain a separate future test layer; they are not claimed by the current portable smoke test.
