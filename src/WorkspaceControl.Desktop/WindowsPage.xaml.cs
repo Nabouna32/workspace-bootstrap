@@ -7,6 +7,6 @@ public sealed partial class WindowsPage : Microsoft.UI.Xaml.Controls.Page
     public WindowsPage()
     {
         InitializeComponent();
-        DataContext = ((App)Application.Current).ViewModel;
+        DataContext = ((App)Microsoft.UI.Xaml.Application.Current).ViewModel;
     }
 }
