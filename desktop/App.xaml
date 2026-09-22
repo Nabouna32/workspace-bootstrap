@@ -14,8 +14,13 @@
         <SolidColorBrush x:Key="Accent" Color="#78A9FF"/>
         <SolidColorBrush x:Key="AccentSoft" Color="#20334F"/>
         <SolidColorBrush x:Key="Success" Color="#63D6A0"/>
+        <SolidColorBrush x:Key="SuccessSoft" Color="#173A2D"/>
         <SolidColorBrush x:Key="Warning" Color="#F3C969"/>
+        <SolidColorBrush x:Key="WarningSoft" Color="#423618"/>
         <SolidColorBrush x:Key="Danger" Color="#FF7D86"/>
+        <SolidColorBrush x:Key="DangerSoft" Color="#452028"/>
+        <SolidColorBrush x:Key="Info" Color="#78A9FF"/>
+        <SolidColorBrush x:Key="InfoSoft" Color="#20334F"/>
 
         <Style x:Key="CardBorderStyle" TargetType="Border">
             <Setter Property="Background" Value="{StaticResource CardBackground}"/>
@@ -53,6 +58,17 @@
             <Setter Property="Foreground" Value="{StaticResource PrimaryText}"/>
             <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
             <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="StatusTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource SecondaryText}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding}" Value="Terminé"><Setter Property="Foreground" Value="{StaticResource Success}"/></DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="Échec"><Setter Property="Foreground" Value="{StaticResource Danger}"/></DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="Redémarrage requis"><Setter Property="Foreground" Value="{StaticResource Warning}"/></DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="En cours"><Setter Property="Foreground" Value="{StaticResource Info}"/></DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="Démarrage"><Setter Property="Foreground" Value="{StaticResource Info}"/></DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style TargetType="ProgressBar">
