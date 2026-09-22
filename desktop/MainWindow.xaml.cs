@@ -18,7 +18,6 @@ public partial class MainWindow : Window
         DataContext = new MainViewModel(
             repositoryRoot,
             engineClient,
-            new DesktopProcessLauncher(),
             new DesktopDialogService(),
             jobStore,
             jobScheduler);
