@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace BounaDevEnvironment;
+namespace WorkspaceBootstrap.Desktop;
 
 public sealed class DesktopProcessLauncher
 {
