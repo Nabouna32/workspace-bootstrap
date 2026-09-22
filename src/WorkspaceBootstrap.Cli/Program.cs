@@ -21,7 +21,7 @@ try
             data = engine.GetBaseline();
             break;
         case "inventory":
-            data = engine.GetInventory();
+            data = await engine.GetInventoryAsync();
             break;
         case "optimization-plan-safe":
             data = engine.GetSafeOptimizationPlan();
@@ -40,7 +40,7 @@ try
                 .ToArray();
             break;
         case "provisioning-plan":
-            data = MapPlan(engine.GetPlan(profile ?? throw new ArgumentException("--profile est requis.")));
+            data = MapPlan(await engine.GetPlanAsync(profile ?? throw new ArgumentException("--profile est requis.")));
             break;
         case "provisioning-worker":
             await engine.RunProvisioningAsync(

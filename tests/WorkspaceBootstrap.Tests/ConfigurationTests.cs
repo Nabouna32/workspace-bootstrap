@@ -85,7 +85,7 @@ public sealed class ConfigurationTests
 public sealed class ProvisioningPlanContractTests
 {
     [TestMethod]
-    public void Provisioning_plan_exposes_desktop_contract_fields()
+    public async Task Provisioning_plan_exposes_desktop_contract_fields()
     {
         var configuration = new ConfigurationStore();
         var engine = new ProvisioningEngine(
@@ -94,7 +94,7 @@ public sealed class ProvisioningPlanContractTests
             new WorkspacePaths(),
             new InventoryScanner([]));
 
-        var plan = engine.Plan(configuration.LoadProfiles().Values.First().Id);
+        var plan = await engine.PlanAsync(configuration.LoadProfiles().Values.First().Id);
         using var document = System.Text.Json.JsonDocument.Parse(
             System.Text.Json.JsonSerializer.Serialize(plan));
 
@@ -109,6 +109,44 @@ public sealed class ProvisioningPlanContractTests
             Assert.IsTrue(item.TryGetProperty("Message", out var message));
             Assert.IsFalse(string.IsNullOrWhiteSpace(message.GetString()));
             Assert.IsTrue(state.GetString() is "MISSING" or "INSTALLED" or "OUTDATED");
+        }
+    }
+}
+
+
+[TestClass]
+public sealed class InstallerEngineTests
+{
+    [TestMethod]
+    public async Task Cache_only_fails_when_no_verified_artifact_exists()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "workspace-bootstrap-tests", Guid.NewGuid().ToString("N"));
+        try
+        {
+            var paths = new WorkspacePaths(root);
+            var installer = new InstallerEngine(paths);
+            var component = new ComponentManifest(
+                "test-component",
+                "Test component",
+                null,
+                "Test.Package",
+                null,
+                "exe",
+                null,
+                "x64",
+                null,
+                [],
+                "winget");
+
+            var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(
+                () => installer.InstallAsync(component, cacheOnly: true, CancellationToken.None));
+
+            StringAssert.Contains(exception.Message, "cache");
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+                Directory.Delete(root, recursive: true);
         }
     }
 }

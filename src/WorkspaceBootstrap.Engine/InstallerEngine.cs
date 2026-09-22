@@ -35,11 +35,15 @@ public sealed class InstallerEngine
             || string.Equals(component.InstallerType, "wix", StringComparison.OrdinalIgnoreCase))
         {
             psi.FileName = "msiexec.exe";
-            psi.Arguments = $"/i \"{artifact.FilePath}\" {string.Join(' ', arguments)}";
+            psi.ArgumentList.Add("/i");
+            psi.ArgumentList.Add(artifact.FilePath);
+            foreach (var argument in arguments)
+                psi.ArgumentList.Add(argument);
         }
         else
         {
-            psi.Arguments = string.Join(' ', arguments.Select(EscapeArgument));
+            foreach (var argument in arguments)
+                psi.ArgumentList.Add(argument);
         }
 
         using var process = Process.Start(psi)
@@ -58,7 +62,10 @@ public sealed class InstallerEngine
     {
         if (cacheOnly)
         {
-            return FindVerifiedCached(component);
+            return FindVerifiedCached(component)
+                ?? throw new InvalidOperationException(
+                    $"Aucun installeur vérifié disponible dans le cache pour '{component.Name}'. " +
+                    "Le mode cache-only refuse tout téléchargement.");
         }
 
         if (component.OfficialSource is null)
@@ -241,14 +248,18 @@ public sealed class InstallerEngine
         var psi = new ProcessStartInfo
         {
             FileName = "winget.exe",
-            Arguments =
-                $"install --id {EscapeArgument(component.PackageId!)} --exact " +
-                "--accept-source-agreements --accept-package-agreements --silent",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             CreateNoWindow = true
         };
+        psi.ArgumentList.Add("install");
+        psi.ArgumentList.Add("--id");
+        psi.ArgumentList.Add(component.PackageId!);
+        psi.ArgumentList.Add("--exact");
+        psi.ArgumentList.Add("--accept-source-agreements");
+        psi.ArgumentList.Add("--accept-package-agreements");
+        psi.ArgumentList.Add("--silent");
 
         using var process = Process.Start(psi)
             ?? throw new InvalidOperationException("WinGet est introuvable.");
@@ -520,8 +531,4 @@ public sealed class InstallerEngine
     private static string Sanitize(string value) =>
         Regex.Replace(value, @"[^A-Za-z0-9._-]", "_");
 
-    private static string EscapeArgument(string value) =>
-        value.Contains(' ')
-            ? $"\"{value.Replace("\"", "\\\"")}\""
-            : value;
 }

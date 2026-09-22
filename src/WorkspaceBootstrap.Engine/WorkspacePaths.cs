@@ -10,8 +10,10 @@ public sealed class WorkspacePaths
     public string StateRoot => Path.Combine(Root, "state");
     public string LogsRoot => Path.Combine(Root, "logs");
 
-    public WorkspacePaths()
+    public WorkspacePaths(string? root = null)
     {
+        Root = Path.GetFullPath(
+            string.IsNullOrWhiteSpace(root) ? AppContext.BaseDirectory : root);
         CacheRoot = Path.Combine(Root, "cache");
 
         foreach (var path in new[] { Root, CacheRoot, InstallersRoot, MetadataRoot, StagingRoot, StateRoot, LogsRoot })
