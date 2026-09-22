@@ -88,10 +88,10 @@ jobs:
           dotnet-version: 10.0.401
 
       - name: Restore desktop
-        run: dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj
+        run: dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj --runtime win-x64
 
       - name: Restore CLI
-        run: dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj
+        run: dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
 
       - name: Publish self-contained CLI
         run: dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output artifacts/cli
