@@ -72,35 +72,6 @@ public sealed class DesktopEngineClient
             throw;
         }
 
-        if (string.IsNullOrWhiteSpace(stdout))
-        {
-            var detail = string.IsNullOrWhiteSpace(stderr)
-                ? "Le moteur natif n'a retourné aucune réponse."
-                : stderr.Trim();
-            throw new InvalidOperationException(detail);
-        }
-
-        DesktopCommandResponse<T> response;
-        try
-        {
-            response = JsonSerializer.Deserialize<DesktopCommandResponse<T>>(stdout, JsonOptions)
-                ?? throw new InvalidOperationException("Réponse JSON vide.");
-        }
-        catch (JsonException ex)
-        {
-            var detail = string.IsNullOrWhiteSpace(stderr) ? string.Empty : $" STDERR: {stderr.Trim()}";
-            throw new InvalidOperationException($"Réponse du moteur natif invalide : {ex.Message}.{detail}", ex);
-        }
-
-        if (response.SchemaVersion != 1)
-            throw new InvalidOperationException($"Version de contrat desktop non prise en charge : {response.SchemaVersion}.");
-
-        if (response.ExitCode != process.ExitCode)
-            throw new InvalidOperationException($"Incohérence du contrat : exitCode={response.ExitCode}, processus={process.ExitCode}.");
-
-        return response;
-    }
-
     public Task<DesktopCommandResponse<string[]>> GetCapabilitiesAsync(CancellationToken cancellationToken = default) =>
         ExecuteAsync<string[]>("capabilities", cancellationToken: cancellationToken);
 
