@@ -1,8 +1,12 @@
+using System.Text.Json;
+
+namespace WorkspaceBootstrap.Tests;
+
 [TestClass]
 public sealed class RepositoryPolicyTests
 {
     [TestMethod]
-    public void Legacy_script_files_are_absent()
+    public void Retired_script_files_are_absent()
     {
         var root = LocateRepositoryRoot();
         var legacy = Directory.EnumerateFiles(root, "*.*", SearchOption.AllDirectories)
@@ -15,10 +19,16 @@ public sealed class RepositoryPolicyTests
     }
 
     [TestMethod]
-    public void Workflows_target_only_the_self_hosted_windows_runner()
+    public void Workflows_use_only_github_hosted_windows_runners()
     {
         var root = LocateRepositoryRoot();
-        var workflows = Directory.EnumerateFiles(Path.Combine(root, ".github", "workflows"), "*.yml");
+        var workflowsRoot = Path.Combine(root, ".github", "workflows");
+        var workflows = Directory.EnumerateFiles(workflowsRoot, "*.*", SearchOption.AllDirectories)
+            .Where(path => path.EndsWith(".yml", StringComparison.OrdinalIgnoreCase)
+                        || path.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+
+        Assert.IsNotEmpty(workflows);
 
         foreach (var workflow in workflows)
         {
@@ -39,7 +49,7 @@ public sealed class RepositoryPolicyTests
 
         foreach (var path in components)
         {
-            using var document = System.Text.Json.JsonDocument.Parse(File.ReadAllText(path));
+            using var document = JsonDocument.Parse(File.ReadAllText(path));
             var rootElement = document.RootElement;
 
             Assert.IsFalse(rootElement.TryGetProperty("installer", out _), path);
@@ -50,13 +60,36 @@ public sealed class RepositoryPolicyTests
         }
     }
 
+    [TestMethod]
+    public void Product_identity_is_not_the_retired_dev_environment()
+    {
+        var root = LocateRepositoryRoot();
+        var files = Directory.EnumerateFiles(root, "*.*", SearchOption.AllDirectories)
+            .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}.git{Path.DirectorySeparatorChar}"));
+
+        foreach (var path in files)
+        {
+            var extension = Path.GetExtension(path);
+            if (!new[] { ".cs", ".csproj", ".xaml", ".json", ".md", ".yml", ".yaml" }
+                .Contains(extension, StringComparer.OrdinalIgnoreCase))
+                continue;
+
+            var content = File.ReadAllText(path);
+            StringAssert.DoesNotContain(content, "BounaDevEnvironment", path);
+            StringAssert.DoesNotContain(content, "Bouna Dev Environment", path);
+        }
+    }
+
     private static string LocateRepositoryRoot()
     {
         var current = new DirectoryInfo(AppContext.BaseDirectory);
         while (current is not null)
         {
-            if (File.Exists(Path.Combine(current.FullName, "README.md")))
+            if (File.Exists(Path.Combine(current.FullName, "README.md"))
+                && Directory.Exists(Path.Combine(current.FullName, "src"))
+                && Directory.Exists(Path.Combine(current.FullName, "desktop")))
                 return current.FullName;
+
             current = current.Parent;
         }
 
