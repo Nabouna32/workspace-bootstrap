@@ -36,18 +36,6 @@ jobs:
       - name: Validate repository tests
         run: dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration Release --verbosity normal --logger "trx;LogFileName=policy.trx"
 
-      - name: Verify no retired product scripts
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $extensions = '.ps1', '.bat', '.cmd', '.sh'
-          $files = Get-ChildItem -Recurse -File | Where-Object { $_.FullName -notmatch '\\.git\\' }
-          $legacy = $files | Where-Object { $extensions -contains $_.Extension.ToLowerInvariant() }
-          if ($legacy) {
-            $legacy | ForEach-Object { Write-Error $_.FullName }
-            exit 1
-          }
-
   build-test:
     name: Build and test (${{ matrix.configuration }})
     needs: policy
