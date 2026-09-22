@@ -24,7 +24,7 @@ public interface IProvisioningBackend
 /// <summary>
 /// Native provisioning backend backed by the Workspace Bootstrap CLI.
 /// The application layer depends on IProvisioningBackend rather than directly
-/// coupling provisioning jobs to a script-based execution layer.
+/// coupling provisioning jobs to a second execution implementation.
 /// </summary>
 public sealed class NativeProvisioningBackend : IProvisioningBackend
 {
