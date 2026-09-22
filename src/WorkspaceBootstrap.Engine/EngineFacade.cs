@@ -1,4 +1,5 @@
 using WorkspaceControl.Application;
+using WorkspaceControl.Domain;
 
 namespace WorkspaceBootstrap;
 
@@ -20,6 +21,7 @@ public sealed class EngineFacade
         _application = new WorkspaceControlApplication(
             new Application.ProvisioningServiceAdapter(provisioning),
             new Application.InventoryServiceAdapter(inventory),
+            new Application.SoftwareInventoryService([new Infrastructure.RegistrySoftwareInventorySource()]),
             new Application.WindowsAdministrationServiceAdapter(),
             new Application.OptimizationServiceAdapter());
     }
@@ -55,6 +57,9 @@ public sealed class EngineFacade
 
     public Task<InventorySnapshot> GetInventoryAsync(CancellationToken cancellationToken = default) =>
         _application.GetInventoryAsync(cancellationToken);
+
+    public Task<SoftwareInventorySnapshot> GetSoftwareInventoryAsync(CancellationToken cancellationToken = default) =>
+        _application.GetSoftwareInventoryAsync(cancellationToken);
 
     public BaselineSnapshot GetBaseline() => _application.GetBaseline();
 
