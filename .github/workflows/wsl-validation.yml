@@ -1,0 +1,88 @@
+name: WSL bootstrap validation
+
+on:
+  pull_request:
+    paths:
+      - "bootstrap/wsl/**"
+      - "config/wsl/**"
+      - ".github/workflows/wsl-validation.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "bootstrap/wsl/**"
+      - "config/wsl/**"
+      - ".github/workflows/wsl-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate WSL bootstrap scripts
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install validation dependencies
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update
+          sudo apt-get install -y shellcheck jq
+
+      - name: Validate shell syntax
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          while IFS= read -r -d '' file; do
+            bash -n "$file"
+          done < <(find bootstrap/wsl -type f -name '*.sh' -print0)
+
+      - name: Run ShellCheck
+        shell: bash
+        run: shellcheck -x bootstrap/wsl/*.sh
+
+      - name: Validate WSL configuration
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -f config/wsl/wsl.conf
+          grep -qx 'systemd=true' config/wsl/wsl.conf
+
+      - name: Validate bootstrap contracts
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          find bootstrap/wsl -type f -name '*.sh' -print0 |
+            while IFS= read -r -d '' file; do
+              test -f "$file"
+            done
+
+      - name: Validate optional-component gating
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -q '\[\[ "$node_enabled" == "yes" \]\]' bootstrap/wsl/bootstrap.sh
+          grep -q '\[\[ "$docker_enabled" == "yes" \]\]' bootstrap/wsl/bootstrap.sh
+          grep -q '\[\[ "$playwright_enabled" == "yes" \]\]' bootstrap/wsl/bootstrap.sh
+          ! grep -q 'android_enabled' bootstrap/wsl/bootstrap.sh
+
+      - name: Validate transactional archive installs
+        shell: bash
+        run: bash tests/Validate-WSLTransactions.sh
+
+      - name: Validate WSL state lifecycle
+        shell: bash
+        run: bash tests/Validate-WSLState.sh
+
+      - name: Validate JSON configuration
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          while IFS= read -r -d '' file; do
+            jq empty "$file"
+          done < <(find config bootstrap/windows -type f -name '*.json' -print0)
