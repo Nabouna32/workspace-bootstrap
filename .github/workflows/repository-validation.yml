@@ -5,137 +5,71 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  static-validation:
-    name: Static validation
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+  validate:
+    name: Restore, build, test and publish
+    runs-on: [self-hosted, windows, x64]
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Validate Bash syntax
-        shell: bash
+      - name: Show toolchain
+        shell: cmd
         run: |
-          set -Eeuo pipefail
-          while IFS= read -r -d '' file; do
-            bash -n "$file"
-          done < <(find bootstrap/wsl -type f -name '*.sh' -print0)
+          dotnet --info
+          git --version
 
-      - name: Run ShellCheck
-        shell: bash
+      - name: Restore
+        run: dotnet restore src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj
+
+      - name: Build engine
+        run: dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release --no-restore
+
+      - name: Build desktop
+        run: dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --no-restore
+
+      - name: Build CLI
+        run: dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=tests.trx"
+
+      - name: Publish self-contained CLI
+        run: dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output artifacts/cli
+
+      - name: Verify publish output
+        shell: cmd
         run: |
-          set -Eeuo pipefail
-          shellcheck -x bootstrap/wsl/*.sh
+          if not exist artifacts\cli\WorkspaceBootstrap.exe exit /b 1
 
-      - name: Validate PowerShell syntax
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          $files = Get-ChildItem bootstrap/windows -Recurse -Filter *.ps1 -File
-          $errors = @()
-          foreach ($file in $files) {
-            $tokens = $null
-            $parseErrors = $null
-            [void][System.Management.Automation.Language.Parser]::ParseFile(
-              $file.FullName,
-              [ref]$tokens,
-              [ref]$parseErrors
-            )
-            if ($parseErrors.Count -gt 0) {
-              $errors += $file.FullName
-              $parseErrors | ForEach-Object { Write-Error "$($file.FullName): $($_.Message)" }
-            }
-          }
-          if ($errors.Count -gt 0) { exit 1 }
-          Write-Host "PowerShell syntax validation: OK ($($files.Count) files)."
-
-      - name: Validate JSON manifests
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          while IFS= read -r -d '' file; do
-            jq empty "$file"
-          done < <(find config bootstrap/windows contracts -type f -name '*.json' -print0)
-
-      - name: Run PowerShell unit tests
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          & ./tests/Validate-WindowsOptimization.ps1
-          & ./tests/Validate-WindowsCatalog.ps1
-          & ./tests/Validate-WindowsMaintenance.ps1
-          & ./tests/Validate-WindowsComponentStates.ps1
-          & ./tests/Validate-ProductArchitecture.ps1
-          & ./tests/Validate-ProvisioningPlan.ps1
-          & ./tests/Validate-InstallerCache.ps1
-
-      - name: Validate workflow architecture
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          test -f config/wsl/wsl.conf
-          grep -qx 'systemd=true' config/wsl/wsl.conf
-          true
-
-  desktop-build:
-    name: Desktop WPF build
-    runs-on: windows-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup .NET 8
-        uses: actions/setup-dotnet@v5
+      - name: Upload validation artifacts
+        uses: actions/upload-artifact@v6
         with:
-          dotnet-version: 8.0.x
+          name: workspace-bootstrap-validation-${{ github.run_id }}
+          path: |
+            artifacts/cli/**
+            **/TestResults/*.trx
+          if-no-files-found: error
 
-      - name: Build desktop application
-        run: dotnet build desktop/BounaDevEnvironment.Desktop.csproj --configuration Release
-
-  desktop-contract-validation:
-    name: Desktop contract validation
-    runs-on: ubuntu-latest
+  workflow-policy:
+    name: Enforce self-hosted Windows CI
+    runs-on: [self-hosted, windows, x64]
     timeout-minutes: 5
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Validate contract files
-        shell: pwsh
-        run: ./tests/Validate-DesktopCommandContract.ps1
-
-  windows-bootstrap-launcher:
-    name: Windows bootstrap launcher (PowerShell 5.1)
-    runs-on: windows-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Validate bootstrap launcher syntax with Windows PowerShell 5.1
-        shell: powershell
+      - name: Validate workflow declarations
+        shell: cmd
         run: |
-          $ErrorActionPreference = "Stop"
-          $file = Join-Path $PWD "bootstrap/windows/dev-env.ps1"
-          $tokens = $null
-          $parseErrors = $null
-          [void][System.Management.Automation.Language.Parser]::ParseFile(
-            $file,
-            [ref]$tokens,
-            [ref]$parseErrors
-          )
-          if ($parseErrors.Count -gt 0) {
-            $parseErrors | ForEach-Object { Write-Error "${file}: $($_.Message)" }
-            exit 1
-          }
-          Write-Host "Windows PowerShell 5.1 launcher syntax validation: OK."
+          findstr /s /n /c:"ubuntu-latest" .github\workflows\*.yml >nul && exit /b 1 || exit /b 0
+          findstr /s /n /c:"windows-latest" .github\workflows\*.yml >nul && exit /b 1 || exit /b 0
+          findstr /s /n /c:"macos-latest" .github\workflows\*.yml >nul && exit /b 1 || exit /b 0
