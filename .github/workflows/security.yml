@@ -46,7 +46,10 @@ jobs:
       - name: Build engine
         run: dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release
 
-      - name: Build desktop
+      - name: Build WinUI desktop
+        run: dotnet build src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj --configuration Release --runtime win-x64
+
+      - name: Build legacy desktop
         run: dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release
 
       - name: Build CLI
