@@ -1,6 +1,6 @@
 using Microsoft.Win32;
 
-namespace WorkspaceBootstrap.Desktop;
+namespace WorkspaceBootstrap;
 
 public sealed class WindowsRegistryUninstallInventoryProvider : IInventoryProvider
 {

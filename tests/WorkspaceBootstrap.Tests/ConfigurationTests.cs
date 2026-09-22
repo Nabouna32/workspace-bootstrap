@@ -91,7 +91,8 @@ public sealed class ProvisioningPlanContractTests
         var engine = new ProvisioningEngine(
             configuration,
             new InstallerEngine(new WorkspacePaths()),
-            new WorkspacePaths());
+            new WorkspacePaths(),
+            new InventoryScanner([]));
 
         var plan = engine.Plan(configuration.LoadProfiles().Values.First().Id);
         using var document = System.Text.Json.JsonDocument.Parse(
@@ -107,7 +108,7 @@ public sealed class ProvisioningPlanContractTests
 
             Assert.IsTrue(item.TryGetProperty("Message", out var message));
             Assert.IsFalse(string.IsNullOrWhiteSpace(message.GetString()));
-            Assert.AreEqual("UNKNOWN", state.GetString());
+            Assert.IsTrue(state.GetString() is "MISSING" or "INSTALLED" or "OUTDATED");
         }
     }
 }

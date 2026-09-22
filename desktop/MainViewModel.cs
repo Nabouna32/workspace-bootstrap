@@ -41,7 +41,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private readonly JobStore _jobStore;
     private readonly JobScheduler _jobScheduler;
     private readonly ThemeManager _themeManager;
-    private readonly InventoryScanner _inventoryScanner;
     private InventorySnapshot? _inventorySnapshot;
     private IReadOnlyList<InventoryCleanupRecommendation> _inventoryRecommendations = Array.Empty<InventoryCleanupRecommendation>();
     private bool _isBusy;
@@ -81,10 +80,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
         _jobScheduler = jobScheduler;
         _themeManager = new ThemeManager();
         SelectedTheme = ThemeOptions.First(option => option.Mode == _themeManager.LoadMode());
-        _inventoryScanner = new InventoryScanner([
-            new WindowsRegistryUninstallInventoryProvider(),
-            new WinGetInventoryProvider()
-        ]);
         DashboardCommand = new AsyncCommand(() => NavigateAsync(DesktopPage.Dashboard));
         OptimizationCommand = new AsyncCommand(() => NavigateAsync(DesktopPage.Optimization));
         ProvisioningCommand = new AsyncCommand(() => NavigateAsync(DesktopPage.Provisioning));
@@ -304,7 +299,11 @@ public sealed class MainViewModel : INotifyPropertyChanged
         {
             try
             {
-                var snapshot = await _inventoryScanner.ScanAsync();
+                var response = await _engineClient.ExecuteAsync<InventorySnapshot>("inventory");
+                if (!response.Success || response.Data is null)
+                    throw new InvalidOperationException(response.Error ?? "Impossible d’analyser l’inventaire.");
+
+                var snapshot = response.Data;
                 InventorySnapshot = snapshot;
                 InventoryRecommendations = new InventoryCleanupAnalyzer()
                     .Analyze(snapshot.Items, new HashSet<string>(StringComparer.OrdinalIgnoreCase));

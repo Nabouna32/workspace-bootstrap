@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace WorkspaceBootstrap.Desktop;
+namespace WorkspaceBootstrap;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum InventoryOwnership
