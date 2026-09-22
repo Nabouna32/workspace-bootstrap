@@ -105,7 +105,7 @@ public sealed class DesktopEngineClient
         var candidates = new[]
         {
             installed,
-            Path.Combine(@"C:\Dev\WorkspaceBootstrap\app", "WorkspaceBootstrap.exe"),
+            Path.Combine(@"C:\Dev\WorkspaceBootstrap\app", "WorkspaceBootstrap.Cli.exe"),
             Path.Combine(AppContext.BaseDirectory, "WorkspaceBootstrap.exe")
         }.Where(x => !string.IsNullOrWhiteSpace(x)).Cast<string>();
 
