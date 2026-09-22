@@ -5,7 +5,7 @@
 - Canonical technical identity: **WorkspaceBootstrap**.
 - Windows-only product. Linux/WSL tooling is outside product scope.
 - The application is designed to be portable: executable, bundled assets and local mutable state live with the application package.
-- Persistent installer cache: `C:\DevCache`.
+- Installer cache is kept inside the application package under `cache`. 
 
 ## Strategic architecture
 - C#/.NET 10 is the single application and orchestration technology.
