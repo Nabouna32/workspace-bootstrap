@@ -2,16 +2,30 @@
   "id": "rustup",
   "name": "Rustup / Rust",
   "category": "development",
-  "profiles": ["development"],
-  "platforms": ["windows"],
+  "profiles": [
+    "development"
+  ],
+  "platforms": [
+    "windows"
+  ],
   "versionPolicy": "latest-stable",
-  "packageManager": "winget",
   "packageId": "Rustlang.Rustup",
-  "source": "winget",
   "installerType": "exe",
-  "installer": "Install-WingetPackage.ps1",
-  "installerParameters": ["-PackageId", "Rustlang.Rustup"],
   "dependencies": [],
-  "prerequisites": [{"type": "admin"}, {"type": "command", "name": "winget"}],
-  "checks": [{"type": "winget-package", "id": "Rustlang.Rustup"}]
+  "prerequisites": [
+    {
+      "type": "admin"
+    },
+    {
+      "type": "command",
+      "name": "winget"
+    }
+  ],
+  "checks": [
+    {
+      "type": "winget-package",
+      "id": "Rustlang.Rustup"
+    }
+  ],
+  "fallbackPackageManager": "winget"
 }
