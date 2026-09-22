@@ -21,7 +21,7 @@ public sealed class EngineFacade
         _application = new WorkspaceControlApplication(
             new Application.ProvisioningServiceAdapter(provisioning),
             new Application.InventoryServiceAdapter(inventory),
-            new Application.SoftwareInventoryService([new Infrastructure.RegistrySoftwareInventorySource()]),
+            new SoftwareInventoryService([new Infrastructure.RegistrySoftwareInventorySource()]),
             new Application.WindowsAdministrationServiceAdapter(),
             new Application.OptimizationServiceAdapter());
     }
