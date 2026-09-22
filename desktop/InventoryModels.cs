@@ -17,7 +17,6 @@ public enum InventoryScope
 {
     User,
     System,
-    Wsl,
     Unknown
 }
 
