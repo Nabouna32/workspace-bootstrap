@@ -19,15 +19,15 @@
                     <StackPanel Spacing="8">
                         <TextBlock Text="Processor" Opacity="0.68" />
                         <TextBlock Text="{Binding Baseline.Cpu}" FontSize="20" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding Baseline.CpuCores, StringFormat='{}{0} logical cores'}" />
+                        <TextBlock Text="{Binding CpuCoresDisplay}" />
                         <TextBlock Text="{Binding Baseline.Architecture}" Opacity="0.72" />
                     </StackPanel>
                 </Border>
                 <Border Grid.Column="1" Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <StackPanel Spacing="8">
                         <TextBlock Text="Runtime" Opacity="0.68" />
-                        <TextBlock Text="{Binding Baseline.UptimeHours, StringFormat='{}{0:F1} hours uptime'}" FontSize="20" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding Baseline.MemoryGB, StringFormat='{}{0:F1} GB memory'}" />
+                        <TextBlock Text="{Binding UptimeDisplay}" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding MemoryDisplay}" />
                     </StackPanel>
                 </Border>
             </Grid>
