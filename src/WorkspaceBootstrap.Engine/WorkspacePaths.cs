@@ -12,7 +12,7 @@ public sealed class WorkspacePaths
 
     public WorkspacePaths()
     {
-        CacheRoot = Environment.GetEnvironmentVariable("DEV_ENVIRONMENT_CACHE")
+        CacheRoot = Environment.GetEnvironmentVariable("WORKSPACE_BOOTSTRAP_CACHE")
             ?? @"C:\DevCache";
 
         foreach (var path in new[] { Root, CacheRoot, InstallersRoot, MetadataRoot, StagingRoot, StateRoot, LogsRoot })
