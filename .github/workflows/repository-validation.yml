@@ -44,6 +44,7 @@ jobs:
         shell: pwsh
         run: |
           dotnet restore src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj
+          dotnet restore src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj --runtime win-x64
           dotnet restore desktop/WorkspaceBootstrap.Desktop.csproj --runtime win-x64
           dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
           dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
@@ -52,6 +53,7 @@ jobs:
         shell: pwsh
         run: |
           dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release --no-restore --warnaserror
+          dotnet build src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj --configuration Release --no-restore --warnaserror
           dotnet build desktop/WorkspaceBootstrap.Desktop.csproj --configuration Release --no-restore --warnaserror
           dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --no-restore --warnaserror
 
