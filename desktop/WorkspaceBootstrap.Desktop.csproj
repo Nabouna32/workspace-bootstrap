@@ -9,7 +9,6 @@
     <RootNamespace>WorkspaceBootstrap.Desktop</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
     <ProjectReference Include="..\src\WorkspaceBootstrap.Engine\WorkspaceBootstrap.Engine.csproj" />
     <Content Include="..\README.md" Link="README.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="..\bootstrap\windows\components\**\*.json" LinkBase="bootstrap\windows\components" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
