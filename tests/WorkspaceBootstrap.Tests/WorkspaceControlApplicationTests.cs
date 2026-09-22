@@ -1,3 +1,4 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WorkspaceBootstrap;
 using WorkspaceControl.Application;
 using WorkspaceControl.Application.Contracts;
