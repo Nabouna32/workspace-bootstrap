@@ -16,9 +16,7 @@ public partial class MainWindow : Window
         var jobScheduler = new JobScheduler(jobStore, capabilityProvider);
 
         DataContext = new MainViewModel(
-            repositoryRoot,
             engineClient,
-            new DesktopProcessLauncher(),
             new DesktopDialogService(),
             jobStore,
             jobScheduler);
