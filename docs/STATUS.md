@@ -14,18 +14,52 @@ C# Engine
 Catalog → Resolver → Cache → Verification → Provisioning → State/Recovery
 ```
 
-## Current branch
+## Current development state
 
-`refactor/native-csharp-cutover`
+- Native C#/.NET 10 architecture is established.
+- WPF desktop and self-contained Windows x64 CLI share the Engine.
+- Provisioning has durable state, a serialized worker lock and recoverable worker startup failures.
+- Installer artifacts use isolated staging, SHA-256 verification and Authenticode validation.
+- Cache metadata is revalidated before an artifact is trusted.
+- Windows optimization state is package-local and persisted atomically.
+- The desktop has an explicit WPF exception boundary with diagnostic logging.
+- GitHub Actions uses fast PR validation; full packaging/security validation is scheduled or explicit.
+- Windows releases are explicit via manual dispatch or `v*` tags.
 
-## Validation
+## Validation cadence
 
-The repository validates:
+### Every pull request
 
-- Debug and Release builds;
+- NuGet restore with cache;
+- Release compilation;
 - automated tests;
+- formatting verification.
+
+### Weekly / manual full validation
+
+- Debug and Release compilation;
+- tests;
 - formatting;
 - self-contained Windows publication;
-- CodeQL security analysis.
+- portable package smoke test.
 
-The published desktop package contains the desktop executable, CLI and bundled application assets.
+### Release
+
+- Release build and tests;
+- self-contained Windows x64 package;
+- package smoke test;
+- SHA-256 checksum;
+- GitHub Release for tagged builds.
+
+### Security
+
+CodeQL remains a separate scheduled/manual validation rather than part of the fast development loop.
+
+## Next product focus
+
+1. Complete the desktop information architecture and component/profile experience.
+2. Replace placeholder provisioning plan states with real inventory-aware states.
+3. Strengthen installer cache lifecycle, retention and recovery UX.
+4. Expand provisioning/job integration tests.
+5. Add Windows published-artifact smoke/integration coverage.
+6. Continue dead-code and retired-script cleanup.

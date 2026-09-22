@@ -1,6 +1,5 @@
 using Microsoft.Win32;
 using System.Management;
-using System.Text.RegularExpressions;
 
 namespace WorkspaceBootstrap;
 

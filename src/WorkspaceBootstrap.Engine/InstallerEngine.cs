@@ -87,6 +87,9 @@ public sealed class InstallerEngine
                     File.ReadAllText(metadataPath), JsonDefaults.Options);
 
                 if (artifact is null
+                    || !IsValidArtifactPath(artifact.FilePath)
+                    || string.IsNullOrWhiteSpace(artifact.Sha256)
+                    || artifact.Sha256.Length != 64
                     || !File.Exists(artifact.FilePath)
                     || !string.Equals(artifact.Source, "official", StringComparison.OrdinalIgnoreCase)
                     || !string.Equals(artifact.ComponentId, component.Id, StringComparison.OrdinalIgnoreCase)
@@ -282,7 +285,15 @@ public sealed class InstallerEngine
         Directory.CreateDirectory(componentDir);
         Directory.CreateDirectory(metadataDir);
 
-        var finalPath = Path.Combine(componentDir, fileName);
+        var safeFileName = Path.GetFileName(fileName);
+        if (string.IsNullOrWhiteSpace(safeFileName) || !string.Equals(safeFileName, fileName, StringComparison.Ordinal))
+            throw new InvalidOperationException($"Nom d'installeur invalide : {fileName}");
+
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var downloadUri)
+            || downloadUri.Scheme != Uri.UriSchemeHttps)
+            throw new InvalidOperationException($"La source d'installation doit utiliser HTTPS : {url}");
+
+        var finalPath = Path.Combine(componentDir, safeFileName);
         var staging = Path.Combine(
             _paths.StagingRoot,
             $"{Sanitize(component.Id)}-{Sanitize(version)}-{Guid.NewGuid():N}.download");
@@ -345,9 +356,19 @@ public sealed class InstallerEngine
             metadataDir,
             $"{Sanitize(artifact.Version)}-{artifact.Sha256[..12]}.json");
 
-        File.WriteAllText(
-            path,
-            JsonSerializer.Serialize(artifact, JsonDefaults.Options));
+        var temporary = $"{path}.{Guid.NewGuid():N}.tmp";
+        try
+        {
+            File.WriteAllText(
+                temporary,
+                JsonSerializer.Serialize(artifact, JsonDefaults.Options));
+            File.Move(temporary, path, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(temporary))
+                File.Delete(temporary);
+        }
     }
 
     private static void ValidateAuthenticodeIfRequired(string path)
@@ -386,7 +407,7 @@ public sealed class InstallerEngine
         new("00AAC56B-CD44-11d0-8CC2-00C04FC295EE");
 
     private const uint WinTrustUiChoiceNone = 2;
-    private const uint WinTrustRevocationCheckNone = 0;
+    private const uint WinTrustRevocationCheckWholeChain = 1;
     private const uint WinTrustUnionChoiceFile = 1;
     private const uint WinTrustStateActionIgnore = 0;
     private const uint WinTrustStateActionClose = 2;
@@ -465,7 +486,7 @@ public sealed class InstallerEngine
             {
                 cbStruct = (uint)Marshal.SizeOf<WinTrustDataNative>(),
                 dwUIChoice = WinTrustUiChoiceNone,
-                fdwRevocationChecks = WinTrustRevocationCheckNone,
+                fdwRevocationChecks = WinTrustRevocationCheckWholeChain,
                 dwUnionChoice = WinTrustUnionChoiceFile,
                 pFile = fileInfo.NativePointer,
                 dwStateAction = WinTrustStateActionIgnore,
@@ -475,6 +496,19 @@ public sealed class InstallerEngine
         }
 
         public void Dispose() => _fileInfo.Dispose();
+    }
+
+    private bool IsValidArtifactPath(string path)
+    {
+        if (!Path.IsPathFullyQualified(path))
+            return false;
+
+        var installersRoot = Path.GetFullPath(_paths.InstallersRoot)
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+            + Path.DirectorySeparatorChar;
+        var candidate = Path.GetFullPath(path);
+
+        return candidate.StartsWith(installersRoot, StringComparison.OrdinalIgnoreCase);
     }
 
     private static string ComputeSha256(string path)

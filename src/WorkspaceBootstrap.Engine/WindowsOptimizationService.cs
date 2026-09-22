@@ -1,6 +1,5 @@
 using Microsoft.Win32;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 
 namespace WorkspaceBootstrap;
 
@@ -40,7 +39,6 @@ public sealed class WindowsOptimizationService
 
     public IReadOnlyList<string> ApplySafe()
     {
-        EnsureAdmin();
         var state = LoadState();
         var messages = new List<string>();
 
@@ -68,7 +66,6 @@ public sealed class WindowsOptimizationService
 
     public IReadOnlyList<string> Rollback()
     {
-        EnsureAdmin();
         var state = LoadState();
         var messages = new List<string>();
 
@@ -114,15 +111,22 @@ public sealed class WindowsOptimizationService
             File.ReadAllText(_statePath), JsonDefaults.Options) ?? new State();
     }
 
-    private void SaveState(State state) =>
-        File.WriteAllText(_statePath, JsonSerializer.Serialize(state, JsonDefaults.Options));
-
-    private static void EnsureAdmin()
+    private void SaveState(State state)
     {
-        using var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
-        var principal = new System.Security.Principal.WindowsPrincipal(identity);
-        if (!principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator))
-            throw new InvalidOperationException("Cette opération nécessite des privilèges administrateur.");
+        Directory.CreateDirectory(Path.GetDirectoryName(_statePath)!);
+        var temporary = $"{_statePath}.{Guid.NewGuid():N}.tmp";
+        try
+        {
+            File.WriteAllText(
+                temporary,
+                JsonSerializer.Serialize(state, JsonDefaults.Options));
+            File.Move(temporary, _statePath, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(temporary))
+                File.Delete(temporary);
+        }
     }
 
     private sealed record Definition(

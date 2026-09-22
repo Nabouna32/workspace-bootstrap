@@ -58,7 +58,19 @@ public sealed class ProvisioningEngine
         };
 
         Save(operation);
-        LaunchWorker(operation.OperationId, cacheOnly);
+        try
+        {
+            LaunchWorker(operation.OperationId, cacheOnly);
+        }
+        catch (Exception ex)
+        {
+            operation.Status = "failed";
+            operation.Error = $"Impossible de démarrer le worker : {ex.Message}";
+            operation.CanResume = true;
+            Save(operation);
+            throw;
+        }
+
         return operation.OperationId;
     }
 
@@ -178,7 +190,19 @@ public sealed class ProvisioningEngine
             throw new InvalidOperationException(
                 "Cette opération ne peut pas être reprise.");
 
-        LaunchWorker(operation.OperationId, cacheOnly);
+        try
+        {
+            LaunchWorker(operation.OperationId, cacheOnly);
+        }
+        catch (Exception ex)
+        {
+            operation.Status = "failed";
+            operation.Error = $"Impossible de redémarrer le worker : {ex.Message}";
+            operation.CanResume = true;
+            Save(operation);
+            throw;
+        }
+
         return operation.OperationId;
     }
 
@@ -261,6 +285,14 @@ public sealed class ProvisioningEngine
 
     private void Save(ProvisioningOperation operation)
     {
+        if (string.IsNullOrWhiteSpace(operation.OperationId))
+            throw new InvalidOperationException("L'opération doit posséder un identifiant.");
+        if (string.IsNullOrWhiteSpace(operation.ProfileId))
+            throw new InvalidOperationException("L'opération doit référencer un profil.");
+        if (operation.Completed < 0 || operation.Total < 0 || operation.Completed > operation.Total)
+            throw new InvalidOperationException("L'état de progression de l'opération est incohérent.");
+
+        Directory.CreateDirectory(_paths.StateRoot);
         operation.UpdatedAt = DateTimeOffset.UtcNow;
 
         var path = OperationPath(operation.OperationId);

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Windows.Input;
 
 namespace WorkspaceBootstrap.Desktop;
@@ -31,6 +32,11 @@ public sealed class AsyncCommand : ICommand
         try
         {
             await _execute();
+        }
+        catch (Exception ex)
+        {
+            Trace.TraceError($"Unhandled asynchronous command failure: {ex}");
+            throw;
         }
         finally
         {
