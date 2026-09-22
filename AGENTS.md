@@ -5,12 +5,12 @@
 - Canonical technical identity: **WorkspaceBootstrap**.
 - Windows-only product. Linux/WSL tooling is outside product scope.
 - The application is designed to be portable: executable, bundled assets and local mutable state live with the application package.
-- Installer cache is kept inside the application package under `cache`. 
+- Installer cache is kept inside the application package under `cache`.
 
 ## Strategic architecture
 - C#/.NET 10 is the single application and orchestration technology.
 - The native .NET engine owns provisioning, installer resolution, cache, verification, profiles, operation state, diagnostics, maintenance, optimization and Windows integration.
-- The desktop application and self-contained CLI consume the same engine.
+- The desktop application and self-contained CLI consume the same Engine.
 - The desktop presentation is a native Windows UI; WPF is the current presentation framework, not a second application architecture.
 - There is one product architecture, not parallel implementations.
 - PowerShell, batch files, shell scripts and WSL are not product dependencies or execution backends.
@@ -34,8 +34,8 @@
 ## Git workflow
 - GitHub is the source of truth.
 - Work on feature branches and use PRs.
-- GitHub Actions uses standard GitHub-hosted runners.
-- CI must not depend on a developer workstation.
+- All GitHub Actions jobs use the project's **self-hosted Windows runner**; no product validation is intentionally delegated to GitHub-hosted execution.
+- CI must remain reproducible on the maintained development workstation.
 - Never claim CI green without checking the exact commit.
 
 ## Execution-first
