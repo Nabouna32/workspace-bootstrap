@@ -47,9 +47,13 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
 
     public ProvisioningOperation? GetProvisioningRecovery()
     {
-        return _provisioning.GetHistory()
+        var latest = _provisioning.GetHistory()
             .OrderByDescending(x => x.UpdatedAt)
-            .FirstOrDefault(x => x.Status is "starting" or "running" or "failed");
+            .FirstOrDefault();
+
+        return latest?.Status is "starting" or "running" or "failed"
+            ? latest
+            : null;
     }
 
     public ProvisioningOperation? GetProvisioningDetail(string operationId) =>
