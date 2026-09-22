@@ -17,8 +17,8 @@ public sealed class JobStore : IJobExecutionStateWriter
     public JobStore(string? databasePath = null)
     {
         var path = databasePath ?? Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "WorkspaceBootstrap.Desktop",
+            AppContext.BaseDirectory,
+            "data",
             "jobs",
             "jobs.db");
 
