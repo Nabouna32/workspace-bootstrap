@@ -19,8 +19,8 @@ Version selection is explicit per component. Supported policies include `latest`
 
 An exact version is a desired-state constraint. If it is unavailable or incompatible, the operation reports a visible conflict rather than silently selecting another version.
 
-## State
+## Local state
 
-Persistent application state lives under `C:\Dev\WorkspaceBootstrap`. Installer artifacts live under `C:\DevCache`.
+Mutable application state, operation history, logs and the installer cache are stored inside the portable application package.
 
 Secrets and registration tokens are never stored in configuration bundles.
