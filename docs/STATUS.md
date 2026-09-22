@@ -2,9 +2,9 @@
 
 ## Architecture
 
-The project is in the native C#/.NET 10 cutover.
+Workspace Bootstrap is a native C#/.NET 10 Windows application.
 
-The historical PowerShell, batch and Linux provisioning implementations are retired. The product path is:
+The product path is:
 
 ```text
 Windows UI / CLI
@@ -18,18 +18,14 @@ Catalog → Resolver → Cache → Verification → Provisioning → State/Recov
 
 `refactor/native-csharp-cutover`
 
-This branch consolidates the product identity, native Engine, desktop project, installer/cache semantics, provisioning worker, repository policy tests and GitHub-hosted CI.
+## Validation
 
-## Validation policy
+The repository validates:
 
-The exact PR head must pass:
-
-- repository policy tests;
 - Debug and Release builds;
-- unit/integration tests;
-- formatting validation;
-- self-contained CLI and desktop publication;
-- CodeQL;
-- dependency review on pull requests.
+- automated tests;
+- formatting;
+- self-contained Windows publication;
+- CodeQL security analysis.
 
-No local machine or self-hosted runner is required for CI.
+The published desktop package contains the desktop executable, CLI and bundled application assets.
