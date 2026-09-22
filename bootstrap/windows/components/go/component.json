@@ -1,0 +1,17 @@
+{
+  "id": "go",
+  "name": "Go",
+  "category": "development",
+  "profiles": ["development"],
+  "platforms": ["windows"],
+  "versionPolicy": "latest-stable",
+  "packageManager": "winget",
+  "packageId": "GoLang.Go",
+  "source": "winget",
+  "installerType": "msi",
+  "installer": "Install-WingetPackage.ps1",
+  "installerParameters": ["-PackageId", "GoLang.Go"],
+  "dependencies": [],
+  "prerequisites": [{"type": "admin"}, {"type": "command", "name": "winget"}],
+  "checks": [{"type": "winget-package", "id": "GoLang.Go"}]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "llvm",
+  "name": "LLVM / Clang",
+  "category": "development",
+  "profiles": ["development"],
+  "platforms": ["windows"],
+  "versionPolicy": "latest-stable",
+  "packageManager": "winget",
+  "packageId": "LLVM.LLVM",
+  "source": "winget",
+  "installerType": "exe",
+  "installer": "Install-WingetPackage.ps1",
+  "installerParameters": ["-PackageId", "LLVM.LLVM"],
+  "dependencies": [],
+  "prerequisites": [{"type": "admin"}, {"type": "command", "name": "winget"}],
+  "checks": [{"type": "winget-package", "id": "LLVM.LLVM"}]
+}

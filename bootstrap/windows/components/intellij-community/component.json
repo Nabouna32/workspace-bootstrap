@@ -1,0 +1,17 @@
+{
+  "id": "intellij-community",
+  "name": "IntelliJ IDEA Community",
+  "category": "development",
+  "profiles": ["development-extended"],
+  "platforms": ["windows"],
+  "versionPolicy": "latest-stable",
+  "packageManager": "winget",
+  "packageId": "JetBrains.IntelliJIDEA.Community",
+  "source": "winget",
+  "installerType": "exe",
+  "installer": "Install-WingetPackage.ps1",
+  "installerParameters": ["-PackageId", "JetBrains.IntelliJIDEA.Community"],
+  "dependencies": [],
+  "prerequisites": [{"type": "admin"}, {"type": "command", "name": "winget"}],
+  "checks": [{"type": "winget-package", "id": "JetBrains.IntelliJIDEA.Community"}]
+}
