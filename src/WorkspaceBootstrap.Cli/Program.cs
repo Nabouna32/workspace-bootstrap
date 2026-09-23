@@ -39,6 +39,9 @@ try
                 .Select(x => new { x.Id, x.Name, x.Description })
                 .ToArray();
             break;
+        case "desired-state-diff":
+            data = MapDiff(await application.GetDesiredStateDiffAsync(profile ?? throw new ArgumentException("--profile est requis.")));
+            break;
         case "provisioning-plan":
             data = MapPlan(await application.GetPlanAsync(profile ?? throw new ArgumentException("--profile est requis.")));
             break;
@@ -90,6 +93,32 @@ catch (Exception ex)
 {
     WriteResponse(false, 1, null, Array.Empty<string>(), ex.Message);
     return 1;
+}
+
+static object MapDiff(DesiredStateDiff diff)
+{
+    return new
+    {
+        Profile = new
+        {
+            Id = diff.ProfileId,
+            Name = diff.ProfileName
+        },
+        InventoryScanId = diff.InventoryScanId,
+        InventoryDiagnostics = diff.InventoryDiagnostics,
+        Items = diff.Items.Select(item => new
+        {
+            Domain = item.Domain,
+            Id = item.TargetId,
+            Name = item.TargetName,
+            StateCode = item.StateCode,
+            ActionCode = item.ActionCode,
+            ObservedValue = item.ObservedValue,
+            AvailableValue = item.AvailableValue,
+            DesiredValue = item.DesiredValue,
+            Message = item.Message
+        }).ToArray()
+    };
 }
 
 static object MapPlan(ProvisioningPlan plan)
