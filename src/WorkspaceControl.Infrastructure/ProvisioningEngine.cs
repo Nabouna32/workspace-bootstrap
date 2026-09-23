@@ -10,19 +10,22 @@ public sealed class ProvisioningEngine
     private readonly WorkspacePaths _paths;
     private readonly InventoryScanner _inventory;
     private readonly WindowsSystemService _windows;
+    private readonly RegistryDesiredStateObserver _registry;
 
     public ProvisioningEngine(
         ConfigurationStore config,
         InstallerEngine installer,
         WorkspacePaths paths,
         InventoryScanner inventory,
-        WindowsSystemService? windows = null)
+        WindowsSystemService? windows = null,
+        RegistryDesiredStateObserver? registry = null)
     {
         _config = config;
         _installer = installer;
         _paths = paths;
         _inventory = inventory;
         _windows = windows ?? new WindowsSystemService();
+        _registry = registry ?? new RegistryDesiredStateObserver();
     }
 
     public IReadOnlyList<ProfileManifest> Profiles() =>
@@ -63,6 +66,7 @@ public sealed class ProvisioningEngine
 
         AddUnsupportedDesiredStateItems(profile, items);
         AddConditionDiffItems(profile, items);
+        AddRegistryDiffItems(profile, items);
 
         return new DesiredStateDiff(
             profile.Id,
@@ -673,6 +677,68 @@ public sealed class ProvisioningEngine
             DesiredStateDomainCodes.Condition,
             "conditions",
             items);
+    }
+
+    private void AddRegistryDiffItems(
+        ProfileManifest profile,
+        List<DesiredStateDiffItem> items)
+    {
+        var registrySettings = profile.DesiredState?.RegistrySettings;
+        if (registrySettings is null || registrySettings.Count == 0)
+            return;
+
+        foreach (var desired in registrySettings)
+        {
+            var observation = _registry.Observe(desired);
+            var targetId = $"registry:{desired.Hive}:{desired.Key}:{desired.ValueName}";
+
+            if (!string.IsNullOrWhiteSpace(observation.Error))
+            {
+                items.Add(new DesiredStateDiffItem(
+                    DesiredStateDomainCodes.RegistrySetting,
+                    targetId,
+                    targetId,
+                    ProvisioningStateCodes.Unknown,
+                    ProvisioningActionCodes.Blocked,
+                    null,
+                    null,
+                    desired.Value,
+                    observation.Error));
+                continue;
+            }
+
+            if (!observation.Exists)
+            {
+                items.Add(new DesiredStateDiffItem(
+                    DesiredStateDomainCodes.RegistrySetting,
+                    targetId,
+                    targetId,
+                    ProvisioningStateCodes.Missing,
+                    ProvisioningActionCodes.Blocked,
+                    null,
+                    null,
+                    desired.Value,
+                    "Registry value is missing. Registry mutation is not enabled yet."));
+                continue;
+            }
+
+            var matches =
+                string.Equals(observation.Value, desired.Value, StringComparison.Ordinal) &&
+                string.Equals(observation.ValueType, desired.ValueType, StringComparison.OrdinalIgnoreCase);
+
+            items.Add(new DesiredStateDiffItem(
+                DesiredStateDomainCodes.RegistrySetting,
+                targetId,
+                targetId,
+                matches ? DesiredStateStateCodes.Compliant : DesiredStateStateCodes.Drifted,
+                matches ? ProvisioningActionCodes.None : ProvisioningActionCodes.Blocked,
+                observation.Value,
+                observation.ValueType,
+                desired.Value,
+                matches
+                    ? "Registry value matches the desired state."
+                    : "Registry value differs from the desired state. Registry mutation is not enabled yet."));
+        }
     }
 
     private void AddConditionDiffItems(
