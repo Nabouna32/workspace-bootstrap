@@ -2,7 +2,7 @@
 
 ## Product identity
 - Product: **Workspace Control**.
-- Repository: `workspace-bootstrap` until a deliberate repository rename.
+- Repository: `workspace-control`.
 - Target: **Windows 11 x64**.
 - This is a permanent Windows control center, not a one-time bootstrapper.
 - Core domains: software, Windows configuration, diagnostics, cleanup, optimization, drivers, WSL, profiles, cache/offline workflows and future fleet configuration.
@@ -19,6 +19,7 @@
 8. Risk-aware mutation: reversible, risky and irreversible actions are explicitly classified.
 9. Least privilege by default; a user may explicitly launch an elevated session as a convenience.
 10. Automation is explicit and auditable.
+12. Provisioning plans are immutable after confirmation; Apply executes the persisted plan and never silently replans.
 11. Windows 11 is the only supported target unless product direction explicitly changes.
 12. Open-source local client first; future paid services remain optional.
 
@@ -44,6 +45,7 @@ Workspace Control
 ├── Optimization / Policies
 ├── Diagnostics
 ├── Profiles / Desired state
+├── Provisioning plan / confirmation lifecycle
 ├── Installer artifact reuse
 ├── Security / Privileged operations
 └── Plugins
@@ -65,7 +67,7 @@ Presentation depends on Application contracts. Application owns use-case orchest
 Every mutation should have a stable operation id, capability, target, evidence, desired state, plan, risk, reversibility, confirmation requirement, elevation requirement, progress, logs and result/recovery state.
 
 ## Profiles and future fleet
-Profiles are declarative desired-state documents. They may contain applications, Windows policies/settings, registry-backed settings, drivers, WSL, optimizations and machine conditions. The model must support future machine groups, per-machine overrides and cloud synchronization without a second execution engine.
+Profiles are declarative desired-state documents. They may contain applications, Windows policies/settings, registry-backed settings, drivers, WSL, optimizations and machine conditions. The model must support future machine groups, per-machine overrides and cloud synchronization without a second execution engine. A provisioning operation persists its exact plan, requires explicit confirmation, verifies preconditions before uncompleted mutations, and enters a terminal stale state when observed state diverges.
 
 ## Security
 - Verify downloaded artifacts with SHA-256 and Authenticode where applicable.
