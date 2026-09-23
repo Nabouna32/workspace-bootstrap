@@ -1,7 +1,21 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "gaming",
   "name": "Environnement gaming",
   "description": "Applications de jeu et outils associés ajoutés après la base du PC.",
-  "components": ["steam", "prismlauncher"]
+  "desiredState": {
+    "applications": [
+      {
+        "componentId": "steam"
+      },
+      {
+        "componentId": "prismlauncher"
+      }
+    ],
+    "windowsSettings": [],
+    "policies": [],
+    "registrySettings": [],
+    "optimizations": [],
+    "conditions": []
+  }
 }
