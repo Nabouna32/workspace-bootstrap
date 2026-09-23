@@ -103,6 +103,14 @@
                     "minLength": 1,
                     "maxLength": 128
                   },
+                  "state": {
+                    "type": "string",
+                    "enum": [
+                      "present",
+                      "absent"
+                    ],
+                    "default": "present"
+                  },
                   "versionPolicy": {
                     "type": "string",
                     "enum": [
