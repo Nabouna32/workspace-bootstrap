@@ -13,12 +13,15 @@ public sealed class InstallerEngine
 
     public InstallerEngine(WorkspacePaths paths) => _paths = paths;
 
-    public async Task InstallAsync(ComponentManifest component, CancellationToken token)
+    public async Task InstallAsync(ComponentManifest component, string actionCode, CancellationToken token)
     {
         if (string.IsNullOrWhiteSpace(component.PackageId))
             throw new InvalidOperationException($"Le composant '{component.Id}' ne possède aucun packageId.");
 
-        var artifact = await ResolveArtifactAsync(component, token);
+        if (actionCode is not (ProvisioningActionCodes.Install or ProvisioningActionCodes.Update))
+            throw new InvalidOperationException($"Unsupported provisioning action '{actionCode}' for '{component.Name}'.");
+
+        var artifact = await ResolveArtifactAsync(component, actionCode, token);
         if (artifact is null)
             return;
 
@@ -57,10 +60,11 @@ public sealed class InstallerEngine
 
     private async Task<InstallerArtifact?> ResolveArtifactAsync(
         ComponentManifest component,
+        string actionCode,
         CancellationToken token)
     {
         if (component.OfficialSource is null)
-            return await InstallViaWingetFallbackAsync(component, token);
+            return await InstallViaWingetFallbackAsync(component, actionCode, token);
 
         return component.OfficialSource.Type switch
         {
@@ -225,6 +229,7 @@ public sealed class InstallerEngine
 
     private async Task<InstallerArtifact?> InstallViaWingetFallbackAsync(
         ComponentManifest component,
+        string actionCode,
         CancellationToken token)
     {
         if (!string.Equals(
@@ -244,13 +249,9 @@ public sealed class InstallerEngine
             RedirectStandardError = true,
             CreateNoWindow = true
         };
-        psi.ArgumentList.Add("install");
-        psi.ArgumentList.Add("--id");
-        psi.ArgumentList.Add(component.PackageId!);
-        psi.ArgumentList.Add("--exact");
-        psi.ArgumentList.Add("--accept-source-agreements");
-        psi.ArgumentList.Add("--accept-package-agreements");
-        psi.ArgumentList.Add("--silent");
+
+        foreach (var argument in BuildWingetArguments(component, actionCode))
+            psi.ArgumentList.Add(argument);
 
         using var process = Process.Start(psi)
             ?? throw new InvalidOperationException("WinGet est introuvable.");
@@ -517,6 +518,32 @@ public sealed class InstallerEngine
     {
         using var stream = File.OpenRead(path);
         return Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
+    }
+
+    internal static IReadOnlyList<string> BuildWingetArguments(
+        ComponentManifest component,
+        string actionCode)
+    {
+        if (string.IsNullOrWhiteSpace(component.PackageId))
+            throw new InvalidOperationException("WinGet fallback requires a package id.");
+
+        var command = actionCode switch
+        {
+            ProvisioningActionCodes.Install => "install",
+            ProvisioningActionCodes.Update => "upgrade",
+            _ => throw new InvalidOperationException($"Unsupported WinGet provisioning action: {actionCode}")
+        };
+
+        return
+        [
+            command,
+            "--id",
+            component.PackageId,
+            "--exact",
+            "--accept-source-agreements",
+            "--accept-package-agreements",
+            "--silent"
+        ];
     }
 
     private static string Sanitize(string value) =>
