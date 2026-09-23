@@ -27,7 +27,8 @@ public sealed record ProfileManifest(
     string Id,
     string Name,
     string Description,
-    string[] Components);
+    string[] Components,
+    int SchemaVersion = 1);
 
 public sealed record InstallerArtifact(
     string ComponentId,
