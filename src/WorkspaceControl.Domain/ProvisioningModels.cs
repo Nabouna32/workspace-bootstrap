@@ -113,6 +113,7 @@ public sealed class ProvisioningOperation
     public string? Error { get; set; }
     public bool CanResume { get; set; }
     public List<ProvisioningStep> Steps { get; init; } = [];
+    public List<ProvisioningApplicationSnapshot> ApplicationSnapshots { get; init; } = [];
     public List<ProvisioningRegistrySnapshot> RegistrySnapshots { get; init; } = [];
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
