@@ -110,6 +110,8 @@ static object MapPlan(ProvisioningPlan plan)
             StateCode = item.StateCode,
             ActionCode = item.ActionCode,
             InstalledVersion = item.InstalledVersion,
+            AvailableVersion = item.AvailableVersion,
+            DesiredVersion = item.DesiredVersion,
             Message = item.Message
         }).ToArray()
     };

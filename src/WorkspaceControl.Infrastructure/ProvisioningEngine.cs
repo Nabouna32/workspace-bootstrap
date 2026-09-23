@@ -81,6 +81,8 @@ public sealed class ProvisioningEngine
                     ProvisioningStateCodes.Unknown,
                     ProvisioningActionCodes.Blocked,
                     null,
+                    null,
+                    null,
                     "Inventory is incomplete; Workspace Control cannot safely determine whether the component is installed.");
             }
 
@@ -90,25 +92,106 @@ public sealed class ProvisioningEngine
                 ProvisioningStateCodes.Missing,
                 ProvisioningActionCodes.Install,
                 null,
+                null,
+                null,
                 "Component is absent from the detected inventory.");
         }
 
-        var updateAvailable = match.Evidence.Any(evidence =>
-            evidence.Kind.Equals("available-update", StringComparison.OrdinalIgnoreCase));
+        var installedVersion = match.Version;
+        var availableVersion = match.AvailableVersion;
+        var policy = component.VersionPolicy?.Trim().ToLowerInvariant();
+
+        if (policy == "minimum")
+        {
+            if (!TryParseVersion(component.MinimumVersion, out var minimumVersion))
+            {
+                return new ProvisioningPlanItem(
+                    component.Id,
+                    component.Name,
+                    ProvisioningStateCodes.Unknown,
+                    ProvisioningActionCodes.Blocked,
+                    installedVersion,
+                    availableVersion,
+                    component.MinimumVersion,
+                    "The component declares a minimum-version policy without a valid minimum version.");
+            }
+
+            if (!TryParseVersion(installedVersion, out var installed)
+                || installed < minimumVersion)
+            {
+                return new ProvisioningPlanItem(
+                    component.Id,
+                    component.Name,
+                    ProvisioningStateCodes.Outdated,
+                    ProvisioningActionCodes.Update,
+                    installedVersion,
+                    availableVersion,
+                    component.MinimumVersion,
+                    $"Installed version: {installedVersion ?? "unknown"}; minimum required version: {component.MinimumVersion}.");
+            }
+
+            return new ProvisioningPlanItem(
+                component.Id,
+                component.Name,
+                ProvisioningStateCodes.Installed,
+                ProvisioningActionCodes.None,
+                installedVersion,
+                availableVersion,
+                component.MinimumVersion,
+                $"Installed version: {installedVersion}; minimum required version: {component.MinimumVersion}.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(policy) && policy != "latest-stable" && policy != "stable-compatible")
+        {
+            return new ProvisioningPlanItem(
+                component.Id,
+                component.Name,
+                ProvisioningStateCodes.Unknown,
+                ProvisioningActionCodes.Blocked,
+                installedVersion,
+                availableVersion,
+                null,
+                $"Unsupported version policy '{component.VersionPolicy}'.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(availableVersion))
+        {
+            var policyDescription = policy == "stable-compatible"
+                ? "stable-compatible available"
+                : "latest stable available";
+
+            return new ProvisioningPlanItem(
+                component.Id,
+                component.Name,
+                ProvisioningStateCodes.Outdated,
+                ProvisioningActionCodes.Update,
+                installedVersion,
+                availableVersion,
+                availableVersion,
+                $"Installed version: {installedVersion ?? "unknown"}; {policyDescription} version: {availableVersion}.");
+        }
 
         return new ProvisioningPlanItem(
             component.Id,
             component.Name,
-            updateAvailable
-                ? ProvisioningStateCodes.Outdated
-                : ProvisioningStateCodes.Installed,
-            updateAvailable
-                ? ProvisioningActionCodes.Update
-                : ProvisioningActionCodes.None,
-            match.Version,
-            updateAvailable
-                ? $"Installed version: {match.Version ?? "unknown"}; inventory reports an available update."
-                : $"Installed version: {match.Version ?? "unknown"}.");
+            ProvisioningStateCodes.Installed,
+            ProvisioningActionCodes.None,
+            installedVersion,
+            null,
+            null,
+            $"Installed version: {installedVersion ?? "unknown"}.");
+    }
+
+    private static bool TryParseVersion(string? value, out Version version)
+    {
+        if (Version.TryParse(value, out var parsed) && parsed is not null)
+        {
+            version = parsed;
+            return true;
+        }
+
+        version = default!;
+        return false;
     }
 
     public async Task<ProvisioningOperation> CreateAsync(
@@ -452,7 +535,9 @@ public sealed class ProvisioningEngine
             if (!string.Equals(expected.ComponentId, observed.ComponentId, StringComparison.Ordinal)
                 || !string.Equals(expected.StateCode, observed.StateCode, StringComparison.Ordinal)
                 || !string.Equals(expected.ActionCode, observed.ActionCode, StringComparison.Ordinal)
-                || !string.Equals(expected.InstalledVersion, observed.InstalledVersion, StringComparison.Ordinal))
+                || !string.Equals(expected.InstalledVersion, observed.InstalledVersion, StringComparison.Ordinal)
+                || !string.Equals(expected.AvailableVersion, observed.AvailableVersion, StringComparison.Ordinal)
+                || !string.Equals(expected.DesiredVersion, observed.DesiredVersion, StringComparison.Ordinal))
             {
                 operation.Status = ProvisioningOperationStatuses.Stale;
                 operation.CanResume = false;

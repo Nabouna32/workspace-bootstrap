@@ -86,7 +86,25 @@
                                         <StackPanel Spacing="3">
                                             <TextBlock Text="{Binding ComponentName}" FontWeight="SemiBold" />
                                             <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Opacity="0.72" />
-                                            <TextBlock Text="{Binding InstalledVersion}" Opacity="0.55" />
+                                            <Grid ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Spacing="1">
+                                                    <TextBlock x:Uid="ProfilesPage_InstalledVersion" FontSize="12" Opacity="0.6" />
+                                                    <TextBlock Text="{Binding InstalledVersion}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1" Spacing="1">
+                                                    <TextBlock x:Uid="ProfilesPage_AvailableVersion" FontSize="12" Opacity="0.6" />
+                                                    <TextBlock Text="{Binding AvailableVersion}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="2" Spacing="1">
+                                                    <TextBlock x:Uid="ProfilesPage_DesiredVersion" FontSize="12" Opacity="0.6" />
+                                                    <TextBlock Text="{Binding DesiredVersion}" />
+                                                </StackPanel>
+                                            </Grid>
                                         </StackPanel>
                                         <StackPanel Grid.Column="1" Spacing="2" HorizontalAlignment="Right">
                                             <TextBlock

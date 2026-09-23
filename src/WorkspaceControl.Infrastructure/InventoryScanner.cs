@@ -71,6 +71,9 @@ public sealed class InventoryScanner
                     Id = group.Key,
                     DisplayName = first.DisplayName,
                     Version = first.Version,
+                    AvailableVersion = ordered
+                        .Select(item => item.AvailableVersion)
+                        .FirstOrDefault(version => !string.IsNullOrWhiteSpace(version)),
                     FamilyId = first.FamilyId,
                     Scope = first.Scope,
                     InstallLocation = first.InstallLocation,

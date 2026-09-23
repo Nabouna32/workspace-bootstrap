@@ -46,6 +46,15 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
+    public async Task Inventory_aggregation_preserves_available_version()
+    {
+        var scanner = new InventoryScanner([new AvailableVersionProvider()]);
+        var snapshot = await scanner.ScanAsync();
+
+        Assert.AreEqual("2.0.0", snapshot.Items.Single().AvailableVersion);
+    }
+
+    [TestMethod]
     public void Profiles_are_loadable_and_reference_known_components()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
@@ -81,6 +90,68 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
+    public async Task Provisioning_plan_uses_available_version_for_latest_stable()
+    {
+        var configuration = new ConfigurationStore(FindRepositoryRoot());
+        var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
+        var engine = new ProvisioningEngine(
+            configuration,
+            new InstallerEngine(paths),
+            paths,
+            new InventoryScanner([new VersionedInventoryProvider("Microsoft.VisualStudioCode", "1.0.0", "2.0.0")]));
+
+        var plan = await engine.PlanAsync("development-extended");
+        var item = plan.Items.Single(item => item.ComponentId == "vscode");
+
+        Assert.AreEqual(ProvisioningStateCodes.Outdated, item.StateCode);
+        Assert.AreEqual(ProvisioningActionCodes.Update, item.ActionCode);
+        Assert.AreEqual("1.0.0", item.InstalledVersion);
+        Assert.AreEqual("2.0.0", item.AvailableVersion);
+        Assert.AreEqual("2.0.0", item.DesiredVersion);
+    }
+
+    [TestMethod]
+    public async Task Provisioning_plan_preserves_stable_compatible_policy()
+    {
+        var configuration = new ConfigurationStore(FindRepositoryRoot());
+        var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
+        var engine = new ProvisioningEngine(
+            configuration,
+            new InstallerEngine(paths),
+            paths,
+            new InventoryScanner([new VersionedInventoryProvider("Microsoft.VisualStudio.2022.BuildTools", "17.14.0", "17.14.1")]));
+
+        var plan = await engine.PlanAsync("development");
+        var item = plan.Items.Single(item => item.ComponentId == "visual-studio");
+
+        Assert.AreEqual(ProvisioningStateCodes.Outdated, item.StateCode);
+        Assert.AreEqual(ProvisioningActionCodes.Update, item.ActionCode);
+        Assert.AreEqual("17.14.0", item.InstalledVersion);
+        Assert.AreEqual("17.14.1", item.AvailableVersion);
+        Assert.AreEqual("17.14.1", item.DesiredVersion);
+    }
+
+    [TestMethod]
+    public async Task Provisioning_plan_applies_minimum_version_policy()
+    {
+        var configuration = new ConfigurationStore(FindRepositoryRoot());
+        var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
+        var engine = new ProvisioningEngine(
+            configuration,
+            new InstallerEngine(paths),
+            paths,
+            new InventoryScanner([new VersionedInventoryProvider("EclipseAdoptium.Temurin.21.JDK", "21.0.0")]));
+
+        var plan = await engine.PlanAsync("development-extended");
+        var item = plan.Items.Single(item => item.ComponentId == "temurin21");
+
+        Assert.AreEqual(ProvisioningStateCodes.Installed, item.StateCode);
+        Assert.AreEqual(ProvisioningActionCodes.None, item.ActionCode);
+        Assert.AreEqual("21.0.0", item.InstalledVersion);
+        Assert.AreEqual("21.0.0", item.DesiredVersion);
+    }
+
+    [TestMethod]
     public async Task Provisioning_plan_blocks_mutation_when_inventory_is_incomplete()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
@@ -112,6 +183,62 @@ public sealed class ConfigurationTests
                     false,
                     "Synthetic inventory failure.",
                     "Test failure.")));
+    }
+
+    private sealed class AvailableVersionProvider : IInventoryProvider
+    {
+        public string Id => "test.available";
+
+        public Task<InventoryProviderResult> ScanAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(new InventoryProviderResult(
+                [
+                    new InventoryObservation(
+                        "test.package",
+                        "Test package",
+                        "1.0.0",
+                        null,
+                        Id,
+                        "Test.Package",
+                        "test",
+                        InventoryScope.System,
+                        null,
+                        null,
+                        "Test",
+                        InventoryOwnership.PackageManagerManaged,
+                        [],
+                        [new InventoryEvidence("installed", "installed", true, Id)],
+                        DateTimeOffset.UtcNow,
+                        "2.0.0")
+                ],
+                new InventoryProviderDiagnostic(Id, true, "Synthetic inventory.")));
+    }
+
+    private sealed class VersionedInventoryProvider(string packageId, string version, string? availableVersion = null) : IInventoryProvider
+    {
+        public string Id => "test.versioned";
+
+        public Task<InventoryProviderResult> ScanAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(new InventoryProviderResult(
+                [
+                    new InventoryObservation(
+                        packageId,
+                        packageId,
+                        version,
+                        null,
+                        Id,
+                        packageId,
+                        "test",
+                        InventoryScope.System,
+                        null,
+                        null,
+                        "Test",
+                        InventoryOwnership.PackageManagerManaged,
+                        [],
+                        [new InventoryEvidence("installed", "installed", true, Id)],
+                        DateTimeOffset.UtcNow,
+                        availableVersion)
+                ],
+                new InventoryProviderDiagnostic(Id, true, "Synthetic inventory.")));
     }
 
     private static string FindRepositoryRoot()

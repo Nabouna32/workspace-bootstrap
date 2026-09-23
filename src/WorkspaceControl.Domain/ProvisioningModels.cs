@@ -13,7 +13,9 @@ public sealed record ComponentManifest(
     string? Architecture,
     OfficialSource? OfficialSource,
     string[]? InstallArguments,
-    string? FallbackPackageManager);
+    string? FallbackPackageManager,
+    string? VersionPolicy = null,
+    string? MinimumVersion = null);
 
 public sealed record OfficialSource(
     string Type,
@@ -75,6 +77,8 @@ public sealed record ProvisioningPlanItem(
     string StateCode,
     string ActionCode,
     string? InstalledVersion,
+    string? AvailableVersion,
+    string? DesiredVersion,
     string Message);
 
 public sealed record ProvisioningStep(
