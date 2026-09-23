@@ -1,5 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using WorkspaceBootstrap;
+using WorkspaceControl.Infrastructure;
 using WorkspaceControl.Application;
 using WorkspaceControl.Application.Contracts;
 using WorkspaceControl.Domain;

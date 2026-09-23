@@ -1,6 +1,6 @@
 using Microsoft.UI.Xaml;
 using WorkspaceControl.Application;
-using WorkspaceBootstrap;
+using WorkspaceControl.Infrastructure;
 
 namespace WorkspaceControl.Desktop;
 

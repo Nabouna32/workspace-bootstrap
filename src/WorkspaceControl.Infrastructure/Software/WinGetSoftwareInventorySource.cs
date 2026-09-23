@@ -1,7 +1,7 @@
 using WorkspaceControl.Application.Contracts;
 using WorkspaceControl.Domain;
 
-namespace WorkspaceBootstrap.Infrastructure;
+namespace WorkspaceControl.Infrastructure.Software;
 
 internal sealed class WinGetSoftwareInventorySource : ISoftwareInventorySource
 {

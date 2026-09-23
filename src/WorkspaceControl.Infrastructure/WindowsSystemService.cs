@@ -1,7 +1,7 @@
 using Microsoft.Win32;
 using System.Management;
 
-namespace WorkspaceBootstrap;
+namespace WorkspaceControl.Infrastructure;
 
 public sealed class WindowsSystemService
 {

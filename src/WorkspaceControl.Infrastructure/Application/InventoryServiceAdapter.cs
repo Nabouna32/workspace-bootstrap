@@ -1,7 +1,7 @@
 using WorkspaceControl.Application.Contracts;
 using WorkspaceControl.Domain;
 
-namespace WorkspaceBootstrap.Application;
+namespace WorkspaceControl.Infrastructure.Application;
 
 internal sealed class InventoryServiceAdapter : IInventoryService
 {
