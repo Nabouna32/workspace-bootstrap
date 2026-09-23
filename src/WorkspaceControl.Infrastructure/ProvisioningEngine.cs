@@ -51,7 +51,11 @@ public sealed class ProvisioningEngine
 
             var component = ApplyProfileOverrides(catalogComponent, request);
             var match = FindInventoryMatch(component, inventory.Items);
-            var planItem = BuildPlanItem(component, match, inventory.ProviderDiagnostics);
+            var planItem = BuildApplicationPlanItem(
+                component,
+                request,
+                match,
+                inventory.ProviderDiagnostics);
 
             return new DesiredStateDiffItem(
                 DesiredStateDomainCodes.Application,
@@ -136,11 +140,82 @@ public sealed class ProvisioningEngine
                 observation.ProviderId?.EndsWith($":{component.PackageId}", StringComparison.OrdinalIgnoreCase) == true));
     }
 
-    private static ProvisioningPlanItem BuildPlanItem(
+    private static ProvisioningPlanItem BuildApplicationPlanItem(
         ComponentManifest component,
+        ProfileApplication request,
         InventoryItem? match,
         IReadOnlyList<InventoryProviderDiagnostic> diagnostics)
     {
+        var desiredPresent = !string.Equals(
+            request.State,
+            "absent",
+            StringComparison.OrdinalIgnoreCase);
+
+        if (!desiredPresent)
+        {
+            if (diagnostics.Any(diagnostic => !diagnostic.Success))
+            {
+                return new ProvisioningPlanItem(
+                    component.Id,
+                    component.Name,
+                    ProvisioningStateCodes.Unknown,
+                    ProvisioningActionCodes.Blocked,
+                    match?.Version,
+                    null,
+                    null,
+                    "Inventory is incomplete; Workspace Control cannot safely verify application removal.");
+            }
+
+            if (match is null)
+            {
+                return new ProvisioningPlanItem(
+                    component.Id,
+                    component.Name,
+                    ProvisioningStateCodes.Absent,
+                    ProvisioningActionCodes.None,
+                    null,
+                    null,
+                    null,
+                    "Application is absent as requested.");
+            }
+
+            if (string.IsNullOrWhiteSpace(match.Version))
+            {
+                return new ProvisioningPlanItem(
+                    component.Id,
+                    component.Name,
+                    ProvisioningStateCodes.Unknown,
+                    ProvisioningActionCodes.Blocked,
+                    null,
+                    null,
+                    null,
+                    "Installed application version is unknown; safe rollback cannot be guaranteed.");
+            }
+
+            if (string.IsNullOrWhiteSpace(component.PackageId))
+            {
+                return new ProvisioningPlanItem(
+                    component.Id,
+                    component.Name,
+                    ProvisioningStateCodes.Unknown,
+                    ProvisioningActionCodes.Blocked,
+                    match.Version,
+                    null,
+                    null,
+                    "Application does not declare a package id for the supported uninstall provider.");
+            }
+
+            return new ProvisioningPlanItem(
+                component.Id,
+                component.Name,
+                ProvisioningStateCodes.Installed,
+                ProvisioningActionCodes.Remove,
+                match.Version,
+                null,
+                null,
+                $"Application version {match.Version} is installed but absent from the desired state and will be removed.");
+        }
+
         if (match is null)
         {
             if (diagnostics.Any(diagnostic => !diagnostic.Success))
@@ -292,6 +367,18 @@ public sealed class ProvisioningEngine
                 throw new InvalidOperationException(
                     $"Post-condition verification failed for '{component.Name}': installed version '{verified.InstalledVersion}' does not match confirmed target '{planned.DesiredVersion}'.");
             }
+        }
+    }
+
+    private static void ValidateRemovePostcondition(
+        ProvisioningPlanItem planned,
+        ProvisioningPlanItem verified)
+    {
+        if (verified.StateCode != ProvisioningStateCodes.Absent
+            || verified.ActionCode != ProvisioningActionCodes.None)
+        {
+            throw new InvalidOperationException(
+                $"Post-condition verification failed for '{planned.ComponentName}': {verified.Message}");
         }
     }
 
@@ -457,13 +544,27 @@ public sealed class ProvisioningEngine
 
                         var component = ApplyProfileOverrides(catalogComponent, request);
 
-                        await _installer.InstallAsync(
-                            component,
-                            planned.ActionCode,
-                            string.Equals(component.VersionPolicy, "minimum", StringComparison.OrdinalIgnoreCase)
-                                ? null
-                                : planned.DesiredVersion,
-                            token);
+                        if (planned.ActionCode == ProvisioningActionCodes.Remove)
+                        {
+                            operation.ApplicationSnapshots.Add(
+                                new ProvisioningApplicationSnapshot(
+                                    planned.ComponentId,
+                                    planned.InstalledVersion,
+                                    index));
+                            Save(operation);
+
+                            await _installer.UninstallAsync(component, token);
+                        }
+                        else
+                        {
+                            await _installer.InstallAsync(
+                                component,
+                                planned.ActionCode,
+                                string.Equals(component.VersionPolicy, "minimum", StringComparison.OrdinalIgnoreCase)
+                                    ? null
+                                    : planned.DesiredVersion,
+                                token);
+                        }
                     }
                     else
                     {
@@ -491,19 +592,26 @@ public sealed class ProvisioningEngine
                     }
                     else
                     {
-                        if (!components.TryGetValue(planned.ComponentId, out var catalogComponent))
-                            throw new InvalidOperationException($"Unknown component: {planned.ComponentId}");
+                        if (planned.ActionCode == ProvisioningActionCodes.Remove)
+                        {
+                            ValidateRemovePostcondition(planned, verified);
+                        }
+                        else
+                        {
+                            if (!components.TryGetValue(planned.ComponentId, out var catalogComponent))
+                                throw new InvalidOperationException($"Unknown component: {planned.ComponentId}");
 
-                        var request = profile.ApplicationRequests
-                            .FirstOrDefault(item =>
-                                string.Equals(item.ComponentId, planned.ComponentId, StringComparison.Ordinal))
-                            ?? throw new InvalidOperationException(
-                                $"Profile '{profile.Id}' does not contain application '{planned.ComponentId}'.");
+                            var request = profile.ApplicationRequests
+                                .FirstOrDefault(item =>
+                                    string.Equals(item.ComponentId, planned.ComponentId, StringComparison.Ordinal))
+                                ?? throw new InvalidOperationException(
+                                    $"Profile '{profile.Id}' does not contain application '{planned.ComponentId}'.");
 
-                        ValidatePostcondition(
-                            ApplyProfileOverrides(catalogComponent, request),
-                            planned,
-                            verified);
+                            ValidatePostcondition(
+                                ApplyProfileOverrides(catalogComponent, request),
+                                planned,
+                                verified);
+                        }
                     }
 
                     operation.Steps.Add(
@@ -526,7 +634,7 @@ public sealed class ProvisioningEngine
 
                     try
                     {
-                        RollbackRegistrySnapshots(operation);
+                        RollbackSnapshotsAsync(operation, components, token);
                     }
                     catch (Exception rollbackEx)
                     {
@@ -582,6 +690,12 @@ public sealed class ProvisioningEngine
                     continue;
                 }
 
+                if (planned.ActionCode == ProvisioningActionCodes.Remove)
+                {
+                    ValidateRemovePostcondition(planned, verified);
+                    continue;
+                }
+
                 if (!components.TryGetValue(planned.ComponentId, out var catalogComponent))
                     throw new InvalidOperationException($"Unknown component: {planned.ComponentId}");
 
@@ -602,6 +716,7 @@ public sealed class ProvisioningEngine
             operation.CanResume = false;
             operation.Error = null;
             operation.RegistrySnapshots.Clear();
+            operation.ApplicationSnapshots.Clear();
             Save(operation);
         }
         catch (OperationCanceledException)
@@ -990,6 +1105,57 @@ public sealed class ProvisioningEngine
             throw new InvalidOperationException(
                 $"Post-condition verification failed for registry target '{planned.ComponentName}': {verified.Message}");
         }
+    }
+
+    private async Task RollbackSnapshotsAsync(
+        ProvisioningOperation operation,
+        IReadOnlyDictionary<string, ComponentManifest> components,
+        CancellationToken token)
+    {
+        await RollbackApplicationSnapshotsAsync(operation, components, token);
+        RollbackRegistrySnapshots(operation);
+    }
+
+    private async Task RollbackApplicationSnapshotsAsync(
+        ProvisioningOperation operation,
+        IReadOnlyDictionary<string, ComponentManifest> components,
+        CancellationToken token)
+    {
+        var failures = new List<string>();
+
+        var rollbackStartIndex = operation.ApplicationSnapshots
+            .Select(snapshot => snapshot.PlanIndex)
+            .DefaultIfEmpty(operation.Completed)
+            .Min();
+
+        foreach (var snapshot in operation.ApplicationSnapshots.AsEnumerable().Reverse())
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(snapshot.InstalledVersion))
+                    throw new InvalidOperationException("The installed version required for rollback is unavailable.");
+
+                if (!components.TryGetValue(snapshot.ComponentId, out var component))
+                    throw new InvalidOperationException($"Unknown component '{snapshot.ComponentId}' during rollback.");
+
+                await _installer.InstallAsync(
+                    component,
+                    ProvisioningActionCodes.Install,
+                    snapshot.InstalledVersion,
+                    token);
+            }
+            catch (Exception ex)
+            {
+                failures.Add($"{snapshot.ComponentId}: {ex.Message}");
+            }
+        }
+
+        if (failures.Count > 0)
+            throw new InvalidOperationException(
+                "Application rollback failed: " + string.Join(" | ", failures));
+
+        operation.Completed = Math.Min(operation.Completed, rollbackStartIndex);
+        operation.ApplicationSnapshots.Clear();
     }
 
     private void RollbackRegistrySnapshots(ProvisioningOperation operation)
