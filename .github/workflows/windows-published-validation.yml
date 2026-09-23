@@ -78,6 +78,26 @@ jobs:
           Copy-Item README.md (Join-Path $package "README.md") -Force
           Copy-Item LICENSE (Join-Path $package "LICENSE") -Force
 
+      - name: Inspect published application PRI
+        shell: pwsh
+        run: |
+          $package = Join-Path $env:RUNNER_TEMP "workspace-control-published"
+          $diagnostics = Join-Path $env:RUNNER_TEMP "workspace-control-published-diagnostics"
+          New-Item -ItemType Directory -Force -Path $diagnostics | Out-Null
+          $pri = Join-Path $package "WorkspaceControl/WorkspaceControl.pri"
+          if (-not (Test-Path $pri -PathType Leaf)) { throw "Published application PRI is missing: $pri" }
+
+          $makePri = Get-ChildItem "$env:ProgramFiles(x86)\Windows Kits\10\bin" -Filter makepri.exe -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match '\\x64\\makepri\.exe$' } |
+            Select-Object -First 1
+          if (-not $makePri) {
+            Write-Warning "MakePri.exe was not found; the published PRI will still be validated by the launch smoke test."
+            return
+          }
+
+          & $makePri.FullName dump /if $pri /of (Join-Path $diagnostics "WorkspaceControl.pri") /o
+          if ($LASTEXITCODE -ne 0) { throw "MakePri dump failed with exit code $LASTEXITCODE." }
+
       - name: Validate published package and launch smoke test
         shell: pwsh
         run: |
