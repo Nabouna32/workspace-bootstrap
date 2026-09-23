@@ -241,6 +241,8 @@ public sealed class ProvisioningEngine
                 {
                     await _installer.InstallAsync(component, planned.ActionCode, token);
 
+                    operation.CurrentComponentName = $"Verifying: {component.Name}";
+                    Save(operation);
                     var verificationPlan = await PlanAsync(operation.ProfileId, token);
                     var verified = verificationPlan.Items[index];
 
@@ -268,6 +270,9 @@ public sealed class ProvisioningEngine
                     return;
                 }
             }
+
+            operation.CurrentComponentName = "Verifying final state…";
+            Save(operation);
 
             var finalPlan = await PlanAsync(operation.ProfileId, token);
             var unresolved = finalPlan.Items
