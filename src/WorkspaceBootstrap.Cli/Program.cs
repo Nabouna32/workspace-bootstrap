@@ -9,15 +9,13 @@ try
     var command = args.FirstOrDefault()?.ToLowerInvariant() ?? "help";
     var profile = GetOption(args, "--profile");
     var operation = GetOption(args, "--operation");
-    var cacheOnly = args.Any(x => x.Equals("--cache-only", StringComparison.OrdinalIgnoreCase));
-
     object? data;
     IReadOnlyList<string> messages = Array.Empty<string>();
 
     switch (command)
     {
         case "capabilities":
-            data = new[] { "baseline", "provisioning", "optimization", "cache", "official-sources", "winget-fallback" };
+            data = new[] { "baseline", "provisioning", "optimization", "official-sources", "winget-fallback" };
             break;
         case "baseline":
             data = application.GetBaseline();
@@ -47,14 +45,13 @@ try
         case "provisioning-worker":
             await application.RunProvisioningAsync(
                 operation ?? throw new ArgumentException("--operation est requis."),
-                cacheOnly,
                 CancellationToken.None);
             data = new { OperationId = operation, Status = "completed" };
             break;
         case "provisioning-start":
             data = new
             {
-                OperationId = application.StartProvisioning(profile ?? throw new ArgumentException("--profile est requis."), cacheOnly),
+                OperationId = application.StartProvisioning(profile ?? throw new ArgumentException("--profile est requis.")),
                 Status = "starting"
             };
             break;
@@ -67,7 +64,7 @@ try
         case "provisioning-resume":
             data = new
             {
-                OperationId = application.ResumeProvisioning(operation ?? throw new ArgumentException("--operation est requis."), cacheOnly),
+                OperationId = application.ResumeProvisioning(operation ?? throw new ArgumentException("--operation est requis.")),
                 Status = "starting"
             };
             break;
