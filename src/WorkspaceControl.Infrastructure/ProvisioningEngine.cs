@@ -25,7 +25,7 @@ public sealed class ProvisioningEngine
     public IReadOnlyList<ProfileManifest> Profiles() =>
         _config.LoadProfiles().Values.OrderBy(x => x.Id).ToArray();
 
-    public async Task<object> PlanAsync(
+    public async Task<ProvisioningPlan> PlanAsync(
         string profileId,
         CancellationToken token = default)
     {
@@ -33,21 +33,23 @@ public sealed class ProvisioningEngine
         var components = _config.LoadComponents();
         var inventory = await _inventory.ScanAsync(token);
 
-        return new
+        var items = profile.Components.Select(id =>
         {
-            Profile = profile,
-            InventoryScanId = inventory.ScanId,
-            InventoryDiagnostics = inventory.ProviderDiagnostics,
-            Items = profile.Components.Select(id =>
-            {
-                var component = components.TryGetValue(id, out var value)
-                    ? value
-                    : throw new InvalidOperationException($"Composant inconnu : {id}");
+            var component = components.TryGetValue(id, out var value)
+                ? value
+                : throw new InvalidOperationException($"Unknown component: {id}");
 
-                var match = FindInventoryMatch(component, inventory.Items);
-                return BuildPlanItem(component, match);
-            }).ToArray()
-        };
+            var match = FindInventoryMatch(component, inventory.Items);
+            return BuildPlanItem(component, match, inventory.ProviderDiagnostics);
+        }).ToArray();
+
+        return new ProvisioningPlan(
+            profile.Id,
+            profile.Name,
+            inventory.ScanId,
+            inventory.ProviderDiagnostics,
+            items,
+            DateTimeOffset.UtcNow);
     }
 
     private static InventoryItem? FindInventoryMatch(
@@ -64,33 +66,49 @@ public sealed class ProvisioningEngine
                 observation.ProviderId?.EndsWith($":{component.PackageId}", StringComparison.OrdinalIgnoreCase) == true));
     }
 
-    private static object BuildPlanItem(ComponentManifest component, InventoryItem? match)
+    private static ProvisioningPlanItem BuildPlanItem(
+        ComponentManifest component,
+        InventoryItem? match,
+        IReadOnlyList<InventoryProviderDiagnostic> diagnostics)
     {
         if (match is null)
         {
-            return new
+            if (diagnostics.Any(diagnostic => !diagnostic.Success))
             {
+                return new ProvisioningPlanItem(
+                    component.Id,
+                    component.Name,
+                    ProvisioningStateCodes.Unknown,
+                    ProvisioningActionCodes.Blocked,
+                    null,
+                    "Inventory is incomplete; Workspace Control cannot safely determine whether the component is installed.");
+            }
+
+            return new ProvisioningPlanItem(
                 component.Id,
                 component.Name,
-                StateCode = "MISSING",
-                ActionCode = "install",
-                Message = "Composant absent de l'inventaire détecté."
-            };
+                ProvisioningStateCodes.Missing,
+                ProvisioningActionCodes.Install,
+                null,
+                "Component is absent from the detected inventory.");
         }
 
         var updateAvailable = match.Evidence.Any(evidence =>
             evidence.Kind.Equals("available-update", StringComparison.OrdinalIgnoreCase));
 
-        return new
-        {
+        return new ProvisioningPlanItem(
             component.Id,
             component.Name,
-            StateCode = updateAvailable ? "OUTDATED" : "INSTALLED",
-            ActionCode = updateAvailable ? "update" : "none",
-            Message = updateAvailable
-                ? $"Version installée : {match.Version ?? "inconnue"} ; une mise à jour est signalée par l'inventaire."
-                : $"Version installée : {match.Version ?? "inconnue"}."
-        };
+            updateAvailable
+                ? ProvisioningStateCodes.Outdated
+                : ProvisioningStateCodes.Installed,
+            updateAvailable
+                ? ProvisioningActionCodes.Update
+                : ProvisioningActionCodes.None,
+            match.Version,
+            updateAvailable
+                ? $"Installed version: {match.Version ?? "unknown"}; inventory reports an available update."
+                : $"Installed version: {match.Version ?? "unknown"}.");
     }
 
     public string Start(string profileId)
@@ -111,7 +129,7 @@ public sealed class ProvisioningEngine
         catch (Exception ex)
         {
             operation.Status = "failed";
-            operation.Error = $"Impossible de démarrer le worker : {ex.Message}";
+            operation.Error = $"Unable to start worker: {ex.Message}";
             operation.CanResume = true;
             Save(operation);
             throw;
@@ -125,18 +143,15 @@ public sealed class ProvisioningEngine
         CancellationToken token)
     {
         var operation = Get(operationId)
-            ?? throw new InvalidOperationException("Opération introuvable.");
+            ?? throw new InvalidOperationException("Operation not found.");
 
         if (operation.Status is "completed")
             return;
 
         await using var operationLock = await AcquireOperationLockAsync(token);
 
-        // A worker may have been queued while another operation was running.
-        // Re-read the operation after acquiring the process-wide lock so a stale
-        // worker cannot overwrite the final state written by the active worker.
         operation = Get(operationId)
-            ?? throw new InvalidOperationException("Opération introuvable.");
+            ?? throw new InvalidOperationException("Operation not found.");
 
         if (operation.Status is "completed")
             return;
@@ -146,6 +161,13 @@ public sealed class ProvisioningEngine
 
         try
         {
+            var plan = await PlanAsync(operation.ProfileId, token);
+            if (plan.Items.Count != profile.Components.Length)
+            {
+                throw new InvalidOperationException(
+                    "Provisioning plan is inconsistent with the profile.");
+            }
+
             operation.Status = "running";
             operation.Error = null;
             operation.CanResume = true;
@@ -157,14 +179,40 @@ public sealed class ProvisioningEngine
 
                 var componentId = profile.Components[index];
                 if (!components.TryGetValue(componentId, out var component))
-                    throw new InvalidOperationException($"Composant inconnu : {componentId}");
+                    throw new InvalidOperationException($"Unknown component: {componentId}");
 
+                var planned = plan.Items[index];
                 operation.CurrentComponentName = component.Name;
                 Save(operation);
+
+                if (planned.ActionCode == ProvisioningActionCodes.Blocked)
+                {
+                    throw new InvalidOperationException(planned.Message);
+                }
+
+                if (planned.ActionCode == ProvisioningActionCodes.None)
+                {
+                    operation.Steps.Add(
+                        new ProvisioningStep(component.Id, component.Name, "skipped"));
+                    operation.Completed = index + 1;
+                    Save(operation);
+                    continue;
+                }
 
                 try
                 {
                     await _installer.InstallAsync(component, token);
+
+                    var verificationPlan = await PlanAsync(operation.ProfileId, token);
+                    var verified = verificationPlan.Items[index];
+
+                    if (verified.StateCode != ProvisioningStateCodes.Installed
+                        || verified.ActionCode != ProvisioningActionCodes.None)
+                    {
+                        throw new InvalidOperationException(
+                            $"Post-condition verification failed for '{component.Name}': {verified.Message}");
+                    }
+
                     operation.Steps.Add(
                         new ProvisioningStep(component.Id, component.Name, "completed"));
                     operation.Completed = index + 1;
@@ -192,7 +240,7 @@ public sealed class ProvisioningEngine
         catch (OperationCanceledException)
         {
             operation.Status = "failed";
-            operation.Error = "Opération annulée.";
+            operation.Error = "Operation cancelled.";
             operation.CanResume = true;
             Save(operation);
             throw;
@@ -229,11 +277,11 @@ public sealed class ProvisioningEngine
     public string Resume(string id)
     {
         var operation = Get(id)
-            ?? throw new InvalidOperationException("Opération introuvable.");
+            ?? throw new InvalidOperationException("Operation not found.");
 
         if (operation.Status != "failed" || !operation.CanResume)
             throw new InvalidOperationException(
-                "Cette opération ne peut pas être reprise.");
+                "This operation cannot be resumed.");
 
         try
         {
@@ -242,7 +290,7 @@ public sealed class ProvisioningEngine
         catch (Exception ex)
         {
             operation.Status = "failed";
-            operation.Error = $"Impossible de redémarrer le worker : {ex.Message}";
+            operation.Error = $"Unable to restart worker: {ex.Message}";
             operation.CanResume = true;
             Save(operation);
             throw;
@@ -255,7 +303,7 @@ public sealed class ProvisioningEngine
     {
         var processPath = Environment.ProcessPath
             ?? throw new InvalidOperationException(
-                "Impossible de déterminer le processus Workspace Control.");
+                "Unable to determine the Workspace Control process.");
 
         var currentAssembly = Environment.ProcessPath;
         var entryAssembly = System.Reflection.Assembly.GetEntryAssembly()?.Location;
@@ -266,7 +314,7 @@ public sealed class ProvisioningEngine
         {
             if (string.IsNullOrWhiteSpace(entryAssembly))
                 throw new InvalidOperationException(
-                    "Le chemin de l'assembly CLI est introuvable pour le worker de développement.");
+                    "The CLI assembly path is unavailable for the development worker.");
 
             psi = new ProcessStartInfo
             {
@@ -296,7 +344,7 @@ public sealed class ProvisioningEngine
 
         var worker = Process.Start(psi)
             ?? throw new InvalidOperationException(
-                "Impossible de démarrer le worker de provisioning.");
+                "Unable to start the provisioning worker.");
 
         worker.Dispose();
     }
@@ -329,16 +377,16 @@ public sealed class ProvisioningEngine
     private ProfileManifest GetProfile(string id) =>
         _config.LoadProfiles().TryGetValue(id, out var profile)
             ? profile
-            : throw new InvalidOperationException($"Profil inconnu : {id}");
+            : throw new InvalidOperationException($"Unknown profile: {id}");
 
     private void Save(ProvisioningOperation operation)
     {
         if (string.IsNullOrWhiteSpace(operation.OperationId))
-            throw new InvalidOperationException("L'opération doit posséder un identifiant.");
+            throw new InvalidOperationException("Operation must have an identifier.");
         if (string.IsNullOrWhiteSpace(operation.ProfileId))
-            throw new InvalidOperationException("L'opération doit référencer un profil.");
+            throw new InvalidOperationException("Operation must reference a profile.");
         if (operation.Completed < 0 || operation.Total < 0 || operation.Completed > operation.Total)
-            throw new InvalidOperationException("L'état de progression de l'opération est incohérent.");
+            throw new InvalidOperationException("Operation progress is inconsistent.");
 
         Directory.CreateDirectory(_paths.StateRoot);
         operation.UpdatedAt = DateTimeOffset.UtcNow;

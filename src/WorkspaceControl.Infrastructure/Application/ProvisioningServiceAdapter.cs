@@ -10,7 +10,7 @@ internal sealed class ProvisioningServiceAdapter : IProvisioningService
         _engine = engine ?? throw new ArgumentNullException(nameof(engine));
 
     public IReadOnlyList<ProfileManifest> GetProfiles() => _engine.Profiles();
-    public Task<object> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
+    public Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
         _engine.PlanAsync(profileId, cancellationToken);
     public string Start(string profileId) => _engine.Start(profileId);
     public Task RunAsync(string operationId, CancellationToken cancellationToken = default) =>

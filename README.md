@@ -30,7 +30,7 @@ Normal interactive mode never silently changes the system. Every meaningful muta
 
 C#/.NET 10, WinUI 3 / Windows App SDK and Windows 11 x64. The CLI shares the same application/domain engine.
 
-The GitHub repository name `workspace-bootstrap` is historical; the product identity is **Workspace Control**.
+The GitHub repository is **Workspace Control**; the product identity and repository are intentionally aligned.
 
 ## Documentation
 
