@@ -135,12 +135,15 @@ static object MapPlan(ProvisioningPlan plan)
         Items = plan.Items.Select(item => new
         {
             Id = item.ComponentId,
+            TargetId = item.TargetId,
+            Domain = item.Domain,
             Name = item.ComponentName,
             StateCode = item.StateCode,
             ActionCode = item.ActionCode,
             InstalledVersion = item.InstalledVersion,
             AvailableVersion = item.AvailableVersion,
             DesiredVersion = item.DesiredVersion,
+            ObservedValue = item.ObservedValue,
             Message = item.Message
         }).ToArray()
     };

@@ -68,6 +68,7 @@ public static class ProvisioningActionCodes
     public const string Install = "install";
     public const string Update = "update";
     public const string None = "none";
+    public const string Set = "set";
     public const string Blocked = "blocked";
 }
 
@@ -87,7 +88,10 @@ public sealed record ProvisioningPlanItem(
     string? InstalledVersion,
     string? AvailableVersion,
     string? DesiredVersion,
-    string Message);
+    string Message,
+    string Domain = DesiredStateDomainCodes.Application,
+    string? TargetId = null,
+    string? ObservedValue = null);
 
 public sealed record ProvisioningStep(
     string ComponentId,
@@ -107,8 +111,18 @@ public sealed class ProvisioningOperation
     public string? Error { get; set; }
     public bool CanResume { get; set; }
     public List<ProvisioningStep> Steps { get; init; } = [];
+    public List<ProvisioningRegistrySnapshot> RegistrySnapshots { get; init; } = [];
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
+
+public sealed record ProvisioningRegistrySnapshot(
+    string Hive,
+    string Key,
+    string ValueName,
+    bool Exists,
+    string? Value,
+    string? ValueType,
+    int PlanIndex = 0);
 
 public static class JsonDefaults
 {

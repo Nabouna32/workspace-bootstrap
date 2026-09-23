@@ -167,6 +167,91 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
+    public async Task Desired_state_plan_includes_registry_without_applications()
+    {
+        var root = CreateConfigurationRoot();
+        var configuration = new ConfigurationStore(root);
+        var paths = new WorkspacePaths(Path.Combine(
+            Path.GetTempPath(),
+            "workspace-control-registry-plan-tests",
+            Guid.NewGuid().ToString("N")));
+
+        var profile = new ProfileManifest(
+            "registry-only",
+            "Registry only",
+            "Registry desired-state test",
+            DesiredState: new DesiredStateManifest(
+                [],
+                [],
+                [],
+                [
+                    new RegistrySettingDesiredState(
+                        "HKCU",
+                        @"Software\\WorkspaceControl\\Tests",
+                        "Enabled",
+                        "1",
+                        "dword")
+                ],
+                [],
+                []),
+            SchemaVersion: 2);
+
+        var profilePath = Path.Combine(root, "bootstrap", "windows", "profiles", "registry-only.json");
+        File.WriteAllText(profilePath, JsonSerializer.Serialize(profile, JsonDefaults.Options));
+
+        try
+        {
+            var registry = new RegistryDesiredStateObserver(
+                new FakeRegistryReader(new RegistryObservation(false, null, null, null)));
+            var engine = new ProvisioningEngine(
+                configuration,
+                new InstallerEngine(paths),
+                paths,
+                new InventoryScanner([new EmptyInventoryProvider()]),
+                null,
+                registry);
+
+            var diff = await engine.DiffAsync("registry-only");
+            var diffItem = diff.Items.Single(item => item.Domain == DesiredStateDomainCodes.RegistrySetting);
+            Assert.AreEqual(ProvisioningStateCodes.Missing, diffItem.StateCode);
+            Assert.AreEqual(ProvisioningActionCodes.Set, diffItem.ActionCode);
+
+            var plan = await engine.PlanAsync("registry-only");
+            var planItem = plan.Items.Single();
+            Assert.AreEqual(DesiredStateDomainCodes.RegistrySetting, planItem.Domain);
+            Assert.AreEqual(ProvisioningActionCodes.Set, planItem.ActionCode);
+            Assert.AreEqual(diffItem.TargetId, planItem.TargetId);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public void Registry_writer_preserves_snapshot_for_rollback()
+    {
+        var writer = new RecordingRegistryWriter();
+        var service = new RegistryDesiredStateWriter(writer);
+        var desired = new RegistrySettingDesiredState(
+            "HKCU",
+            @"Software\\WorkspaceControl\\Tests",
+            "Enabled",
+            "2",
+            "dword");
+
+        var snapshot = service.Capture(desired);
+        service.Write(desired);
+        service.Restore(snapshot);
+
+        Assert.AreEqual(1, writer.CaptureCount);
+        Assert.AreEqual(1, writer.WriteCount);
+        Assert.AreEqual(1, writer.RestoreCount);
+        Assert.IsTrue(writer.RestoredSnapshot!.Exists);
+        Assert.AreEqual("1", writer.RestoredSnapshot.Value);
+    }
+
+    [TestMethod]
     public void Machine_condition_evaluator_supports_numeric_and_version_comparisons()
     {
         var baseline = new BaselineSnapshot(
@@ -378,6 +463,44 @@ public sealed class ConfigurationTests
     private sealed class FakeRegistryReader(RegistryObservation observation) : IRegistryReader
     {
         public RegistryObservation Read(RegistrySettingDesiredState desired) => observation;
+    }
+
+    private sealed class EmptyInventoryProvider : IInventoryProvider
+    {
+        public string Id => "test.empty";
+
+        public Task<InventoryProviderResult> ScanAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(new InventoryProviderResult(
+                [],
+                new InventoryProviderDiagnostic(Id, true, "Synthetic empty inventory.")));
+    }
+
+    private sealed class RecordingRegistryWriter : IRegistryWriter
+    {
+        public int CaptureCount { get; private set; }
+        public int WriteCount { get; private set; }
+        public int RestoreCount { get; private set; }
+        public ProvisioningRegistrySnapshot? RestoredSnapshot { get; private set; }
+
+        public ProvisioningRegistrySnapshot Capture(RegistrySettingDesiredState desired)
+        {
+            CaptureCount++;
+            return new ProvisioningRegistrySnapshot(
+                desired.Hive,
+                desired.Key,
+                desired.ValueName,
+                true,
+                "1",
+                "dword");
+        }
+
+        public void Write(RegistrySettingDesiredState desired) => WriteCount++;
+
+        public void Restore(ProvisioningRegistrySnapshot snapshot)
+        {
+            RestoreCount++;
+            RestoredSnapshot = snapshot;
+        }
     }
 
     private sealed class FailedInventoryProvider : IInventoryProvider

@@ -11,6 +11,7 @@ public sealed class ProvisioningEngine
     private readonly InventoryScanner _inventory;
     private readonly WindowsSystemService _windows;
     private readonly RegistryDesiredStateObserver _registry;
+    private readonly RegistryDesiredStateWriter _registryWriter;
 
     public ProvisioningEngine(
         ConfigurationStore config,
@@ -18,7 +19,8 @@ public sealed class ProvisioningEngine
         WorkspacePaths paths,
         InventoryScanner inventory,
         WindowsSystemService? windows = null,
-        RegistryDesiredStateObserver? registry = null)
+        RegistryDesiredStateObserver? registry = null,
+        RegistryDesiredStateWriter? registryWriter = null)
     {
         _config = config;
         _installer = installer;
@@ -26,6 +28,7 @@ public sealed class ProvisioningEngine
         _inventory = inventory;
         _windows = windows ?? new WindowsSystemService();
         _registry = registry ?? new RegistryDesiredStateObserver();
+        _registryWriter = registryWriter ?? new RegistryDesiredStateWriter();
     }
 
     public IReadOnlyList<ProfileManifest> Profiles() =>
@@ -40,8 +43,6 @@ public sealed class ProvisioningEngine
         var inventory = await _inventory.ScanAsync(token);
 
         var requests = profile.ApplicationRequests;
-        if (requests.Count == 0)
-            throw new InvalidOperationException($"Profile '{profile.Id}' does not declare any desired applications.");
 
         var items = requests.Select(request =>
         {
@@ -97,6 +98,7 @@ public sealed class ProvisioningEngine
         }
 
         var items = diff.Items
+            .Where(item => item.Domain != DesiredStateDomainCodes.Condition)
             .Select(item => new ProvisioningPlanItem(
                 item.TargetId,
                 item.TargetName,
@@ -105,7 +107,10 @@ public sealed class ProvisioningEngine
                 item.ObservedValue,
                 item.AvailableValue,
                 item.DesiredValue,
-                item.Message))
+                item.Message,
+                item.Domain,
+                item.TargetId,
+                item.ObservedValue))
             .ToArray();
 
         return new ProvisioningPlan(
@@ -378,7 +383,6 @@ public sealed class ProvisioningEngine
 
         var profile = GetProfile(operation.ProfileId);
         var components = _config.LoadComponents();
-        var requests = profile.ApplicationRequests;
         var plan = operation.Plan
             ?? throw new InvalidOperationException(
                 "The operation has no persisted provisioning plan.");
@@ -389,42 +393,34 @@ public sealed class ProvisioningEngine
             throw new InvalidOperationException(
                 "The provisioning operation is not in an executable state.");
 
-        if (plan.Items.Count != requests.Count)
-            throw new InvalidOperationException(
-                "Persisted provisioning plan is inconsistent with the current profile.");
-
         try
         {
             var currentPlan = await PlanAsync(operation.ProfileId, token);
-            ValidateUncompletedPlanState(operation, plan, currentPlan, requests);
+            ValidateUncompletedPlanState(operation, plan, currentPlan);
 
             operation.Status = ProvisioningOperationStatuses.Running;
             operation.Error = null;
             operation.CanResume = true;
             Save(operation);
 
-            for (var index = operation.Completed; index < requests.Count; index++)
+            for (var index = operation.Completed; index < plan.Items.Count; index++)
             {
                 token.ThrowIfCancellationRequested();
 
-                var request = requests[index];
-                if (!components.TryGetValue(request.ComponentId, out var catalogComponent))
-                    throw new InvalidOperationException($"Unknown component: {request.ComponentId}");
-                var component = ApplyProfileOverrides(catalogComponent, request);
-
                 var planned = plan.Items[index];
-                operation.CurrentComponentName = component.Name;
+                operation.CurrentComponentName = planned.ComponentName;
                 Save(operation);
 
                 if (planned.ActionCode == ProvisioningActionCodes.Blocked)
-                {
                     throw new InvalidOperationException(planned.Message);
-                }
 
                 if (planned.ActionCode == ProvisioningActionCodes.None)
                 {
                     operation.Steps.Add(
-                        new ProvisioningStep(component.Id, component.Name, "skipped"));
+                        new ProvisioningStep(
+                            planned.TargetId ?? planned.ComponentId,
+                            planned.ComponentName,
+                            "skipped"));
                     operation.Completed = index + 1;
                     Save(operation);
                     continue;
@@ -432,23 +428,89 @@ public sealed class ProvisioningEngine
 
                 try
                 {
-                    await _installer.InstallAsync(
-                        component,
-                        planned.ActionCode,
-                        string.Equals(component.VersionPolicy, "minimum", StringComparison.OrdinalIgnoreCase)
-                            ? null
-                            : planned.DesiredVersion,
-                        token);
+                    if (string.Equals(
+                            planned.Domain,
+                            DesiredStateDomainCodes.RegistrySetting,
+                            StringComparison.Ordinal))
+                    {
+                        var desired = FindRegistryDesired(profile, planned.TargetId ?? planned.ComponentId);
+                        var snapshot = _registryWriter.Capture(desired);
 
-                    operation.CurrentComponentName = $"Verifying: {component.Name}";
+                        operation.RegistrySnapshots.Add(snapshot with { PlanIndex = index });
+                        Save(operation);
+
+                        _registryWriter.Write(desired);
+                    }
+                    else if (string.Equals(
+                                 planned.Domain,
+                                 DesiredStateDomainCodes.Application,
+                                 StringComparison.Ordinal))
+                    {
+                        if (!components.TryGetValue(planned.ComponentId, out var catalogComponent))
+                            throw new InvalidOperationException($"Unknown component: {planned.ComponentId}");
+
+                        var request = profile.ApplicationRequests
+                            .FirstOrDefault(item =>
+                                string.Equals(item.ComponentId, planned.ComponentId, StringComparison.Ordinal))
+                            ?? throw new InvalidOperationException(
+                                $"Profile '{profile.Id}' does not contain application '{planned.ComponentId}'.");
+
+                        var component = ApplyProfileOverrides(catalogComponent, request);
+
+                        await _installer.InstallAsync(
+                            component,
+                            planned.ActionCode,
+                            string.Equals(component.VersionPolicy, "minimum", StringComparison.OrdinalIgnoreCase)
+                                ? null
+                                : planned.DesiredVersion,
+                            token);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(
+                            $"Unsupported executable desired-state domain '{planned.Domain}'.");
+                    }
+
+                    operation.CurrentComponentName = $"Verifying: {planned.ComponentName}";
                     Save(operation);
-                    var verificationPlan = await PlanAsync(operation.ProfileId, token);
-                    var verified = verificationPlan.Items[index];
 
-                    ValidatePostcondition(component, planned, verified);
+                    var verificationPlan = await PlanAsync(operation.ProfileId, token);
+                    var verified = verificationPlan.Items
+                        .FirstOrDefault(item =>
+                            string.Equals(item.TargetId, planned.TargetId, StringComparison.Ordinal)
+                            && string.Equals(item.Domain, planned.Domain, StringComparison.Ordinal))
+                        ?? throw new InvalidOperationException(
+                            $"Post-condition verification target '{planned.TargetId}' was not observed.");
+
+                    if (string.Equals(
+                            planned.Domain,
+                            DesiredStateDomainCodes.RegistrySetting,
+                            StringComparison.Ordinal))
+                    {
+                        ValidateRegistryPostcondition(planned, verified);
+                    }
+                    else
+                    {
+                        if (!components.TryGetValue(planned.ComponentId, out var catalogComponent))
+                            throw new InvalidOperationException($"Unknown component: {planned.ComponentId}");
+
+                        var request = profile.ApplicationRequests
+                            .FirstOrDefault(item =>
+                                string.Equals(item.ComponentId, planned.ComponentId, StringComparison.Ordinal))
+                            ?? throw new InvalidOperationException(
+                                $"Profile '{profile.Id}' does not contain application '{planned.ComponentId}'.");
+
+                        ValidatePostcondition(
+                            ApplyProfileOverrides(catalogComponent, request),
+                            planned,
+                            verified);
+                    }
 
                     operation.Steps.Add(
-                        new ProvisioningStep(component.Id, component.Name, "completed"));
+                        new ProvisioningStep(
+                            planned.TargetId ?? planned.ComponentId,
+                            planned.ComponentName,
+                            "completed"));
                     operation.Completed = index + 1;
                     operation.Error = null;
                     Save(operation);
@@ -456,7 +518,25 @@ public sealed class ProvisioningEngine
                 catch (Exception ex)
                 {
                     operation.Steps.Add(
-                        new ProvisioningStep(component.Id, component.Name, "failed", ex.Message));
+                        new ProvisioningStep(
+                            planned.TargetId ?? planned.ComponentId,
+                            planned.ComponentName,
+                            "failed",
+                            ex.Message));
+
+                    try
+                    {
+                        RollbackRegistrySnapshots(operation);
+                    }
+                    catch (Exception rollbackEx)
+                    {
+                        operation.Error = $"{ex.Message} Registry rollback also failed: {rollbackEx.Message}";
+                        operation.Status = ProvisioningOperationStatuses.Failed;
+                        operation.CanResume = false;
+                        Save(operation);
+                        return;
+                    }
+
                     operation.Error = ex.Message;
                     operation.Status = ProvisioningOperationStatuses.Failed;
                     operation.CanResume = true;
@@ -469,10 +549,26 @@ public sealed class ProvisioningEngine
             Save(operation);
 
             var finalPlan = await PlanAsync(operation.ProfileId, token);
-            for (var index = 0; index < plan.Items.Count; index++)
+            if (finalPlan.Items.Count != plan.Items.Count)
+                throw new InvalidOperationException(
+                    "Final state verification failed because the desired-state item set changed.");
+
+            foreach (var planned in plan.Items)
             {
-                var planned = plan.Items[index];
-                var verified = finalPlan.Items[index];
+                var verified = finalPlan.Items.FirstOrDefault(item =>
+                    string.Equals(item.TargetId, planned.TargetId, StringComparison.Ordinal)
+                    && string.Equals(item.Domain, planned.Domain, StringComparison.Ordinal))
+                    ?? throw new InvalidOperationException(
+                        $"Final state verification target '{planned.TargetId}' was not observed.");
+
+                if (string.Equals(
+                        planned.Domain,
+                        DesiredStateDomainCodes.RegistrySetting,
+                        StringComparison.Ordinal))
+                {
+                    ValidateRegistryPostcondition(planned, verified);
+                    continue;
+                }
 
                 if (planned.ActionCode == ProvisioningActionCodes.None)
                 {
@@ -486,22 +582,43 @@ public sealed class ProvisioningEngine
                     continue;
                 }
 
-                var request = requests[index];
-                if (!components.TryGetValue(request.ComponentId, out var catalogComponent))
-                    throw new InvalidOperationException($"Unknown component: {request.ComponentId}");
-                var component = ApplyProfileOverrides(catalogComponent, request);
+                if (!components.TryGetValue(planned.ComponentId, out var catalogComponent))
+                    throw new InvalidOperationException($"Unknown component: {planned.ComponentId}");
 
-                ValidatePostcondition(component, planned, verified);
+                var request = profile.ApplicationRequests
+                    .FirstOrDefault(item =>
+                        string.Equals(item.ComponentId, planned.ComponentId, StringComparison.Ordinal))
+                    ?? throw new InvalidOperationException(
+                        $"Profile '{profile.Id}' does not contain application '{planned.ComponentId}'.");
+
+                ValidatePostcondition(
+                    ApplyProfileOverrides(catalogComponent, request),
+                    planned,
+                    verified);
             }
 
             operation.Status = ProvisioningOperationStatuses.Completed;
             operation.CurrentComponentName = null;
             operation.CanResume = false;
             operation.Error = null;
+            operation.RegistrySnapshots.Clear();
             Save(operation);
         }
         catch (OperationCanceledException)
         {
+            try
+            {
+                RollbackRegistrySnapshots(operation);
+            }
+            catch (Exception rollbackEx)
+            {
+                operation.Error = $"Operation cancelled. Registry rollback failed: {rollbackEx.Message}";
+                operation.Status = ProvisioningOperationStatuses.Failed;
+                operation.CanResume = false;
+                Save(operation);
+                throw;
+            }
+
             operation.Status = ProvisioningOperationStatuses.Failed;
             operation.Error = "Operation cancelled.";
             operation.CanResume = true;
@@ -510,7 +627,20 @@ public sealed class ProvisioningEngine
         }
         catch (Exception ex)
         {
-            operation.Status = "failed";
+            try
+            {
+                RollbackRegistrySnapshots(operation);
+            }
+            catch (Exception rollbackEx)
+            {
+                operation.Status = ProvisioningOperationStatuses.Failed;
+                operation.Error = $"{ex.Message} Registry rollback also failed: {rollbackEx.Message}";
+                operation.CanResume = false;
+                Save(operation);
+                throw;
+            }
+
+            operation.Status = ProvisioningOperationStatuses.Failed;
             operation.Error = ex.Message;
             operation.CanResume = true;
             Save(operation);
@@ -661,21 +791,9 @@ public sealed class ProvisioningEngine
             items);
 
         AddUnsupportedSection(
-            profile.DesiredState.RegistrySettings.Count,
-            DesiredStateDomainCodes.RegistrySetting,
-            "registrySettings",
-            items);
-
-        AddUnsupportedSection(
             profile.DesiredState.Optimizations.Count,
             DesiredStateDomainCodes.Optimization,
             "optimizations",
-            items);
-
-        AddUnsupportedSection(
-            profile.DesiredState.Conditions.Count,
-            DesiredStateDomainCodes.Condition,
-            "conditions",
             items);
     }
 
@@ -714,11 +832,11 @@ public sealed class ProvisioningEngine
                     targetId,
                     targetId,
                     ProvisioningStateCodes.Missing,
-                    ProvisioningActionCodes.Blocked,
+                    ProvisioningActionCodes.Set,
                     null,
                     null,
                     desired.Value,
-                    "Registry value is missing. Registry mutation is not enabled yet."));
+                    "Registry value is missing and will be created."));
                 continue;
             }
 
@@ -731,7 +849,7 @@ public sealed class ProvisioningEngine
                 targetId,
                 targetId,
                 matches ? DesiredStateStateCodes.Compliant : DesiredStateStateCodes.Drifted,
-                matches ? ProvisioningActionCodes.None : ProvisioningActionCodes.Blocked,
+                matches ? ProvisioningActionCodes.None : ProvisioningActionCodes.Set,
                 observation.Value,
                 observation.ValueType,
                 desired.Value,
@@ -812,20 +930,29 @@ public sealed class ProvisioningEngine
     private static void ValidateUncompletedPlanState(
         ProvisioningOperation operation,
         ProvisioningPlan persistedPlan,
-        ProvisioningPlan currentPlan,
-        IReadOnlyList<ProfileApplication> requests)
+        ProvisioningPlan currentPlan)
     {
-        for (var index = operation.Completed; index < requests.Count; index++)
+        if (persistedPlan.Items.Count != currentPlan.Items.Count)
+        {
+            operation.Status = ProvisioningOperationStatuses.Stale;
+            operation.CanResume = false;
+            operation.Error = "Provisioning plan is stale because the desired-state item set changed.";
+            throw new InvalidOperationException(operation.Error);
+        }
+
+        for (var index = operation.Completed; index < persistedPlan.Items.Count; index++)
         {
             var expected = persistedPlan.Items[index];
             var observed = currentPlan.Items[index];
 
-            if (!string.Equals(expected.ComponentId, observed.ComponentId, StringComparison.Ordinal)
+            if (!string.Equals(expected.Domain, observed.Domain, StringComparison.Ordinal)
+                || !string.Equals(expected.TargetId, observed.TargetId, StringComparison.Ordinal)
                 || !string.Equals(expected.StateCode, observed.StateCode, StringComparison.Ordinal)
                 || !string.Equals(expected.ActionCode, observed.ActionCode, StringComparison.Ordinal)
                 || !string.Equals(expected.InstalledVersion, observed.InstalledVersion, StringComparison.Ordinal)
                 || !string.Equals(expected.AvailableVersion, observed.AvailableVersion, StringComparison.Ordinal)
-                || !string.Equals(expected.DesiredVersion, observed.DesiredVersion, StringComparison.Ordinal))
+                || !string.Equals(expected.DesiredVersion, observed.DesiredVersion, StringComparison.Ordinal)
+                || !string.Equals(expected.ObservedValue, observed.ObservedValue, StringComparison.Ordinal))
             {
                 operation.Status = ProvisioningOperationStatuses.Stale;
                 operation.CanResume = false;
@@ -836,6 +963,62 @@ public sealed class ProvisioningEngine
                 throw new InvalidOperationException(operation.Error);
             }
         }
+    }
+
+    private static RegistrySettingDesiredState FindRegistryDesired(
+        ProfileManifest profile,
+        string targetId)
+    {
+        var desired = profile.DesiredState?.RegistrySettings
+            .FirstOrDefault(item =>
+                string.Equals(
+                    $"registry:{item.Hive}:{item.Key}:{item.ValueName}",
+                    targetId,
+                    StringComparison.Ordinal));
+
+        return desired
+            ?? throw new InvalidOperationException($"Unknown registry desired-state target '{targetId}'.");
+    }
+
+    private static void ValidateRegistryPostcondition(
+        ProvisioningPlanItem planned,
+        ProvisioningPlanItem verified)
+    {
+        if (verified.StateCode != DesiredStateStateCodes.Compliant
+            || verified.ActionCode != ProvisioningActionCodes.None)
+        {
+            throw new InvalidOperationException(
+                $"Post-condition verification failed for registry target '{planned.ComponentName}': {verified.Message}");
+        }
+    }
+
+    private void RollbackRegistrySnapshots(ProvisioningOperation operation)
+    {
+        var failures = new List<string>();
+
+        var rollbackStartIndex = operation.RegistrySnapshots
+            .Select(snapshot => snapshot.PlanIndex)
+            .DefaultIfEmpty(operation.Completed)
+            .Min();
+
+        foreach (var snapshot in operation.RegistrySnapshots.AsEnumerable().Reverse())
+        {
+            try
+            {
+                _registryWriter.Restore(snapshot);
+            }
+            catch (Exception ex)
+            {
+                failures.Add($"{snapshot.Hive}\\{snapshot.Key}\\{snapshot.ValueName}: {ex.Message}");
+            }
+        }
+
+        if (failures.Count > 0)
+            throw new InvalidOperationException(
+                "Registry rollback failed: " + string.Join(" | ", failures));
+
+        operation.Completed = Math.Min(operation.Completed, rollbackStartIndex);
+        operation.RegistrySnapshots.Clear();
     }
 
     private void Save(ProvisioningOperation operation)

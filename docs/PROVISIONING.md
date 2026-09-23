@@ -25,7 +25,7 @@ After confirmation, Apply executes the persisted plan. It does not silently reco
 
 Before any uncompleted mutation, the current observed state is compared with the corresponding planned precondition. If it differs, the operation becomes `stale`, is persisted in that terminal state and cannot be resumed. The user must generate and explicitly confirm a new plan.
 
-Each completed mutation is followed by post-condition verification. After all planned steps, a final state verification confirms that the desired state is actually satisfied.
+Each completed mutation is followed by post-condition verification. Registry mutations are journaled with a pre-mutation snapshot before the write. If a registry write, post-condition check, final verification or later operation step fails, the persisted registry snapshots are restored in reverse order; rollback failure is reported explicitly and the operation is not marked resumable. After all planned steps, a final state verification confirms that the desired state is actually satisfied.
 
 ## Interactive installers
 Resolve and verify the installer, launch it, wait for completion, rescan the machine and verify the expected state.
@@ -36,7 +36,7 @@ Installation is online-first. If a verified local artifact already matches the r
 ## Recovery
 Durable operations survive restart where technically possible. A failed operation may be resumed only when its persisted operation is explicitly resumable. Resume reuses the same confirmed plan and repeats precondition validation before any uncompleted mutation.
 
-A stale operation is never resumed because doing so would execute against state different from the state the user confirmed.
+A stale operation is never resumed because doing so would execute against state different from the state the user confirmed. A failed operation with successful registry rollback may be resumed; resume revalidates the persisted plan before any uncompleted mutation.
 
 ## Cancellation
 Cancellation is cooperative. If an external installer cannot safely stop, Workspace Control waits for a safe boundary.
