@@ -12,7 +12,7 @@ public partial class App : Microsoft.UI.Xaml.Application
     {
         InitializeComponent();
         Application = WorkspaceControlApplicationFactory.Create();
-        ViewModel = new WorkspaceControlViewModel(Application);
+        ViewModel = new WorkspaceControlViewModel(Application, new WinUiLocalizer());
     }
 
     public IWorkspaceControlApplication Application { get; }
