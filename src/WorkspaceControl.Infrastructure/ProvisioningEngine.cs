@@ -93,7 +93,7 @@ public sealed class ProvisioningEngine
         };
     }
 
-    public string Start(string profileId, bool cacheOnly)
+    public string Start(string profileId)
     {
         var profile = GetProfile(profileId);
         var operation = new ProvisioningOperation
@@ -106,7 +106,7 @@ public sealed class ProvisioningEngine
         Save(operation);
         try
         {
-            LaunchWorker(operation.OperationId, cacheOnly);
+            LaunchWorker(operation.OperationId);
         }
         catch (Exception ex)
         {
@@ -122,7 +122,6 @@ public sealed class ProvisioningEngine
 
     public async Task RunAsync(
         string operationId,
-        bool cacheOnly,
         CancellationToken token)
     {
         var operation = Get(operationId)
@@ -165,7 +164,7 @@ public sealed class ProvisioningEngine
 
                 try
                 {
-                    await _installer.InstallAsync(component, cacheOnly, token);
+                    await _installer.InstallAsync(component, token);
                     operation.Steps.Add(
                         new ProvisioningStep(component.Id, component.Name, "completed"));
                     operation.Completed = index + 1;
@@ -227,7 +226,7 @@ public sealed class ProvisioningEngine
             .Select(x => x!)
             .OrderByDescending(x => x.UpdatedAt);
 
-    public string Resume(string id, bool cacheOnly)
+    public string Resume(string id)
     {
         var operation = Get(id)
             ?? throw new InvalidOperationException("Opération introuvable.");
@@ -252,11 +251,11 @@ public sealed class ProvisioningEngine
         return operation.OperationId;
     }
 
-    private void LaunchWorker(string operationId, bool cacheOnly)
+    private void LaunchWorker(string operationId)
     {
         var processPath = Environment.ProcessPath
             ?? throw new InvalidOperationException(
-                "Impossible de déterminer le processus Workspace Bootstrap.");
+                "Impossible de déterminer le processus Workspace Control.");
 
         var currentAssembly = Environment.ProcessPath;
         var entryAssembly = System.Reflection.Assembly.GetEntryAssembly()?.Location;
@@ -280,8 +279,6 @@ public sealed class ProvisioningEngine
             psi.ArgumentList.Add("provisioning-worker");
             psi.ArgumentList.Add("--operation");
             psi.ArgumentList.Add(operationId);
-            if (cacheOnly)
-                psi.ArgumentList.Add("--cache-only");
         }
         else
         {
@@ -295,8 +292,6 @@ public sealed class ProvisioningEngine
             psi.ArgumentList.Add("provisioning-worker");
             psi.ArgumentList.Add("--operation");
             psi.ArgumentList.Add(operationId);
-            if (cacheOnly)
-                psi.ArgumentList.Add("--cache-only");
         }
 
         var worker = Process.Start(psi)
