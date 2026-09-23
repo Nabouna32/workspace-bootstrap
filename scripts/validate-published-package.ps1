@@ -11,8 +11,8 @@ $catalog = Join-Path $PackageRoot 'bootstrap\windows\components\catalog.json'
 $profiles = Join-Path $PackageRoot 'bootstrap\windows\profiles'
 $readme = Join-Path $PackageRoot 'README.md'
 $license = Join-Path $PackageRoot 'LICENSE'
-$englishResources = Join-Path $PackageRoot 'Strings\en-US\Resources.resw'
-$frenchResources = Join-Path $PackageRoot 'Strings\fr-FR\Resources.resw'
+$englishResources = Join-Path $PackageRoot 'WorkspaceControl\Strings\en-US\Resources.resw'
+$frenchResources = Join-Path $PackageRoot 'WorkspaceControl\Strings\fr-FR\Resources.resw'
 
 $requiredFiles = @(
     $desktop,
