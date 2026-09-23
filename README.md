@@ -2,14 +2,14 @@
 
 **Workspace Control** is a permanent Windows 11 control center for managing a PC throughout its lifetime.
 
-It brings software management, Windows configuration, diagnostics, maintenance, optimization, drivers, WSL, profiles and offline cache into one understandable application.
+It brings software management, Windows configuration, diagnostics, maintenance, optimization, drivers, WSL and desired-state profiles into one understandable application.
 
 ## Main capabilities
 
 - Install, update and uninstall applications.
 - Discover applications even without a curated definition.
 - Identify residuals conservatively.
-- Maintain a verified offline software cache.
+- Reuse a verified local installer when it already matches the requested current version.
 - Choose the appropriate installation source/provider, including interactive vendor installers.
 - Inspect and configure supported Windows settings and policies.
 - Recommend and apply documented optimizations.
