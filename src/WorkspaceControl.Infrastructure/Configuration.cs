@@ -36,6 +36,55 @@ public sealed class ConfigurationStore
             .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
     }
 
+
+    public string ExportProfile(string profileId, string destinationPath)
+    {
+        var profile = LoadProfiles().TryGetValue(profileId, out var value)
+            ? value
+            : throw new KeyNotFoundException($"Unknown profile: {profileId}");
+
+        var fullPath = Path.GetFullPath(destinationPath);
+        var parent = Path.GetDirectoryName(fullPath)
+            ?? throw new InvalidOperationException("The export destination has no parent directory.");
+
+        Directory.CreateDirectory(parent);
+
+        var json = JsonSerializer.Serialize(profile, JsonDefaults.Options);
+        File.WriteAllText(fullPath, json);
+        return fullPath;
+    }
+
+    public ProfileManifest ImportProfile(string sourcePath, bool overwrite = false)
+    {
+        var fullPath = Path.GetFullPath(sourcePath);
+        if (!File.Exists(fullPath))
+            throw new FileNotFoundException("Profile file was not found.", fullPath);
+
+        var profile = JsonSerializer.Deserialize<ProfileManifest>(
+            File.ReadAllText(fullPath), JsonDefaults.Options)
+            ?? throw new InvalidOperationException("The imported profile is invalid.");
+
+        ValidateProfile(profile, Path.GetFileName(fullPath));
+
+        var destination = Path.Combine(ProfilesRoot, $"{profile.Id}.json");
+        if (File.Exists(destination) && !overwrite)
+            throw new IOException($"Profile '{profile.Id}' already exists.");
+
+        var temporary = destination + $".{Guid.NewGuid():N}.tmp";
+        try
+        {
+            File.WriteAllText(temporary, JsonSerializer.Serialize(profile, JsonDefaults.Options));
+            File.Move(temporary, destination, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(temporary))
+                File.Delete(temporary);
+        }
+
+        return profile;
+    }
+
     public IReadOnlyDictionary<string, ProfileManifest> LoadProfiles() =>
         Directory.EnumerateFiles(ProfilesRoot, "*.json")
             .Select(path =>
@@ -45,21 +94,31 @@ public sealed class ConfigurationStore
                     ?? throw new InvalidOperationException(
                         $"Invalid profile: {Path.GetFileName(path)}");
 
-                if (profile.SchemaVersion is not (1 or 2))
-                    throw new InvalidOperationException(
-                        $"Unsupported profile schema version '{profile.SchemaVersion}' in {Path.GetFileName(path)}.");
-
-                if (profile.SchemaVersion == 1 && (profile.Components is null || profile.Components.Length == 0))
-                    throw new InvalidOperationException(
-                        $"Legacy profile '{Path.GetFileName(path)}' must declare at least one component.");
-
-                if (profile.SchemaVersion == 2 && profile.DesiredState is null)
-                    throw new InvalidOperationException(
-                        $"Profile '{Path.GetFileName(path)}' must declare desiredState for schema version 2.");
-
+                ValidateProfile(profile, Path.GetFileName(path));
                 return profile;
             })
             .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+
+    private static void ValidateProfile(ProfileManifest profile, string sourceName)
+    {
+        if (profile.SchemaVersion is not (1 or 2))
+            throw new InvalidOperationException(
+                $"Unsupported profile schema version '{profile.SchemaVersion}' in {sourceName}.");
+
+        if (string.IsNullOrWhiteSpace(profile.Id) ||
+            profile.Id.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 ||
+            profile.Id.Contains('/') ||
+            profile.Id.Contains('\\'))
+            throw new InvalidOperationException($"Profile id '{profile.Id}' is not a valid profile identifier.");
+
+        if (profile.SchemaVersion == 1 && (profile.Components is null || profile.Components.Length == 0))
+            throw new InvalidOperationException(
+                $"Legacy profile '{sourceName}' must declare at least one component.");
+
+        if (profile.SchemaVersion == 2 && profile.DesiredState is null)
+            throw new InvalidOperationException(
+                $"Profile '{sourceName}' must declare desiredState for schema version 2.");
+    }
 
     private void ValidateLayout()
     {
