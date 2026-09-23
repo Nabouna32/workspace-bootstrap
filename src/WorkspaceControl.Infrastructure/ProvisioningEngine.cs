@@ -694,8 +694,12 @@ public sealed class ProvisioningEngine
 
                 if (planned.ActionCode == ProvisioningActionCodes.None)
                 {
-                    if (verified.StateCode != ProvisioningStateCodes.Installed
-                        || verified.ActionCode != ProvisioningActionCodes.None)
+                    if (planned.StateCode == ProvisioningStateCodes.Absent)
+                    {
+                        ValidateRemovePostcondition(planned, verified);
+                    }
+                    else if (verified.StateCode != ProvisioningStateCodes.Installed
+                             || verified.ActionCode != ProvisioningActionCodes.None)
                     {
                         throw new InvalidOperationException(
                             $"Final state verification failed for '{planned.ComponentName}': {verified.Message}");
