@@ -111,24 +111,53 @@ public sealed class ProvisioningEngine
                 : $"Installed version: {match.Version ?? "unknown"}.");
     }
 
-    public string Start(string profileId)
+    public async Task<ProvisioningOperation> CreateAsync(
+        string profileId,
+        CancellationToken token = default)
     {
-        var profile = GetProfile(profileId);
+        var plan = await PlanAsync(profileId, token);
         var operation = new ProvisioningOperation
         {
-            ProfileId = profile.Id,
-            Status = "queued",
-            Total = profile.Components.Length
+            ProfileId = plan.ProfileId,
+            Plan = plan,
+            Status = ProvisioningOperationStatuses.AwaitingConfirmation,
+            Total = plan.Items.Count,
+            CanResume = false
         };
 
         Save(operation);
+        return operation;
+    }
+
+    public string Confirm(string operationId)
+    {
+        var operation = Get(operationId)
+            ?? throw new InvalidOperationException("Operation not found.");
+
+        if (operation.Status != ProvisioningOperationStatuses.AwaitingConfirmation)
+            throw new InvalidOperationException(
+                "Only an operation awaiting confirmation can be confirmed.");
+
+        if (operation.Plan is null)
+            throw new InvalidOperationException(
+                "The operation does not contain a provisioning plan.");
+
+        if (operation.Plan.Items.Any(item => item.ActionCode == ProvisioningActionCodes.Blocked))
+            throw new InvalidOperationException(
+                "The provisioning plan contains blocked actions and cannot be confirmed.");
+
+        operation.Status = ProvisioningOperationStatuses.Queued;
+        operation.CanResume = false;
+        operation.Error = null;
+        Save(operation);
+
         try
         {
             LaunchWorker(operation.OperationId);
         }
         catch (Exception ex)
         {
-            operation.Status = "failed";
+            operation.Status = ProvisioningOperationStatuses.Failed;
             operation.Error = $"Unable to start worker: {ex.Message}";
             operation.CanResume = true;
             Save(operation);
@@ -145,7 +174,7 @@ public sealed class ProvisioningEngine
         var operation = Get(operationId)
             ?? throw new InvalidOperationException("Operation not found.");
 
-        if (operation.Status is "completed")
+        if (operation.Status is ProvisioningOperationStatuses.Completed)
             return;
 
         await using var operationLock = await AcquireOperationLockAsync(token);
@@ -158,17 +187,24 @@ public sealed class ProvisioningEngine
 
         var profile = GetProfile(operation.ProfileId);
         var components = _config.LoadComponents();
+        var plan = operation.Plan
+            ?? throw new InvalidOperationException(
+                "The operation has no persisted provisioning plan.");
+
+        if (operation.Status is ProvisioningOperationStatuses.AwaitingConfirmation)
+            throw new InvalidOperationException(
+                "The provisioning plan must be explicitly confirmed before it can be applied.");
+
+        if (plan.Items.Count != profile.Components.Length)
+            throw new InvalidOperationException(
+                "Persisted provisioning plan is inconsistent with the current profile.");
 
         try
         {
-            var plan = await PlanAsync(operation.ProfileId, token);
-            if (plan.Items.Count != profile.Components.Length)
-            {
-                throw new InvalidOperationException(
-                    "Provisioning plan is inconsistent with the profile.");
-            }
+            var currentPlan = await PlanAsync(operation.ProfileId, token);
+            ValidateUncompletedPlanState(operation, plan, currentPlan, profile.Components);
 
-            operation.Status = "running";
+            operation.Status = ProvisioningOperationStatuses.Running;
             operation.Error = null;
             operation.CanResume = true;
             Save(operation);
@@ -224,14 +260,26 @@ public sealed class ProvisioningEngine
                     operation.Steps.Add(
                         new ProvisioningStep(component.Id, component.Name, "failed", ex.Message));
                     operation.Error = ex.Message;
-                    operation.Status = "failed";
+                    operation.Status = ProvisioningOperationStatuses.Failed;
                     operation.CanResume = true;
                     Save(operation);
                     return;
                 }
             }
 
-            operation.Status = "completed";
+            var finalPlan = await PlanAsync(operation.ProfileId, token);
+            var unresolved = finalPlan.Items
+                .Where(item => item.StateCode != ProvisioningStateCodes.Installed
+                    || item.ActionCode != ProvisioningActionCodes.None)
+                .ToArray();
+
+            if (unresolved.Length > 0)
+            {
+                throw new InvalidOperationException(
+                    $"Final state verification failed for: {string.Join(", ", unresolved.Select(x => x.ComponentName))}.");
+            }
+
+            operation.Status = ProvisioningOperationStatuses.Completed;
             operation.CurrentComponentName = null;
             operation.CanResume = false;
             operation.Error = null;
@@ -279,7 +327,7 @@ public sealed class ProvisioningEngine
         var operation = Get(id)
             ?? throw new InvalidOperationException("Operation not found.");
 
-        if (operation.Status != "failed" || !operation.CanResume)
+        if (operation.Status != ProvisioningOperationStatuses.Failed || !operation.CanResume)
             throw new InvalidOperationException(
                 "This operation cannot be resumed.");
 
@@ -378,6 +426,33 @@ public sealed class ProvisioningEngine
         _config.LoadProfiles().TryGetValue(id, out var profile)
             ? profile
             : throw new InvalidOperationException($"Unknown profile: {id}");
+
+    private static void ValidateUncompletedPlanState(
+        ProvisioningOperation operation,
+        ProvisioningPlan persistedPlan,
+        ProvisioningPlan currentPlan,
+        IReadOnlyList<string> componentIds)
+    {
+        for (var index = operation.Completed; index < componentIds.Count; index++)
+        {
+            var expected = persistedPlan.Items[index];
+            var observed = currentPlan.Items[index];
+
+            if (!string.Equals(expected.ComponentId, observed.ComponentId, StringComparison.Ordinal)
+                || !string.Equals(expected.StateCode, observed.StateCode, StringComparison.Ordinal)
+                || !string.Equals(expected.ActionCode, observed.ActionCode, StringComparison.Ordinal)
+                || !string.Equals(expected.InstalledVersion, observed.InstalledVersion, StringComparison.Ordinal))
+            {
+                operation.Status = ProvisioningOperationStatuses.Stale;
+                operation.CanResume = false;
+                operation.Error =
+                    $"Provisioning plan is stale for '{expected.ComponentName}'. " +
+                    $"Observed state is {observed.StateCode}/{observed.ActionCode} " +
+                    $"but the confirmed plan expected {expected.StateCode}/{expected.ActionCode}.";
+                throw new InvalidOperationException(operation.Error);
+            }
+        }
+    }
 
     private void Save(ProvisioningOperation operation)
     {
