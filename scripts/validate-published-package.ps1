@@ -45,7 +45,7 @@ if ($LASTEXITCODE -ne 0) {
 $werKey = 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\WorkspaceControl.exe'
 $werConfigured = $false
 $werCreated = $false
-$dumpFilesBefore = @()
+$werBackup = $null
 
 if ($DiagnosticsDirectory) {
     if (-not (Test-Path $DiagnosticsDirectory -PathType Container)) {
@@ -54,10 +54,14 @@ if ($DiagnosticsDirectory) {
 
     $werDumpDirectory = Join-Path $DiagnosticsDirectory 'dumps'
     New-Item -ItemType Directory -Force -Path $werDumpDirectory | Out-Null
-    $dumpFilesBefore = @(Get-ChildItem -Path $werDumpDirectory -Filter '*.dmp' -File -ErrorAction SilentlyContinue)
 
     try {
+        $werBackup = Join-Path $DiagnosticsDirectory 'WorkspaceControl-WER.reg'
         if (Test-Path $werKey) {
+            & reg.exe export 'HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\WorkspaceControl.exe' $werBackup /y | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+                throw "reg.exe export failed with exit code $LASTEXITCODE."
+            }
             Remove-Item -Path $werKey -Recurse -Force
         }
 
@@ -75,9 +79,11 @@ if ($DiagnosticsDirectory) {
 }
 
 $process = $null
+$launchTimeUtc = $null
 
 try {
     Write-Host "Launching published WinUI desktop application..."
+    $launchTimeUtc = [DateTime]::UtcNow
     $process = Start-Process -FilePath $desktop -WorkingDirectory (Split-Path $desktop) -PassThru
 
     Start-Sleep -Seconds 10
@@ -85,11 +91,11 @@ try {
     if ($process.HasExited) {
         if ($DiagnosticsDirectory -and $werConfigured) {
             Start-Sleep -Seconds 3
-            $dumpFilesAfter = @(Get-ChildItem -Path (Join-Path $DiagnosticsDirectory 'dumps') -Filter '*.dmp' -File -ErrorAction SilentlyContinue)
-            $newDump = $dumpFilesAfter | Where-Object {
-                $before = $dumpFilesBefore | Where-Object { $_.FullName -eq $_.FullName }
-                $_.LastWriteTimeUtc -ge $process.StartTime.ToUniversalTime()
-            } | Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
+            $dumpDirectory = Join-Path $DiagnosticsDirectory 'dumps'
+            $newDump = Get-ChildItem -Path $dumpDirectory -Filter '*.dmp' -File -ErrorAction SilentlyContinue |
+                Where-Object { $_.LastWriteTimeUtc -ge $launchTimeUtc } |
+                Sort-Object LastWriteTimeUtc -Descending |
+                Select-Object -First 1
 
             if ($newDump) {
                 Write-Host "Captured native crash dump: $($newDump.FullName)"
@@ -126,5 +132,12 @@ finally {
 
     if ($werCreated) {
         Remove-Item -Path $werKey -Recurse -Force -ErrorAction SilentlyContinue
+
+        if ($werBackup -and (Test-Path $werBackup)) {
+            & reg.exe import $werBackup | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+                Write-Warning "Failed to restore the previous WER configuration from $werBackup."
+            }
+        }
     }
 }
