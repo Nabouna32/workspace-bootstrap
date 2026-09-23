@@ -92,6 +92,51 @@ public sealed class ConfigurationTests
         }
     }
 
+
+    [TestMethod]
+    public async Task Desired_state_diff_exposes_application_observation_without_mutation()
+    {
+        var configuration = new ConfigurationStore(FindRepositoryRoot());
+        var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-diff-tests", Guid.NewGuid().ToString("N")));
+        var engine = new ProvisioningEngine(
+            configuration,
+            new InstallerEngine(paths),
+            paths,
+            new InventoryScanner([new VersionedInventoryProvider("Microsoft.VisualStudioCode", "1.0.0", "2.0.0")]));
+
+        var diff = await engine.DiffAsync("development-extended");
+        var item = diff.Items.Single(item => item.TargetId == "vscode");
+
+        Assert.AreEqual(DesiredStateDomainCodes.Application, item.Domain);
+        Assert.AreEqual(ProvisioningStateCodes.Outdated, item.StateCode);
+        Assert.AreEqual(ProvisioningActionCodes.Update, item.ActionCode);
+        Assert.AreEqual("1.0.0", item.ObservedValue);
+        Assert.AreEqual("2.0.0", item.AvailableValue);
+        Assert.AreEqual("2.0.0", item.DesiredValue);
+    }
+
+    [TestMethod]
+    public async Task Provisioning_plan_is_derived_from_the_same_desired_state_diff()
+    {
+        var configuration = new ConfigurationStore(FindRepositoryRoot());
+        var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-diff-tests", Guid.NewGuid().ToString("N")));
+        var engine = new ProvisioningEngine(
+            configuration,
+            new InstallerEngine(paths),
+            paths,
+            new InventoryScanner([new VersionedInventoryProvider("Microsoft.VisualStudioCode", "1.0.0", "2.0.0")]));
+
+        var diff = await engine.DiffAsync("development-extended");
+        var plan = await engine.PlanAsync("development-extended");
+        var diffItem = diff.Items.Single(item => item.TargetId == "vscode");
+        var planItem = plan.Items.Single(item => item.ComponentId == "vscode");
+
+        Assert.AreEqual(diffItem.ObservedValue, planItem.InstalledVersion);
+        Assert.AreEqual(diffItem.AvailableValue, planItem.AvailableVersion);
+        Assert.AreEqual(diffItem.DesiredValue, planItem.DesiredVersion);
+        Assert.AreEqual(diffItem.ActionCode, planItem.ActionCode);
+    }
+
     [TestMethod]
     public async Task Provisioning_plan_uses_available_version_for_latest_stable()
     {
