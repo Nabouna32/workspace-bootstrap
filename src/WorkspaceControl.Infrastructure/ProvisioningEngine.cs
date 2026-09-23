@@ -548,10 +548,26 @@ public sealed class ProvisioningEngine
             Save(operation);
 
             var finalPlan = await PlanAsync(operation.ProfileId, token);
-            for (var index = 0; index < plan.Items.Count; index++)
+            if (finalPlan.Items.Count != plan.Items.Count)
+                throw new InvalidOperationException(
+                    "Final state verification failed because the desired-state item set changed.");
+
+            foreach (var planned in plan.Items)
             {
-                var planned = plan.Items[index];
-                var verified = finalPlan.Items[index];
+                var verified = finalPlan.Items.FirstOrDefault(item =>
+                    string.Equals(item.TargetId, planned.TargetId, StringComparison.Ordinal)
+                    && string.Equals(item.Domain, planned.Domain, StringComparison.Ordinal))
+                    ?? throw new InvalidOperationException(
+                        $"Final state verification target '{planned.TargetId}' was not observed.");
+
+                if (string.Equals(
+                        planned.Domain,
+                        DesiredStateDomainCodes.RegistrySetting,
+                        StringComparison.Ordinal))
+                {
+                    ValidateRegistryPostcondition(planned, verified);
+                    continue;
+                }
 
                 if (planned.ActionCode == ProvisioningActionCodes.None)
                 {
@@ -565,12 +581,19 @@ public sealed class ProvisioningEngine
                     continue;
                 }
 
-                var request = requests[index];
-                if (!components.TryGetValue(request.ComponentId, out var catalogComponent))
-                    throw new InvalidOperationException($"Unknown component: {request.ComponentId}");
-                var component = ApplyProfileOverrides(catalogComponent, request);
+                if (!components.TryGetValue(planned.ComponentId, out var catalogComponent))
+                    throw new InvalidOperationException($"Unknown component: {planned.ComponentId}");
 
-                ValidatePostcondition(component, planned, verified);
+                var request = profile.ApplicationRequests
+                    .FirstOrDefault(item =>
+                        string.Equals(item.ComponentId, planned.ComponentId, StringComparison.Ordinal))
+                    ?? throw new InvalidOperationException(
+                        $"Profile '{profile.Id}' does not contain application '{planned.ComponentId}'.");
+
+                ValidatePostcondition(
+                    ApplyProfileOverrides(catalogComponent, request),
+                    planned,
+                    verified);
             }
 
             operation.Status = ProvisioningOperationStatuses.Completed;
@@ -581,6 +604,19 @@ public sealed class ProvisioningEngine
         }
         catch (OperationCanceledException)
         {
+            try
+            {
+                RollbackRegistrySnapshots(operation);
+            }
+            catch (Exception rollbackEx)
+            {
+                operation.Error = $"Operation cancelled. Registry rollback failed: {rollbackEx.Message}";
+                operation.Status = ProvisioningOperationStatuses.Failed;
+                operation.CanResume = false;
+                Save(operation);
+                throw;
+            }
+
             operation.Status = ProvisioningOperationStatuses.Failed;
             operation.Error = "Operation cancelled.";
             operation.CanResume = true;
@@ -589,7 +625,20 @@ public sealed class ProvisioningEngine
         }
         catch (Exception ex)
         {
-            operation.Status = "failed";
+            try
+            {
+                RollbackRegistrySnapshots(operation);
+            }
+            catch (Exception rollbackEx)
+            {
+                operation.Status = ProvisioningOperationStatuses.Failed;
+                operation.Error = $"{ex.Message} Registry rollback also failed: {rollbackEx.Message}";
+                operation.CanResume = false;
+                Save(operation);
+                throw;
+            }
+
+            operation.Status = ProvisioningOperationStatuses.Failed;
             operation.Error = ex.Message;
             operation.CanResume = true;
             Save(operation);
