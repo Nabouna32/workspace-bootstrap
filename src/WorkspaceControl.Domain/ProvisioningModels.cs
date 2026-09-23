@@ -117,7 +117,8 @@ public sealed record ProvisioningRegistrySnapshot(
     string ValueName,
     bool Exists,
     string? Value,
-    string? ValueType);
+    string? ValueType,
+    int PlanIndex = 0);
 
 public static class JsonDefaults
 {
