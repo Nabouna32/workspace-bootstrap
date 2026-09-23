@@ -5,6 +5,7 @@ namespace WorkspaceControl.Application.Contracts;
 public interface IProvisioningService
 {
     IReadOnlyList<ProfileManifest> GetProfiles();
+    Task<DesiredStateDiff> GetDesiredStateDiffAsync(string profileId, CancellationToken cancellationToken = default);
     Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default);
     Task<ProvisioningOperation> CreateAsync(string profileId, CancellationToken cancellationToken = default);
     string Confirm(string operationId);
