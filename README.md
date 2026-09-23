@@ -24,7 +24,7 @@ Workspace Control is not an antivirus, VPN, password manager or generic endpoint
 
 ## User control
 
-Normal interactive mode never silently changes the system. Every meaningful mutation explains what changes, why, scope, risk, reversibility and restart requirements. Irreversible actions are explicitly identified and require stronger confirmation.
+Normal interactive mode never silently changes the system. Provisioning follows an explicit cycle: observe state, calculate a plan, persist it, request user confirmation, apply exactly that confirmed plan, verify postconditions and verify the final state. If the machine changes between planning and apply, the operation is blocked rather than silently replanned. Every meaningful mutation explains what changes, why, scope, risk, reversibility and restart requirements. Irreversible actions are explicitly identified and require stronger confirmation.
 
 ## Technology
 
