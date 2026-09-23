@@ -769,6 +769,12 @@ public sealed class ProvisioningEngine
                 throw;
             }
 
+            if (operation.Status == ProvisioningOperationStatuses.Stale)
+            {
+                Save(operation);
+                throw;
+            }
+
             operation.Status = ProvisioningOperationStatuses.Failed;
             operation.Error = ex.Message;
             operation.CanResume = true;
