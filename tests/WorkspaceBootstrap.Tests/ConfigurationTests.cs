@@ -170,11 +170,18 @@ public sealed class ConfigurationTests
             "winget",
             "latest-stable");
 
+        var componentDirectory = Path.Combine(
+            root,
+            "bootstrap",
+            "windows",
+            "components",
+            "test-app");
+        Directory.CreateDirectory(componentDirectory);
         File.WriteAllText(
             Path.Combine(root, "bootstrap", "windows", "components", "catalog.json"),
             """{"components":["test-app"]}""");
         File.WriteAllText(
-            Path.Combine(root, "bootstrap", "windows", "components", "test-app.json"),
+            Path.Combine(componentDirectory, "component.json"),
             JsonSerializer.Serialize(component, JsonDefaults.Options));
 
         var profile = new ProfileManifest(
