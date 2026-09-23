@@ -182,6 +182,49 @@ public sealed class ProvisioningEngine
             $"Installed version: {installedVersion ?? "unknown"}.");
     }
 
+    private static void ValidatePostcondition(
+        ComponentManifest component,
+        ProvisioningPlanItem planned,
+        ProvisioningPlanItem verified)
+    {
+        if (verified.StateCode != ProvisioningStateCodes.Installed
+            || verified.ActionCode != ProvisioningActionCodes.None)
+        {
+            throw new InvalidOperationException(
+                $"Post-condition verification failed for '{component.Name}': {verified.Message}");
+        }
+
+        if (string.IsNullOrWhiteSpace(verified.InstalledVersion))
+        {
+            throw new InvalidOperationException(
+                $"Post-condition verification failed for '{component.Name}': the installed version is unavailable.");
+        }
+
+        if (string.Equals(component.VersionPolicy, "minimum", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!TryParseVersion(planned.DesiredVersion, out var minimum)
+                || !TryParseVersion(verified.InstalledVersion, out var installed)
+                || installed < minimum)
+            {
+                throw new InvalidOperationException(
+                    $"Post-condition verification failed for '{component.Name}': installed version '{verified.InstalledVersion}' does not satisfy minimum version '{planned.DesiredVersion}'.");
+            }
+
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(planned.DesiredVersion))
+        {
+            if (!TryParseVersion(planned.DesiredVersion, out var desired)
+                || !TryParseVersion(verified.InstalledVersion, out var installed)
+                || installed != desired)
+            {
+                throw new InvalidOperationException(
+                    $"Post-condition verification failed for '{component.Name}': installed version '{verified.InstalledVersion}' does not match confirmed target '{planned.DesiredVersion}'.");
+            }
+        }
+    }
+
     private static bool TryParseVersion(string? value, out Version version)
     {
         if (Version.TryParse(value, out var parsed) && parsed is not null)
