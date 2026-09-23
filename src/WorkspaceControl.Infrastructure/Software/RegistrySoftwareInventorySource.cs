@@ -49,5 +49,6 @@ internal sealed class RegistrySoftwareInventorySource : ISoftwareInventorySource
                     evidence.Description,
                     DateTimeOffset.UtcNow,
                     evidence.IsStrong))
-            .ToArray());
+            .ToArray(),
+            observation.AvailableVersion);
 }
