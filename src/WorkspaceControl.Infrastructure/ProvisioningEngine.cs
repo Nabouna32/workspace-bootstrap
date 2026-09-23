@@ -156,6 +156,10 @@ public sealed class ProvisioningEngine
 
         if (!string.IsNullOrWhiteSpace(availableVersion))
         {
+            var policyDescription = policy == "stable-compatible"
+                ? "stable-compatible available"
+                : "latest stable available";
+
             return new ProvisioningPlanItem(
                 component.Id,
                 component.Name,
@@ -164,7 +168,7 @@ public sealed class ProvisioningEngine
                 installedVersion,
                 availableVersion,
                 availableVersion,
-                $"Installed version: {installedVersion ?? "unknown"}; latest stable available version: {availableVersion}.");
+                $"Installed version: {installedVersion ?? "unknown"}; {policyDescription} version: {availableVersion}.");
         }
 
         return new ProvisioningPlanItem(
