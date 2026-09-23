@@ -19,6 +19,9 @@
   <data name="ProfilesPage_Progress.AutomationProperties.Name" xml:space="preserve"><value>Provisioning progress</value></data>
   <data name="ProfilesPage_CurrentComponent.AutomationProperties.Name" xml:space="preserve"><value>Current provisioning component</value></data>
   <data name="ProfilesPage_ActionCode.AutomationProperties.Name" xml:space="preserve"><value>Planned action</value></data>
+  <data name="ProfilesPage_InstalledVersion.Text" xml:space="preserve"><value>Installed</value></data>
+  <data name="ProfilesPage_AvailableVersion.Text" xml:space="preserve"><value>Available</value></data>
+  <data name="ProfilesPage_DesiredVersion.Text" xml:space="preserve"><value>Desired</value></data>
   <data name="ProfilesPage_StateCode.AutomationProperties.Name" xml:space="preserve"><value>Observed state</value></data>
   <data name="NoProvisioningOperation" xml:space="preserve"><value>No provisioning operation</value></data>
   <data name="AwaitingConfirmation" xml:space="preserve"><value>Awaiting your confirmation</value></data>
