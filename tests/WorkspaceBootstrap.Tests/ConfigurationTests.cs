@@ -80,6 +80,40 @@ public sealed class ConfigurationTests
         }
     }
 
+    [TestMethod]
+    public async Task Provisioning_plan_blocks_mutation_when_inventory_is_incomplete()
+    {
+        var configuration = new ConfigurationStore(FindRepositoryRoot());
+        var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
+        var inventory = new InventoryScanner([new FailedInventoryProvider()]);
+        var engine = new ProvisioningEngine(
+            configuration,
+            new InstallerEngine(paths),
+            paths,
+            inventory);
+
+        var plan = await engine.PlanAsync(configuration.LoadProfiles().Values.First().Id);
+
+        Assert.IsNotEmpty(plan.Items);
+        Assert.IsTrue(plan.Items.All(item =>
+            item.StateCode == "UNKNOWN" &&
+            item.ActionCode == "blocked"));
+    }
+
+    private sealed class FailedInventoryProvider : IInventoryProvider
+    {
+        public string Id => "test.failed";
+
+        public Task<InventoryProviderResult> ScanAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(new InventoryProviderResult(
+                [],
+                new InventoryProviderDiagnostic(
+                    Id,
+                    false,
+                    "Synthetic inventory failure.",
+                    "Test failure.")));
+    }
+
     private static string FindRepositoryRoot()
     {
         var current = new DirectoryInfo(AppContext.BaseDirectory);
@@ -101,7 +135,7 @@ public sealed class ConfigurationTests
 public sealed class ProvisioningPlanContractTests
 {
     [TestMethod]
-    public async Task Provisioning_plan_exposes_desktop_contract_fields()
+    public async Task Provisioning_plan_exposes_typed_contract_fields()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
@@ -112,20 +146,18 @@ public sealed class ProvisioningPlanContractTests
             new InventoryScanner([]));
 
         var plan = await engine.PlanAsync(configuration.LoadProfiles().Values.First().Id);
-        using var document = System.Text.Json.JsonDocument.Parse(
-            System.Text.Json.JsonSerializer.Serialize(plan));
+        Assert.AreEqual(configuration.LoadProfiles().Values.First().Id, plan.ProfileId);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(plan.InventoryScanId));
+        Assert.IsNotEmpty(plan.Items);
 
-        foreach (var item in document.RootElement.GetProperty("Items").EnumerateArray())
+        foreach (var item in plan.Items)
         {
-            Assert.IsTrue(item.TryGetProperty("StateCode", out var state));
-            Assert.IsFalse(string.IsNullOrWhiteSpace(state.GetString()));
-
-            Assert.IsTrue(item.TryGetProperty("ActionCode", out var action));
-            Assert.IsFalse(string.IsNullOrWhiteSpace(action.GetString()));
-
-            Assert.IsTrue(item.TryGetProperty("Message", out var message));
-            Assert.IsFalse(string.IsNullOrWhiteSpace(message.GetString()));
-            Assert.IsTrue(state.GetString() is "MISSING" or "INSTALLED" or "OUTDATED");
+            Assert.IsFalse(string.IsNullOrWhiteSpace(item.ComponentId));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(item.ComponentName));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(item.StateCode));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(item.ActionCode));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(item.Message));
+            Assert.IsTrue(item.StateCode is "MISSING" or "INSTALLED" or "OUTDATED" or "UNKNOWN");
         }
     }
 
