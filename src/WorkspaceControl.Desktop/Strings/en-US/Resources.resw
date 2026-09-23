@@ -45,4 +45,5 @@
   <data name="ResumingProvisioning" xml:space="preserve"><value>Resuming provisioning…</value></data>
   <data name="ProvisioningResumed" xml:space="preserve"><value>Provisioning resumed</value></data>
   <data name="ProvisioningCouldNotResume" xml:space="preserve"><value>Provisioning could not resume</value></data>
+  <data name="MainWindow_Profiles.Content" xml:space="preserve"><value>Profiles</value></data>
 </root>
