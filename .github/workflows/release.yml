@@ -93,6 +93,9 @@ jobs:
           & $cli capabilities
           if ($LASTEXITCODE -ne 0) { throw "Portable CLI smoke test failed with exit code $LASTEXITCODE." }
 
+          Write-Host "Launching published WinUI desktop application..."
+          & .\\scripts\\validate-published-package.ps1 -PackageRoot $package
+
       - name: Create checksum
         shell: pwsh
         run: |
