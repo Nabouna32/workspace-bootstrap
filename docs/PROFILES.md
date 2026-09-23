@@ -23,7 +23,7 @@ Profile
 
 Applications reference the existing component catalog. Optional version constraints in a profile override the catalog policy for that profile only. The provisioning engine remains the single mutation engine; the desired-state model does not introduce a parallel installer path.
 
-The desired-state diff is now available through the shared application contract and CLI. Application items are observed from the same inventory used by provisioning planning. Non-application sections are explicit contracts but are not executable yet: they appear as blocked diff items, and provisioning refuses to create a mutation plan until those sections have an observer/planner.
+The desired-state diff is now available through the shared application contract and CLI. Application items are observed from the same inventory used by provisioning planning. Registry settings are also observed read-only with explicit hive/key/value/type evidence. Registry drift is visible in the diff but remains blocked from mutation until a dedicated, reversible registry capability is introduced. Other non-application sections remain explicit contracts and appear as blocked diff items when populated.
 
 ## Local workflow
 

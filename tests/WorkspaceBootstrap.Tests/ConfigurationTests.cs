@@ -94,6 +94,26 @@ public sealed class ConfigurationTests
 
 
     [TestMethod]
+    public void Registry_desired_state_observer_classifies_matching_values()
+    {
+        var observer = new RegistryDesiredStateObserver(new FakeRegistryReader(
+            new RegistryObservation(true, "1", "dword", null)));
+
+        var result = observer.Observe(
+            new RegistrySettingDesiredState(
+                "HKCU",
+                @"Software\\WorkspaceControl\\Tests",
+                "Enabled",
+                "1",
+                "dword"));
+
+        Assert.IsTrue(result.Exists);
+        Assert.AreEqual("1", result.Value);
+        Assert.AreEqual("dword", result.ValueType);
+        Assert.IsNull(result.Error);
+    }
+
+    [TestMethod]
     public void Machine_condition_evaluator_supports_numeric_and_version_comparisons()
     {
         var baseline = new BaselineSnapshot(
@@ -274,6 +294,11 @@ public sealed class ConfigurationTests
         Assert.IsTrue(plan.Items.All(item =>
             item.StateCode == "UNKNOWN" &&
             item.ActionCode == "blocked"));
+    }
+
+    private sealed class FakeRegistryReader(RegistryObservation observation) : IRegistryReader
+    {
+        public RegistryObservation Read(RegistrySettingDesiredState desired) => observation;
     }
 
     private sealed class FailedInventoryProvider : IInventoryProvider
