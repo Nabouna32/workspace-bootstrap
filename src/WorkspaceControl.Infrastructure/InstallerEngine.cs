@@ -13,7 +13,7 @@ public sealed class InstallerEngine
 
     public InstallerEngine(WorkspacePaths paths) => _paths = paths;
 
-    public async Task InstallAsync(ComponentManifest component, string actionCode, CancellationToken token)
+    public async Task InstallAsync(ComponentManifest component, string actionCode, string? desiredVersion, CancellationToken token)
     {
         if (string.IsNullOrWhiteSpace(component.PackageId))
             throw new InvalidOperationException($"Le composant '{component.Id}' ne possède aucun packageId.");
@@ -64,14 +64,14 @@ public sealed class InstallerEngine
         CancellationToken token)
     {
         if (component.OfficialSource is null)
-            return await InstallViaWingetFallbackAsync(component, actionCode, token);
+            return await InstallViaWingetFallbackAsync(component, actionCode, desiredVersion, token);
 
         return component.OfficialSource.Type switch
         {
-            "github-release" => await ResolveGitHubReleaseAsync(component, component.OfficialSource, token),
-            "rarlab-localized" => await ResolveRarLabAsync(component, token),
-            "chrome-enterprise" => await ResolveChromeAsync(component, token),
-            _ => await InstallViaWingetFallbackAsync(component, actionCode, token)
+            "github-release" => await ResolveGitHubReleaseAsync(component, component.OfficialSource, desiredVersion, token),
+            "rarlab-localized" => await ResolveRarLabAsync(component, desiredVersion, token),
+            "chrome-enterprise" => await ResolveChromeAsync(component, desiredVersion, token),
+            _ => await InstallViaWingetFallbackAsync(component, actionCode, desiredVersion, token)
         };
     }
 
@@ -128,12 +128,15 @@ public sealed class InstallerEngine
     private async Task<InstallerArtifact> ResolveGitHubReleaseAsync(
         ComponentManifest component,
         OfficialSource source,
+        string? desiredVersion,
         CancellationToken token)
     {
         if (string.IsNullOrWhiteSpace(source.Repository))
             throw new InvalidOperationException($"La source GitHub du composant '{component.Name}' est incomplète.");
 
-        var url = $"https://api.github.com/repos/{source.Repository}/releases/latest";
+        var url = string.IsNullOrWhiteSpace(desiredVersion)
+            ? $"https://api.github.com/repos/{source.Repository}/releases/latest"
+            : $"https://api.github.com/repos/{source.Repository}/releases/tags/{Uri.EscapeDataString(desiredVersion.StartsWith('v') ? desiredVersion : $"v{desiredVersion}")}";
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.UserAgent.ParseAdd("WorkspaceBootstrap/1.0");
 
@@ -147,6 +150,11 @@ public sealed class InstallerEngine
         var versionMatch = Regex.Match(tag, source.VersionRegex ?? "^v(.+)$");
         if (!versionMatch.Success)
             throw new InvalidOperationException($"Version GitHub inattendue : {tag}");
+
+        var resolvedVersion = versionMatch.Groups[1].Value;
+        if (!string.IsNullOrWhiteSpace(desiredVersion)
+            && !string.Equals(resolvedVersion, desiredVersion, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"Official source resolved version {resolvedVersion}, but {desiredVersion} was required.");
 
         var asset = doc.RootElement.GetProperty("assets")
             .EnumerateArray()
@@ -164,7 +172,7 @@ public sealed class InstallerEngine
 
         return await DownloadAndVerifyAsync(
             component,
-            versionMatch.Groups[1].Value,
+            resolvedVersion,
             asset.Url,
             asset.Name,
             token);
@@ -172,6 +180,7 @@ public sealed class InstallerEngine
 
     private async Task<InstallerArtifact> ResolveRarLabAsync(
         ComponentManifest component,
+        string? desiredVersion,
         CancellationToken token)
     {
         using var request = new HttpRequestMessage(
@@ -192,12 +201,17 @@ public sealed class InstallerEngine
             throw new InvalidOperationException(
                 "Installeur WinRAR français x64 introuvable sur RARLAB.");
 
+        var resolvedVersion = match.Groups["version"].Value;
+        if (!string.IsNullOrWhiteSpace(desiredVersion)
+            && !string.Equals(resolvedVersion, desiredVersion, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"Official source resolved version {resolvedVersion}, but {desiredVersion} was required.");
+
         var relative = match.Groups["url"].Value;
         var uri = new Uri(new Uri("https://www.rarlab.com/"), relative);
 
         return await DownloadAndVerifyAsync(
             component,
-            match.Groups["version"].Value,
+            resolvedVersion,
             uri.ToString(),
             Path.GetFileName(uri.LocalPath),
             token);
@@ -205,6 +219,7 @@ public sealed class InstallerEngine
 
     private async Task<InstallerArtifact> ResolveChromeAsync(
         ComponentManifest component,
+        string? desiredVersion,
         CancellationToken token)
     {
         const string versionApi =
@@ -219,6 +234,10 @@ public sealed class InstallerEngine
             .GetString()
             ?? throw new InvalidOperationException("Version Chrome introuvable.");
 
+        if (!string.IsNullOrWhiteSpace(desiredVersion)
+            && !string.Equals(version, desiredVersion, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"Official source resolved version {version}, but {desiredVersion} was required.");
+
         return await DownloadAndVerifyAsync(
             component,
             version,
@@ -230,6 +249,7 @@ public sealed class InstallerEngine
     private async Task<InstallerArtifact?> InstallViaWingetFallbackAsync(
         ComponentManifest component,
         string actionCode,
+        string? desiredVersion,
         CancellationToken token)
     {
         if (!string.Equals(
@@ -250,7 +270,7 @@ public sealed class InstallerEngine
             CreateNoWindow = true
         };
 
-        foreach (var argument in BuildWingetArguments(component, actionCode))
+        foreach (var argument in BuildWingetArguments(component, actionCode, desiredVersion))
             psi.ArgumentList.Add(argument);
 
         using var process = Process.Start(psi)
@@ -522,7 +542,8 @@ public sealed class InstallerEngine
 
     internal static IReadOnlyList<string> BuildWingetArguments(
         ComponentManifest component,
-        string actionCode)
+        string actionCode,
+        string? desiredVersion = null)
     {
         if (string.IsNullOrWhiteSpace(component.PackageId))
             throw new InvalidOperationException("WinGet fallback requires a package id.");
@@ -534,8 +555,8 @@ public sealed class InstallerEngine
             _ => throw new InvalidOperationException($"Unsupported WinGet provisioning action: {actionCode}")
         };
 
-        return
-        [
+        var arguments = new List<string>
+        {
             command,
             "--id",
             component.PackageId,
@@ -543,7 +564,15 @@ public sealed class InstallerEngine
             "--accept-source-agreements",
             "--accept-package-agreements",
             "--silent"
-        ];
+        };
+
+        if (!string.IsNullOrWhiteSpace(desiredVersion))
+        {
+            arguments.Add("--version");
+            arguments.Add(desiredVersion);
+        }
+
+        return arguments;
     }
 
     private static string Sanitize(string value) =>
