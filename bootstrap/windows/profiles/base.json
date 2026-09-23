@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 1,
   "id": "base",
   "name": "Base du PC",
   "description": "Base complète et polyvalente pour un PC Windows personnel, avec Git pour versionner le dépôt et conserver ses historiques.",
