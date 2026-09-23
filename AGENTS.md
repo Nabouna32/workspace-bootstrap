@@ -12,7 +12,7 @@
 1. User control first: normal interactive mode never mutates silently.
 2. Explain before changing: show what, why, scope, risk, reversibility and restart impact.
 3. Prefer root-cause fixes over workarounds, suppression or hacks.
-4. Local-first: core local workflows work offline where their providers/data permit.
+4. Online-first installation: reuse a verified local installer when it already matches the requested current version; do not design a cache-only/offline provisioning mode.
 5. Capability-driven: desktop, CLI and future API/cloud consume the same capabilities.
 6. Provider-neutral: WinGet is a provider, never the architecture.
 7. Evidence-based inventory: unknown software is still inventory; never guess.
@@ -44,7 +44,7 @@ Workspace Control
 ├── Optimization / Policies
 ├── Diagnostics
 ├── Profiles / Desired state
-├── Cache / Offline
+├── Installer artifact reuse
 ├── Security / Privileged operations
 └── Plugins
 ```
