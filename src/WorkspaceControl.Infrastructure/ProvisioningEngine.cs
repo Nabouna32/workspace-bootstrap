@@ -182,7 +182,7 @@ public sealed class ProvisioningEngine
         operation = Get(operationId)
             ?? throw new InvalidOperationException("Operation not found.");
 
-        if (operation.Status is "completed")
+        if (operation.Status is ProvisioningOperationStatuses.Completed)
             return;
 
         var profile = GetProfile(operation.ProfileId);
@@ -191,9 +191,11 @@ public sealed class ProvisioningEngine
             ?? throw new InvalidOperationException(
                 "The operation has no persisted provisioning plan.");
 
-        if (operation.Status is ProvisioningOperationStatuses.AwaitingConfirmation)
+        if (operation.Status is ProvisioningOperationStatuses.AwaitingConfirmation
+            or ProvisioningOperationStatuses.Stale
+            or ProvisioningOperationStatuses.Completed)
             throw new InvalidOperationException(
-                "The provisioning plan must be explicitly confirmed before it can be applied.");
+                "The provisioning operation is not in an executable state.");
 
         if (plan.Items.Count != profile.Components.Length)
             throw new InvalidOperationException(
@@ -287,7 +289,7 @@ public sealed class ProvisioningEngine
         }
         catch (OperationCanceledException)
         {
-            operation.Status = "failed";
+            operation.Status = ProvisioningOperationStatuses.Failed;
             operation.Error = "Operation cancelled.";
             operation.CanResume = true;
             Save(operation);
@@ -331,13 +333,17 @@ public sealed class ProvisioningEngine
             throw new InvalidOperationException(
                 "This operation cannot be resumed.");
 
+        operation.Status = ProvisioningOperationStatuses.Queued;
+        operation.CanResume = false;
+        Save(operation);
+
         try
         {
             LaunchWorker(operation.OperationId);
         }
         catch (Exception ex)
         {
-            operation.Status = "failed";
+            operation.Status = ProvisioningOperationStatuses.Failed;
             operation.Error = $"Unable to restart worker: {ex.Message}";
             operation.CanResume = true;
             Save(operation);
