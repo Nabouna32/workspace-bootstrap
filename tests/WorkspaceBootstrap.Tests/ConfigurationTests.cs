@@ -46,6 +46,15 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
+    public async Task Inventory_aggregation_preserves_available_version()
+    {
+        var scanner = new InventoryScanner([new AvailableVersionProvider()]);
+        var snapshot = await scanner.ScanAsync();
+
+        Assert.AreEqual("2.0.0", snapshot.Items.Single().AvailableVersion);
+    }
+
+    [TestMethod]
     public void Profiles_are_loadable_and_reference_known_components()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
@@ -112,6 +121,34 @@ public sealed class ConfigurationTests
                     false,
                     "Synthetic inventory failure.",
                     "Test failure.")));
+    }
+
+    private sealed class AvailableVersionProvider : IInventoryProvider
+    {
+        public string Id => "test.available";
+
+        public Task<InventoryProviderResult> ScanAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(new InventoryProviderResult(
+                [
+                    new InventoryObservation(
+                        "test.package",
+                        "Test package",
+                        "1.0.0",
+                        null,
+                        Id,
+                        "Test.Package",
+                        "test",
+                        InventoryScope.System,
+                        null,
+                        null,
+                        "Test",
+                        InventoryOwnership.PackageManagerManaged,
+                        [],
+                        [new InventoryEvidence("installed", "installed", true, Id)],
+                        DateTimeOffset.UtcNow,
+                        "2.0.0")
+                ],
+                new InventoryProviderDiagnostic(Id, true, "Synthetic inventory.")));
     }
 
     private static string FindRepositoryRoot()
