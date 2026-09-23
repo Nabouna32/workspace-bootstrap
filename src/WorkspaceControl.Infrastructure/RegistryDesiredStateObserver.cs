@@ -51,7 +51,8 @@ public sealed class RegistryDesiredStateObserver(IRegistryReader? reader = null)
                 return new RegistryObservation(
                     true,
                     FormatValue(value),
-                    FormatValueType(key.GetValueKind(desired.ValueName)));
+                    FormatValueType(key.GetValueKind(desired.ValueName)),
+                    null);
             }
             catch (Exception ex) when (
                 ex is UnauthorizedAccessException
