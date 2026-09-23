@@ -141,7 +141,7 @@ public sealed class ProvisioningEngine
                 $"Installed version: {installedVersion}; minimum required version: {component.MinimumVersion}.");
         }
 
-        if (!string.IsNullOrWhiteSpace(policy) && policy != "latest-stable")
+        if (!string.IsNullOrWhiteSpace(policy) && policy != "latest-stable" && policy != "stable-compatible")
         {
             return new ProvisioningPlanItem(
                 component.Id,
