@@ -30,20 +30,19 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
     public Task<object> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
         _provisioning.GetPlanAsync(profileId, cancellationToken);
 
-    public string StartProvisioning(string profileId, bool cacheOnly = false) =>
-        _provisioning.Start(profileId, cacheOnly);
+    public string StartProvisioning(string profileId) =>
+        _provisioning.Start(profileId);
 
     public Task RunProvisioningAsync(
         string operationId,
-        bool cacheOnly = false,
         CancellationToken cancellationToken = default) =>
-        _provisioning.RunAsync(operationId, cacheOnly, cancellationToken);
+        _provisioning.RunAsync(operationId, cancellationToken);
 
     public ProvisioningOperation? GetProvisioningStatus(string operationId) =>
         _provisioning.Get(operationId);
 
-    public string ResumeProvisioning(string operationId, bool cacheOnly = false) =>
-        _provisioning.Resume(operationId, cacheOnly);
+    public string ResumeProvisioning(string operationId) =>
+        _provisioning.Resume(operationId);
 
     public IReadOnlyList<ProvisioningOperation> GetProvisioningHistory() =>
         _provisioning.GetHistory();

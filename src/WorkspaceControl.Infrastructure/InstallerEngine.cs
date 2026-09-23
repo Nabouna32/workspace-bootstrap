@@ -13,12 +13,12 @@ public sealed class InstallerEngine
 
     public InstallerEngine(WorkspacePaths paths) => _paths = paths;
 
-    public async Task InstallAsync(ComponentManifest component, bool cacheOnly, CancellationToken token)
+    public async Task InstallAsync(ComponentManifest component, CancellationToken token)
     {
         if (string.IsNullOrWhiteSpace(component.PackageId))
             throw new InvalidOperationException($"Le composant '{component.Id}' ne possède aucun packageId.");
 
-        var artifact = await ResolveArtifactAsync(component, cacheOnly, token);
+        var artifact = await ResolveArtifactAsync(component, token);
         if (artifact is null)
             return;
 
@@ -57,17 +57,8 @@ public sealed class InstallerEngine
 
     private async Task<InstallerArtifact?> ResolveArtifactAsync(
         ComponentManifest component,
-        bool cacheOnly,
         CancellationToken token)
     {
-        if (cacheOnly)
-        {
-            return FindVerifiedCached(component)
-                ?? throw new InvalidOperationException(
-                    $"Aucun installeur vérifié disponible dans le cache pour '{component.Name}'. " +
-                    "Le mode cache-only refuse tout téléchargement.");
-        }
-
         if (component.OfficialSource is null)
             return await InstallViaWingetFallbackAsync(component, token);
 

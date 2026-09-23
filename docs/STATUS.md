@@ -10,7 +10,7 @@ The product is **Workspace Control**, a permanent Windows 11 control center. The
 - Fluent-inspired modern UX with System/Light/Dark themes.
 - Semantic status colors.
 - Simple / Advanced / Expert presentation levels.
-- Local-first and offline-capable.
+- Online-first installation; a verified local installer is reused when it already matches the requested current version. There is no cache-only/offline provisioning mode.
 - Software, Windows administration, diagnostics, cleanup, optimization, drivers and WSL are product domains.
 - Profiles represent desired state.
 - Local import/export first; future cloud/fleet is optional.
@@ -36,7 +36,7 @@ The product is **Workspace Control**, a permanent Windows 11 control center. The
 3. Replace remaining infrastructure composition with a testable dependency-injection/composition strategy where it materially improves lifetime management.
 4. Complete Windows administration, policy, diagnostics, driver and WSL capability boundaries.
 5. Build first-class desired-state diff/plan/confirm/apply/postcondition flows.
-6. Expand cache/offline retention, export/import and integrity verification.
+6. Harden verified installer reuse, artifact retention and integrity verification.
 7. Add Windows integration, published-artifact, UI/accessibility and security validation.
 8. Continue WinUI UX hardening and runtime binding verification.
 9. Remove remaining historical names/dead documentation as each boundary becomes authoritative.

@@ -59,7 +59,7 @@ Providers are replaceable adapters. Examples include official vendor installers,
 The normal UI runs unelevated. A small privileged component accepts a narrow structured command contract and validates all arguments. An explicitly elevated application session may be offered as a convenience but is not the security foundation.
 
 ## Cache
-Cache is a first-class subsystem for staging, verification, immutable versioned artifacts, retention, export/import and offline resolution. Failed downloads never invalidate valid artifacts.
+Installer artifacts are staged and verified before use. A verified artifact is reused when it already matches the requested current version; there is no cache-only/offline provisioning mode. Failed downloads never invalidate valid artifacts.
 
 ## Plugins
 Plugins are planned as a controlled extension boundary for providers, diagnostics, optimizations and Windows/WSL capabilities. Metadata, compatibility and permissions are required; unrestricted privileged access is never implicit.

@@ -13,7 +13,7 @@
 - Application inventory.
 - Install/update/uninstall.
 - Provider selection and interactive installers.
-- Cache/offline workflows.
+- Reuse already-downloaded verified installers when they match the requested current version.
 - Diagnostics and operation history.
 - Theme, localization and accessibility foundations.
 
@@ -45,4 +45,4 @@
 - Reports and alerts.
 
 ## 1.0 quality bar
-Reliable, understandable, safe, tested on real Windows 11 machines, recoverable, offline-capable, maintainable and accessible.
+Reliable, understandable, safe, tested on real Windows 11 machines, recoverable, maintainable and accessible.

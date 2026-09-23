@@ -98,12 +98,12 @@ public sealed class WorkspaceControlApplicationTests
         public IReadOnlyList<ProfileManifest> GetProfiles() => [];
         public Task<object> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
             Task.FromResult<object>(new { profileId });
-        public string Start(string profileId, bool cacheOnly = false) => "operation";
-        public Task RunAsync(string operationId, bool cacheOnly = false, CancellationToken cancellationToken = default) =>
+        public string Start(string profileId) => "operation";
+        public Task RunAsync(string operationId, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
         public ProvisioningOperation? Get(string operationId) =>
             history.FirstOrDefault(x => x.OperationId == operationId);
-        public string Resume(string operationId, bool cacheOnly = false) => operationId;
+        public string Resume(string operationId) => operationId;
         public IReadOnlyList<ProvisioningOperation> GetHistory() => history;
     }
 
