@@ -1,4 +1,5 @@
 using Microsoft.UI.Xaml;
+using WorkspaceControl.Application;
 using WorkspaceBootstrap;
 
 namespace WorkspaceControl.Desktop;
@@ -10,11 +11,11 @@ public partial class App : Microsoft.UI.Xaml.Application
     public App()
     {
         InitializeComponent();
-        Engine = new EngineFacade();
-        ViewModel = new WorkspaceControlViewModel(Engine);
+        Application = WorkspaceControlApplicationFactory.Create();
+        ViewModel = new WorkspaceControlViewModel(Application);
     }
 
-    public EngineFacade Engine { get; }
+    public IWorkspaceControlApplication Application { get; }
     public WorkspaceControlViewModel ViewModel { get; }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)

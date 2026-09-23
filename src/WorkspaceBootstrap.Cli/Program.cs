@@ -1,10 +1,11 @@
 using System.Text.Json;
+using WorkspaceControl.Application;
 using WorkspaceBootstrap;
 using WorkspaceControl.Domain;
 
 try
 {
-    var engine = new EngineFacade();
+    var application = WorkspaceControlApplicationFactory.Create();
     var command = args.FirstOrDefault()?.ToLowerInvariant() ?? "help";
     var profile = GetOption(args, "--profile");
     var operation = GetOption(args, "--operation");
@@ -19,32 +20,32 @@ try
             data = new[] { "baseline", "provisioning", "optimization", "cache", "official-sources", "winget-fallback" };
             break;
         case "baseline":
-            data = engine.GetBaseline();
+            data = application.GetBaseline();
             break;
         case "inventory":
-            data = await engine.GetInventoryAsync();
+            data = await application.GetInventoryAsync();
             break;
         case "optimization-plan-safe":
-            data = engine.GetSafeOptimizationPlan();
+            data = application.GetSafeOptimizationPlan();
             break;
         case "optimization-apply-safe":
-            messages = engine.ApplySafeOptimization();
+            messages = application.ApplySafeOptimization();
             data = new { Applied = messages.Count };
             break;
         case "optimization-rollback":
-            messages = engine.RollbackOptimization();
+            messages = application.RollbackOptimization();
             data = new { Restored = messages.Count };
             break;
         case "provisioning-profiles":
-            data = engine.GetProfiles()
+            data = application.GetProfiles()
                 .Select(x => new { x.Id, x.Name, x.Description })
                 .ToArray();
             break;
         case "provisioning-plan":
-            data = MapPlan(await engine.GetPlanAsync(profile ?? throw new ArgumentException("--profile est requis.")));
+            data = MapPlan(await application.GetPlanAsync(profile ?? throw new ArgumentException("--profile est requis.")));
             break;
         case "provisioning-worker":
-            await engine.RunProvisioningAsync(
+            await application.RunProvisioningAsync(
                 operation ?? throw new ArgumentException("--operation est requis."),
                 cacheOnly,
                 CancellationToken.None);
@@ -53,28 +54,28 @@ try
         case "provisioning-start":
             data = new
             {
-                OperationId = engine.StartProvisioning(profile ?? throw new ArgumentException("--profile est requis."), cacheOnly),
+                OperationId = application.StartProvisioning(profile ?? throw new ArgumentException("--profile est requis."), cacheOnly),
                 Status = "starting"
             };
             break;
         case "provisioning-status":
-            data = MapOperation(engine.GetProvisioningStatus(operation ?? throw new ArgumentException("--operation est requis.")));
+            data = MapOperation(application.GetProvisioningStatus(operation ?? throw new ArgumentException("--operation est requis.")));
             break;
         case "provisioning-recovery":
-            data = MapOperation(engine.GetProvisioningRecovery());
+            data = MapOperation(application.GetProvisioningRecovery());
             break;
         case "provisioning-resume":
             data = new
             {
-                OperationId = engine.ResumeProvisioning(operation ?? throw new ArgumentException("--operation est requis."), cacheOnly),
+                OperationId = application.ResumeProvisioning(operation ?? throw new ArgumentException("--operation est requis."), cacheOnly),
                 Status = "starting"
             };
             break;
         case "provisioning-history":
-            data = engine.GetProvisioningHistory().Select(MapHistory).ToArray();
+            data = application.GetProvisioningHistory().Select(MapHistory).ToArray();
             break;
         case "provisioning-detail":
-            data = MapDetail(engine.GetProvisioningDetail(operation ?? throw new ArgumentException("--operation est requis.")));
+            data = MapDetail(application.GetProvisioningDetail(operation ?? throw new ArgumentException("--operation est requis.")));
             break;
         default:
             throw new ArgumentException($"Commande inconnue : {command}");
