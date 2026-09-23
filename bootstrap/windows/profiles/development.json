@@ -1,7 +1,30 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "development",
   "name": "Environnement développeur",
   "description": "Toolchain Windows pour Next.js/React, Flutter Android/Windows, debug et tests locaux.",
-  "components": ["github-cli", "visual-studio", "flutter", "notepadpp", "powertoys"]
+  "desiredState": {
+    "applications": [
+      {
+        "componentId": "github-cli"
+      },
+      {
+        "componentId": "visual-studio"
+      },
+      {
+        "componentId": "flutter"
+      },
+      {
+        "componentId": "notepadpp"
+      },
+      {
+        "componentId": "powertoys"
+      }
+    ],
+    "windowsSettings": [],
+    "policies": [],
+    "registrySettings": [],
+    "optimizations": [],
+    "conditions": []
+  }
 }
