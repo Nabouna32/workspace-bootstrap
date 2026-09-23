@@ -18,16 +18,6 @@ public sealed class ProvisioningEngine
         InstallerEngine installer,
         WorkspacePaths paths,
         InventoryScanner inventory,
-        RegistryDesiredStateObserver registry)
-        : this(config, installer, paths, inventory, null, registry, null)
-    {
-    }
-
-    public ProvisioningEngine(
-        ConfigurationStore config,
-        InstallerEngine installer,
-        WorkspacePaths paths,
-        InventoryScanner inventory,
         WindowsSystemService? windows = null,
         RegistryDesiredStateObserver? registry = null,
         RegistryDesiredStateWriter? registryWriter = null)
