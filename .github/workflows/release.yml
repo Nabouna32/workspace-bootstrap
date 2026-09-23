@@ -51,7 +51,7 @@ jobs:
         shell: pwsh
         run: |
           dotnet build src/WorkspaceControl.Infrastructure/WorkspaceControl.Infrastructure.csproj --configuration Release --no-restore --warnaserror
-          $msbuild = & "$env:ProgramFiles(x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe | Select-Object -First 1
+          $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe | Select-Object -First 1
           if (-not $msbuild) { throw "Visual Studio MSBuild could not be located." }
           & $msbuild src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj /t:Build /p:Configuration=Release /p:Platform=x64 /warnAsError
           if ($LASTEXITCODE -ne 0) { throw "WinUI desktop build failed with exit code $LASTEXITCODE." }
@@ -64,7 +64,7 @@ jobs:
         run: |
           $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-release"
           New-Item -ItemType Directory -Force -Path $package | Out-Null
-          $msbuild = & "$env:ProgramFiles(x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe | Select-Object -First 1
+          $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe | Select-Object -First 1
           if (-not $msbuild) { throw "Visual Studio MSBuild could not be located." }
           & $msbuild src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj /restore /t:Publish /p:Configuration=Release /p:Platform=x64 /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishDir="$package\WorkspaceControl\"
           if ($LASTEXITCODE -ne 0) { throw "Workspace Control publish failed with exit code $LASTEXITCODE." }
