@@ -110,6 +110,14 @@ public sealed class ProvisioningOperation
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 
+public sealed record ProvisioningRegistrySnapshot(
+    string Hive,
+    string Key,
+    string ValueName,
+    bool Exists,
+    string? Value,
+    string? ValueType);
+
 public static class JsonDefaults
 {
     public static readonly System.Text.Json.JsonSerializerOptions Options = new()
