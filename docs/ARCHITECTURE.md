@@ -59,7 +59,7 @@ Providers are replaceable adapters. Examples include official vendor installers,
 
 ## Provisioning operation lifecycle
 
-A provisioning mutation is never implied by computing a plan. Registry mutations use the same persisted operation lifecycle as application provisioning: capture snapshot → write → post-condition verification → final verification, with reverse-order rollback on failure. The lifecycle is persisted as:
+A provisioning mutation is never implied by computing a plan. Registry mutations and application removals use the same persisted operation lifecycle: capture snapshot → mutate → post-condition verification → final verification, with reverse-order rollback on failure. Application removal snapshots the installed version and restores that version through the provisioning installer when rollback is required. The lifecycle is persisted as:
 
 Observed State → Desired State → Plan → awaiting-confirmation → queued → running → post-condition verification → completed
 
