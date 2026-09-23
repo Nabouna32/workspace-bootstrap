@@ -43,3 +43,7 @@ Cancellation is cooperative. If an external installer cannot safely stop, Worksp
 
 ## Safety
 Destructive and irreversible actions require explicit confirmation. Failed downloads never invalidate a valid previously downloaded artifact.
+
+### Version targeting during apply
+
+For `latest-stable` and `stable-compatible`, the confirmed `DesiredVersion` is an exact installer target. WinGet uses its exact `--version` option for install and upgrade operations, and official sources must resolve the requested version; otherwise the operation fails instead of silently installing a different release. The `minimum` policy is intentionally different: its `DesiredVersion` represents the minimum acceptable version, not an exact target, so apply resolves the current provider release without forcing an exact minimum-version install.
