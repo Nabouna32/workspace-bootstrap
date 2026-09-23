@@ -185,6 +185,10 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         string profileId,
         CancellationToken cancellationToken = default)
     {
+        if (IsBusy)
+            return;
+
+        IsBusy = true;
         Error = null;
         Status = "Generating provisioning plan…";
 
@@ -202,6 +206,10 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         {
             Error = ex.Message;
             Status = "Plan generation failed";
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 
