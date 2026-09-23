@@ -61,6 +61,31 @@ jobs:
           dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
           dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
 
+      - name: Validate provisioning localization and accessibility resources
+        shell: pwsh
+        run: |
+          [xml]$english = Get-Content src/WorkspaceControl.Desktop/Strings/en-US/Resources.resw
+          [xml]$french = Get-Content src/WorkspaceControl.Desktop/Strings/fr-FR/Resources.resw
+
+          $englishKeys = @($english.root.data | ForEach-Object { $_.name }) | Sort-Object
+          $frenchKeys = @($french.root.data | ForEach-Object { $_.name }) | Sort-Object
+
+          if (($englishKeys -join "`n") -ne ($frenchKeys -join "`n")) {
+            Compare-Object $englishKeys $frenchKeys | Format-Table -AutoSize | Out-String | Write-Error
+            throw "English and French resource key sets differ."
+          }
+
+          $profilesPage = Get-Content src/WorkspaceControl.Desktop/ProfilesPage.xaml -Raw
+          if ($profilesPage -match '(?m)Text="(?!\{)[^"]+"' -or
+              $profilesPage -match '(?m)Content="(?!\{)[^"]+"') {
+            throw "ProfilesPage.xaml contains hard-coded Text or Content literals."
+          }
+
+          $mainWindow = Get-Content src/WorkspaceControl.Desktop/MainWindow.xaml -Raw
+          if ($mainWindow -match '<NavigationViewItem Content="Profiles"') {
+            throw "The Profiles navigation item must use a localized x:Uid."
+          }
+
       - name: Build
         shell: pwsh
         run: |

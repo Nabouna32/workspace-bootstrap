@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="ProfilesPage_Title.Text" xml:space="preserve"><value>Profils et provisionnement</value></data>
+  <data name="ProfilesPage_Subtitle.Text" xml:space="preserve"><value>Vérifiez un plan enregistré avant que Workspace Control ne modifie ce PC.</value></data>
+  <data name="ProfilesPage_ChooseHeading.Text" xml:space="preserve"><value>1. Choisir un état souhaité</value></data>
+  <data name="ProfilesPage_ProfileList.AutomationProperties.Name" xml:space="preserve"><value>Profils disponibles</value></data>
+  <data name="ProfilesPage_GeneratePlan.Content" xml:space="preserve"><value>Générer le plan</value></data>
+  <data name="ProfilesPage_GeneratePlan.AutomationProperties.Name" xml:space="preserve"><value>Générer un plan de provisionnement</value></data>
+  <data name="ProfilesPage_ReviewHeading.Text" xml:space="preserve"><value>2. Vérifier le plan</value></data>
+  <data name="ProfilesPage_PlanList.AutomationProperties.Name" xml:space="preserve"><value>Éléments du plan de provisionnement</value></data>
+  <data name="ProfilesPage_Confirm.Content" xml:space="preserve"><value>Confirmer et appliquer</value></data>
+  <data name="ProfilesPage_Confirm.AutomationProperties.Name" xml:space="preserve"><value>Confirmer et appliquer le plan de provisionnement</value></data>
+  <data name="ProfilesPage_Resume.Content" xml:space="preserve"><value>Reprendre en toute sécurité</value></data>
+  <data name="ProfilesPage_Resume.AutomationProperties.Name" xml:space="preserve"><value>Reprendre en toute sécurité l’opération de provisionnement en échec</value></data>
+  <data name="ProfilesPage_ProgressRing.AutomationProperties.Name" xml:space="preserve"><value>Opération de provisionnement en cours</value></data>
+  <data name="ProfilesPage_StaleNote.Text" xml:space="preserve"><value>Si l’état observé change avant une étape non terminée, le plan enregistré devient obsolète et ne peut pas être repris. Générez un nouveau plan.</value></data>
+  <data name="ProfilesPage_ErrorInfoBar.Title" xml:space="preserve"><value>Erreur de provisionnement</value></data>
+  <data name="ProfilesPage_Status.AutomationProperties.Name" xml:space="preserve"><value>État du provisionnement</value></data>
+  <data name="ProfilesPage_Progress.AutomationProperties.Name" xml:space="preserve"><value>Progression du provisionnement</value></data>
+  <data name="ProfilesPage_CurrentComponent.AutomationProperties.Name" xml:space="preserve"><value>Composant de provisionnement actuel</value></data>
+  <data name="ProfilesPage_ActionCode.AutomationProperties.Name" xml:space="preserve"><value>Action prévue</value></data>
+  <data name="ProfilesPage_StateCode.AutomationProperties.Name" xml:space="preserve"><value>État observé</value></data>
+  <data name="NoProvisioningOperation" xml:space="preserve"><value>Aucune opération de provisionnement</value></data>
+  <data name="AwaitingConfirmation" xml:space="preserve"><value>En attente de votre confirmation</value></data>
+  <data name="Queued" xml:space="preserve"><value>En file d’attente</value></data>
+  <data name="ApplyingConfirmedPlan" xml:space="preserve"><value>Application du plan confirmé</value></data>
+  <data name="Completed" xml:space="preserve"><value>Terminé</value></data>
+  <data name="Failed" xml:space="preserve"><value>Échec</value></data>
+  <data name="PlanIsStale" xml:space="preserve"><value>Le plan est obsolète</value></data>
+  <data name="NoOperation" xml:space="preserve"><value>Aucune opération</value></data>
+  <data name="StepsCompletedFormat" xml:space="preserve"><value>{0} étape(s) terminée(s) sur {1}</value></data>
+  <data name="Preparing" xml:space="preserve"><value>Préparation…</value></data>
+  <data name="Ready" xml:space="preserve"><value>Prêt</value></data>
+  <data name="InspectingPc" xml:space="preserve"><value>Inspection de ce PC…</value></data>
+  <data name="ReadySoftwareEntriesFormat" xml:space="preserve"><value>Prêt · {0} entrées logicielles</value></data>
+  <data name="RefreshCancelled" xml:space="preserve"><value>Actualisation annulée</value></data>
+  <data name="RefreshFailed" xml:space="preserve"><value>Échec de l’actualisation</value></data>
+  <data name="GeneratingProvisioningPlan" xml:space="preserve"><value>Génération du plan de provisionnement…</value></data>
+  <data name="PlanReadyForReview" xml:space="preserve"><value>Plan prêt à être vérifié</value></data>
+  <data name="PlanGenerationCancelled" xml:space="preserve"><value>Génération du plan annulée</value></data>
+  <data name="PlanGenerationFailed" xml:space="preserve"><value>Échec de la génération du plan</value></data>
+  <data name="StartingProvisioning" xml:space="preserve"><value>Démarrage du provisionnement…</value></data>
+  <data name="ProvisioningStarted" xml:space="preserve"><value>Provisionnement démarré</value></data>
+  <data name="ProvisioningCouldNotStart" xml:space="preserve"><value>Impossible de démarrer le provisionnement</value></data>
+  <data name="ResumingProvisioning" xml:space="preserve"><value>Reprise du provisionnement…</value></data>
+  <data name="ProvisioningResumed" xml:space="preserve"><value>Provisionnement repris</value></data>
+  <data name="ProvisioningCouldNotResume" xml:space="preserve"><value>Impossible de reprendre le provisionnement</value></data>
+  <data name="MainWindow_Profiles.Content" xml:space="preserve"><value>Profils</value></data>
+</root>

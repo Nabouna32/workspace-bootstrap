@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="ProfilesPage_Title.Text" xml:space="preserve"><value>Profiles &amp; provisioning</value><comment>Page title.</comment></data>
+  <data name="ProfilesPage_Subtitle.Text" xml:space="preserve"><value>Review a persisted plan before Workspace Control changes this PC.</value><comment>Explain that changes are reviewed before application.</comment></data>
+  <data name="ProfilesPage_ChooseHeading.Text" xml:space="preserve"><value>1. Choose a desired state</value></data>
+  <data name="ProfilesPage_ProfileList.AutomationProperties.Name" xml:space="preserve"><value>Available profiles</value></data>
+  <data name="ProfilesPage_GeneratePlan.Content" xml:space="preserve"><value>Generate plan</value></data>
+  <data name="ProfilesPage_GeneratePlan.AutomationProperties.Name" xml:space="preserve"><value>Generate a provisioning plan</value></data>
+  <data name="ProfilesPage_ReviewHeading.Text" xml:space="preserve"><value>2. Review the plan</value></data>
+  <data name="ProfilesPage_PlanList.AutomationProperties.Name" xml:space="preserve"><value>Provisioning plan items</value></data>
+  <data name="ProfilesPage_Confirm.Content" xml:space="preserve"><value>Confirm and apply</value></data>
+  <data name="ProfilesPage_Confirm.AutomationProperties.Name" xml:space="preserve"><value>Confirm and apply the provisioning plan</value></data>
+  <data name="ProfilesPage_Resume.Content" xml:space="preserve"><value>Resume safely</value></data>
+  <data name="ProfilesPage_Resume.AutomationProperties.Name" xml:space="preserve"><value>Resume the failed provisioning operation safely</value></data>
+  <data name="ProfilesPage_ProgressRing.AutomationProperties.Name" xml:space="preserve"><value>Provisioning operation in progress</value></data>
+  <data name="ProfilesPage_StaleNote.Text" xml:space="preserve"><value>If the observed state changes before an uncompleted step, the persisted plan becomes stale and cannot be resumed. Generate a new plan instead.</value></data>
+  <data name="ProfilesPage_ErrorInfoBar.Title" xml:space="preserve"><value>Provisioning error</value></data>
+  <data name="ProfilesPage_Status.AutomationProperties.Name" xml:space="preserve"><value>Provisioning status</value></data>
+  <data name="ProfilesPage_Progress.AutomationProperties.Name" xml:space="preserve"><value>Provisioning progress</value></data>
+  <data name="ProfilesPage_CurrentComponent.AutomationProperties.Name" xml:space="preserve"><value>Current provisioning component</value></data>
+  <data name="ProfilesPage_ActionCode.AutomationProperties.Name" xml:space="preserve"><value>Planned action</value></data>
+  <data name="ProfilesPage_StateCode.AutomationProperties.Name" xml:space="preserve"><value>Observed state</value></data>
+  <data name="NoProvisioningOperation" xml:space="preserve"><value>No provisioning operation</value></data>
+  <data name="AwaitingConfirmation" xml:space="preserve"><value>Awaiting your confirmation</value></data>
+  <data name="Queued" xml:space="preserve"><value>Queued</value></data>
+  <data name="ApplyingConfirmedPlan" xml:space="preserve"><value>Applying confirmed plan</value></data>
+  <data name="Completed" xml:space="preserve"><value>Completed</value></data>
+  <data name="Failed" xml:space="preserve"><value>Failed</value></data>
+  <data name="PlanIsStale" xml:space="preserve"><value>Plan is stale</value></data>
+  <data name="NoOperation" xml:space="preserve"><value>No operation</value></data>
+  <data name="StepsCompletedFormat" xml:space="preserve"><value>{0} of {1} steps completed</value></data>
+  <data name="Preparing" xml:space="preserve"><value>Preparing…</value></data>
+  <data name="Ready" xml:space="preserve"><value>Ready</value></data>
+  <data name="InspectingPc" xml:space="preserve"><value>Inspecting this PC…</value></data>
+  <data name="ReadySoftwareEntriesFormat" xml:space="preserve"><value>Ready · {0} software entries</value></data>
+  <data name="RefreshCancelled" xml:space="preserve"><value>Refresh cancelled</value></data>
+  <data name="RefreshFailed" xml:space="preserve"><value>Refresh failed</value></data>
+  <data name="GeneratingProvisioningPlan" xml:space="preserve"><value>Generating provisioning plan…</value></data>
+  <data name="PlanReadyForReview" xml:space="preserve"><value>Plan ready for review</value></data>
+  <data name="PlanGenerationCancelled" xml:space="preserve"><value>Plan generation cancelled</value></data>
+  <data name="PlanGenerationFailed" xml:space="preserve"><value>Plan generation failed</value></data>
+  <data name="StartingProvisioning" xml:space="preserve"><value>Starting provisioning…</value></data>
+  <data name="ProvisioningStarted" xml:space="preserve"><value>Provisioning started</value></data>
+  <data name="ProvisioningCouldNotStart" xml:space="preserve"><value>Provisioning could not start</value></data>
+  <data name="ResumingProvisioning" xml:space="preserve"><value>Resuming provisioning…</value></data>
+  <data name="ProvisioningResumed" xml:space="preserve"><value>Provisioning resumed</value></data>
+  <data name="ProvisioningCouldNotResume" xml:space="preserve"><value>Provisioning could not resume</value></data>
+  <data name="MainWindow_Profiles.Content" xml:space="preserve"><value>Profiles</value></data>
+</root>

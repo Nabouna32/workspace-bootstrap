@@ -9,15 +9,22 @@ namespace WorkspaceControl.Desktop;
 public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 {
     private readonly IWorkspaceControlApplication _application;
+    private readonly IUiLocalizer _localizer;
     private BaselineSnapshot? _baseline;
     private SoftwareInventorySnapshot? _software;
     private ProvisioningOperation? _provisioningOperation;
     private bool _isBusy;
-    private string _status = "Ready";
+    private string _status;
     private string? _error;
 
-    public WorkspaceControlViewModel(IWorkspaceControlApplication application) =>
+    public WorkspaceControlViewModel(
+        IWorkspaceControlApplication application,
+        IUiLocalizer localizer)
+    {
         _application = application ?? throw new ArgumentNullException(nameof(application));
+        _localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
+        _status = _localizer.Get("Ready");
+    }
 
     public BaselineSnapshot? Baseline
     {
@@ -50,6 +57,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(ProvisioningStatusDisplay));
             OnPropertyChanged(nameof(ProvisioningProgressDisplay));
             OnPropertyChanged(nameof(CurrentComponentDisplay));
+            OnPropertyChanged(nameof(ProvisioningError));
+            OnPropertyChanged(nameof(HasProvisioningError));
         }
     }
 
@@ -73,24 +82,30 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public string ProvisioningStatusDisplay =>
         ProvisioningOperation?.Status switch
         {
-            ProvisioningOperationStatuses.AwaitingConfirmation => "Awaiting your confirmation",
-            ProvisioningOperationStatuses.Queued => "Queued",
-            ProvisioningOperationStatuses.Running => "Applying confirmed plan",
-            ProvisioningOperationStatuses.Completed => "Completed",
-            ProvisioningOperationStatuses.Failed => "Failed",
-            ProvisioningOperationStatuses.Stale => "Plan is stale",
-            _ => "No provisioning operation"
+            ProvisioningOperationStatuses.AwaitingConfirmation => _localizer.Get("AwaitingConfirmation"),
+            ProvisioningOperationStatuses.Queued => _localizer.Get("Queued"),
+            ProvisioningOperationStatuses.Running => _localizer.Get("ApplyingConfirmedPlan"),
+            ProvisioningOperationStatuses.Completed => _localizer.Get("Completed"),
+            ProvisioningOperationStatuses.Failed => _localizer.Get("Failed"),
+            ProvisioningOperationStatuses.Stale => _localizer.Get("PlanIsStale"),
+            _ => _localizer.Get("NoProvisioningOperation")
         };
 
     public string ProvisioningProgressDisplay =>
         ProvisioningOperation is null
-            ? "No operation"
-            : $"{ProvisioningOperation.Completed} of {ProvisioningOperation.Total} steps completed";
+            ? _localizer.Get("NoOperation")
+            : _localizer.Format(
+                "StepsCompletedFormat",
+                ProvisioningOperation.Completed,
+                ProvisioningOperation.Total);
 
     public string CurrentComponentDisplay =>
         string.IsNullOrWhiteSpace(ProvisioningOperation?.CurrentComponentName)
-            ? "Preparing…"
+            ? _localizer.Get("Preparing")
             : ProvisioningOperation.CurrentComponentName;
+
+    public string? ProvisioningError => ProvisioningOperation?.Error;
+    public bool HasProvisioningError => !string.IsNullOrWhiteSpace(ProvisioningError);
 
     public string MemoryDisplay => Baseline is null ? "—" : $"{Baseline.MemoryGB:F1} GB RAM";
     public string CpuCoresDisplay => Baseline is null ? "—" : $"{Baseline.CpuCores} logical cores";
@@ -135,7 +150,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
         IsBusy = true;
         Error = null;
-        Status = "Inspecting this PC…";
+        Status = _localizer.Get("InspectingPc");
 
         try
         {
@@ -163,17 +178,17 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             foreach (var diagnostic in software.Diagnostics)
                 Diagnostics.Add(diagnostic);
 
-            Status = $"Ready · {SoftwareItems.Count} software entries";
+            Status = _localizer.Format("ReadySoftwareEntriesFormat", SoftwareItems.Count);
         }
         catch (OperationCanceledException)
         {
-            Status = "Refresh cancelled";
+            Status = _localizer.Get("RefreshCancelled");
         }
         catch (Exception ex)
         {
             Error = ex.Message;
             Diagnostics.Add(ex.Message);
-            Status = "Refresh failed";
+            Status = _localizer.Get("RefreshFailed");
         }
         finally
         {
@@ -190,22 +205,22 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
         IsBusy = true;
         Error = null;
-        Status = "Generating provisioning plan…";
+        Status = _localizer.Get("GeneratingProvisioningPlan");
 
         try
         {
             SetProvisioningOperation(
                 await _application.CreateProvisioningAsync(profileId, cancellationToken));
-            Status = "Plan ready for review";
+            Status = _localizer.Get("PlanReadyForReview");
         }
         catch (OperationCanceledException)
         {
-            Status = "Plan generation cancelled";
+            Status = _localizer.Get("PlanGenerationCancelled");
         }
         catch (Exception ex)
         {
             Error = ex.Message;
-            Status = "Plan generation failed";
+            Status = _localizer.Get("PlanGenerationFailed");
         }
         finally
         {
@@ -219,19 +234,19 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             return;
 
         Error = null;
-        Status = "Starting provisioning…";
+        Status = _localizer.Get("StartingProvisioning");
 
         try
         {
             _application.ConfirmProvisioning(ProvisioningOperation.OperationId);
             RefreshProvisioningOperation();
-            Status = "Provisioning started";
+            Status = _localizer.Get("ProvisioningStarted");
         }
         catch (Exception ex)
         {
             Error = ex.Message;
             RefreshProvisioningOperation();
-            Status = "Provisioning could not start";
+            Status = _localizer.Get("ProvisioningCouldNotStart");
         }
     }
 
@@ -241,19 +256,19 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             return;
 
         Error = null;
-        Status = "Resuming provisioning…";
+        Status = _localizer.Get("ResumingProvisioning");
 
         try
         {
             _application.ResumeProvisioning(ProvisioningOperation.OperationId);
             RefreshProvisioningOperation();
-            Status = "Provisioning resumed";
+            Status = _localizer.Get("ProvisioningResumed");
         }
         catch (Exception ex)
         {
             Error = ex.Message;
             RefreshProvisioningOperation();
-            Status = "Provisioning could not resume";
+            Status = _localizer.Get("ProvisioningCouldNotResume");
         }
     }
 

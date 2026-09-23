@@ -6,9 +6,9 @@
     <ScrollViewer>
         <StackPanel Padding="28" Spacing="20">
             <StackPanel Spacing="4">
-                <TextBlock Text="Profiles &amp; provisioning" FontSize="32" FontWeight="SemiBold" />
+                <TextBlock x:Uid="ProfilesPage_Title" FontSize="32" FontWeight="SemiBold" />
                 <TextBlock
-                    Text="Review a persisted plan before Workspace Control changes this PC."
+                    x:Uid="ProfilesPage_Subtitle"
                     Opacity="0.72"
                     TextWrapping="Wrap" />
             </StackPanel>
@@ -18,9 +18,10 @@
                 CornerRadius="12"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="1. Choose a desired state" FontSize="20" FontWeight="SemiBold" />
+                    <TextBlock x:Uid="ProfilesPage_ChooseHeading" FontSize="20" FontWeight="SemiBold" />
                     <ListView
                         x:Name="ProfileList"
+                        x:Uid="ProfilesPage_ProfileList"
                         ItemsSource="{Binding Profiles}"
                         SelectionMode="Single"
                         SelectionChanged="ProfileList_SelectionChanged"
@@ -38,7 +39,7 @@
 
                     <Button
                         x:Name="CreatePlanButton"
-                        Content="Generate plan"
+                        x:Uid="ProfilesPage_GeneratePlan"
                         Click="CreatePlanButton_Click"
                         HorizontalAlignment="Left"
                         IsEnabled="False" />
@@ -50,18 +51,27 @@
                 CornerRadius="12"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="2. Review the plan" FontSize="20" FontWeight="SemiBold" />
+                    <TextBlock x:Uid="ProfilesPage_ReviewHeading" FontSize="20" FontWeight="SemiBold" />
+
                     <TextBlock
+                        x:Uid="ProfilesPage_Status"
                         Text="{Binding ProvisioningStatusDisplay}"
                         FontSize="17"
                         FontWeight="SemiBold" />
-                    <TextBlock Text="{Binding ProvisioningProgressDisplay}" Opacity="0.72" />
+
                     <TextBlock
+                        x:Uid="ProfilesPage_Progress"
+                        Text="{Binding ProvisioningProgressDisplay}"
+                        Opacity="0.72" />
+
+                    <TextBlock
+                        x:Uid="ProfilesPage_CurrentComponent"
                         Text="{Binding CurrentComponentDisplay}"
                         TextWrapping="Wrap"
                         Opacity="0.72" />
 
                     <ListView
+                        x:Uid="ProfilesPage_PlanList"
                         ItemsSource="{Binding ProvisioningPlan.Items}"
                         SelectionMode="None"
                         MaxHeight="360">
@@ -79,8 +89,14 @@
                                             <TextBlock Text="{Binding InstalledVersion}" Opacity="0.55" />
                                         </StackPanel>
                                         <StackPanel Grid.Column="1" Spacing="2" HorizontalAlignment="Right">
-                                            <TextBlock Text="{Binding ActionCode}" FontWeight="SemiBold" />
-                                            <TextBlock Text="{Binding StateCode}" Opacity="0.65" />
+                                            <TextBlock
+                                                x:Uid="ProfilesPage_ActionCode"
+                                                Text="{Binding ActionCode}"
+                                                FontWeight="SemiBold" />
+                                            <TextBlock
+                                                x:Uid="ProfilesPage_StateCode"
+                                                Text="{Binding StateCode}"
+                                                Opacity="0.65" />
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -88,34 +104,33 @@
                         </ListView.ItemTemplate>
                     </ListView>
 
-                    <TextBlock
-                        Text="{Binding ProvisioningOperation.Error}"
-                        TextWrapping="Wrap"
-                        Foreground="{ThemeResource SystemFillColorCautionBrush}"
-                        Visibility="Visible" />
+                    <InfoBar
+                        x:Uid="ProfilesPage_ErrorInfoBar"
+                        IsOpen="{Binding HasProvisioningError}"
+                        Message="{Binding ProvisioningError}"
+                        Severity="Error"
+                        IsClosable="False" />
 
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <Button
                             x:Name="ConfirmButton"
-                            Content="Confirm and apply"
+                            x:Uid="ProfilesPage_Confirm"
                             Click="ConfirmButton_Click"
                             IsEnabled="{Binding IsAwaitingConfirmation}" />
                         <Button
                             x:Name="ResumeButton"
-                            Content="Resume safely"
+                            x:Uid="ProfilesPage_Resume"
                             Click="ResumeButton_Click"
                             IsEnabled="{Binding CanResumeProvisioning}" />
                     </StackPanel>
 
                     <ProgressRing
+                        x:Uid="ProfilesPage_ProgressRing"
                         IsActive="{Binding IsProvisioningActive}"
                         Width="28"
                         Height="28" />
 
-                    <TextBlock
-                        Text="If the observed state changes before an uncompleted step, the persisted plan becomes stale and cannot be resumed. Generate a new plan instead."
-                        TextWrapping="Wrap"
-                        Opacity="0.65" />
+                    <TextBlock x:Uid="ProfilesPage_StaleNote" Opacity="0.65" TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
         </StackPanel>
