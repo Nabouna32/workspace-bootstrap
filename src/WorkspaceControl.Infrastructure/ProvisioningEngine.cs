@@ -793,7 +793,7 @@ public sealed class ProvisioningEngine
             DesiredStateDomainCodes.Optimization,
             "optimizations",
             items);
-
+    }
 
     private void AddRegistryDiffItems(
         ProfileManifest profile,
