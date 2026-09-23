@@ -42,6 +42,17 @@ public sealed partial class ProfilesPage : Page
         SelectionChangedEventArgs e)
     {
         _selectedProfile = ProfileList.SelectedItem as ProfileManifest;
+        _viewModel.ClearDesiredStateDiff();
+        UpdateCreatePlanButton();
+    }
+
+    private async void ObserveDiffButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_selectedProfile is null)
+            return;
+
+        ObserveDiffButton.IsEnabled = false;
+        await _viewModel.ObserveDesiredStateAsync(_selectedProfile.Id);
         UpdateCreatePlanButton();
     }
 
@@ -85,7 +96,17 @@ public sealed partial class ProfilesPage : Page
         UpdateCreatePlanButton();
     }
 
-    private void UpdateCreatePlanButton() =>
+    private void UpdateCreatePlanButton()
+    {
+        var canInteract =
+            _selectedProfile is not null &&
+            !_viewModel.IsBusy &&
+            !_viewModel.IsProvisioningActive;
+
+        ObserveDiffButton.IsEnabled = canInteract;
         CreatePlanButton.IsEnabled =
-            _selectedProfile is not null && !_viewModel.IsBusy && !_viewModel.IsProvisioningActive;
+            canInteract &&
+            _selectedProfile is not null &&
+            _viewModel.HasDesiredStateDiffFor(_selectedProfile.Id);
+    }
 }

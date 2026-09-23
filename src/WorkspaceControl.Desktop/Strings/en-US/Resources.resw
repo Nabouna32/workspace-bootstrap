@@ -5,8 +5,8 @@
   <data name="ProfilesPage_ChooseHeading.Text" xml:space="preserve"><value>1. Choose a desired state</value></data>
   <data name="ProfilesPage_ProfileList.AutomationProperties.Name" xml:space="preserve"><value>Available profiles</value></data>
   <data name="ProfilesPage_GeneratePlan.Content" xml:space="preserve"><value>Generate plan</value></data>
-  <data name="ProfilesPage_GeneratePlan.AutomationProperties.Name" xml:space="preserve"><value>Generate a provisioning plan</value></data>
-  <data name="ProfilesPage_ReviewHeading.Text" xml:space="preserve"><value>2. Review the plan</value></data>
+  <data name="ProfilesPage_GeneratePlan.AutomationProperties.Name" xml:space="preserve"><value>Generate a provisioning plan from the reviewed desired-state diff</value></data>
+  <data name="ProfilesPage_ReviewHeading.Text" xml:space="preserve"><value>3. Review the plan</value></data>
   <data name="ProfilesPage_PlanList.AutomationProperties.Name" xml:space="preserve"><value>Provisioning plan items</value></data>
   <data name="ProfilesPage_Confirm.Content" xml:space="preserve"><value>Confirm and apply</value></data>
   <data name="ProfilesPage_Confirm.AutomationProperties.Name" xml:space="preserve"><value>Confirm and apply the provisioning plan</value></data>
@@ -87,4 +87,18 @@
   <data name="DiagnosticsPage_Title.Text" xml:space="preserve"><value>Diagnostics</value></data>
   <data name="DiagnosticsPage_Subtitle.Text" xml:space="preserve"><value>Provider and discovery signals collected during the latest scan.</value></data>
   <data name="DiagnosticsPage_List.AutomationProperties.Name" xml:space="preserve"><value>Diagnostics results</value></data>
+  <data name="ProfilesPage_ObserveDiff.Content" xml:space="preserve"><value>Observe and compare</value></data>
+  <data name="ProfilesPage_ObserveDiff.AutomationProperties.Name" xml:space="preserve"><value>Observe the selected profile and compare it with this PC</value></data>
+  <data name="ProfilesPage_DiffHeading.Text" xml:space="preserve"><value>2. Observe and compare</value></data>
+  <data name="ProfilesPage_DiffDescription.Text" xml:space="preserve"><value>This read-only comparison shows what the selected profile requires before a mutation plan is created.</value></data>
+  <data name="ProfilesPage_DiffList.AutomationProperties.Name" xml:space="preserve"><value>Desired-state comparison</value></data>
+  <data name="ProfilesPage_DiffObserved.Text" xml:space="preserve"><value>Observed</value></data>
+  <data name="ProfilesPage_DiffAvailable.Text" xml:space="preserve"><value>Available</value></data>
+  <data name="ProfilesPage_DiffDesired.Text" xml:space="preserve"><value>Desired</value></data>
+  <data name="ProfilesPage_DiffAction.AutomationProperties.Name" xml:space="preserve"><value>Desired-state action</value></data>
+  <data name="ProfilesPage_DiffState.AutomationProperties.Name" xml:space="preserve"><value>Desired-state state</value></data>
+  <data name="ObservingDesiredState" xml:space="preserve"><value>Observing and comparing this PC…</value></data>
+  <data name="DesiredStateDiffReady" xml:space="preserve"><value>Desired-state comparison ready</value></data>
+  <data name="DesiredStateObservationCancelled" xml:space="preserve"><value>Desired-state observation cancelled</value></data>
+  <data name="DesiredStateObservationFailed" xml:space="preserve"><value>Desired-state observation failed</value></data>
 </root>

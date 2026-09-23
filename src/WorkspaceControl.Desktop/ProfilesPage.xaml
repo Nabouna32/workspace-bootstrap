@@ -37,12 +37,86 @@
                         </ListView.ItemTemplate>
                     </ListView>
 
-                    <Button
-                        x:Name="CreatePlanButton"
-                        x:Uid="ProfilesPage_GeneratePlan"
-                        Click="CreatePlanButton_Click"
-                        HorizontalAlignment="Left"
-                        IsEnabled="False" />
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Button
+                            x:Name="ObserveDiffButton"
+                            x:Uid="ProfilesPage_ObserveDiff"
+                            Click="ObserveDiffButton_Click"
+                            HorizontalAlignment="Left"
+                            IsEnabled="False" />
+                        <Button
+                            x:Name="CreatePlanButton"
+                            x:Uid="ProfilesPage_GeneratePlan"
+                            Click="CreatePlanButton_Click"
+                            HorizontalAlignment="Left"
+                            IsEnabled="False" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border
+                Padding="18"
+                CornerRadius="12"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <StackPanel Spacing="12">
+                    <TextBlock x:Uid="ProfilesPage_DiffHeading" FontSize="20" FontWeight="SemiBold" />
+                    <TextBlock
+                        x:Uid="ProfilesPage_DiffDescription"
+                        TextWrapping="Wrap"
+                        Opacity="0.72" />
+
+                    <ListView
+                        x:Name="DesiredStateDiffList"
+                        x:Uid="ProfilesPage_DiffList"
+                        ItemsSource="{Binding DesiredStateDiffItems}"
+                        SelectionMode="None"
+                        MaxHeight="360">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="12" Margin="0,0,0,8" CornerRadius="8">
+                                    <Grid ColumnSpacing="16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Spacing="3">
+                                            <TextBlock Text="{Binding TargetName}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Opacity="0.72" />
+                                            <Grid ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Spacing="1">
+                                                    <TextBlock x:Uid="ProfilesPage_DiffObserved" FontSize="12" Opacity="0.6" />
+                                                    <TextBlock Text="{Binding ObservedValue}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1" Spacing="1">
+                                                    <TextBlock x:Uid="ProfilesPage_DiffAvailable" FontSize="12" Opacity="0.6" />
+                                                    <TextBlock Text="{Binding AvailableValue}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="2" Spacing="1">
+                                                    <TextBlock x:Uid="ProfilesPage_DiffDesired" FontSize="12" Opacity="0.6" />
+                                                    <TextBlock Text="{Binding DesiredValue}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Spacing="2" HorizontalAlignment="Right">
+                                            <TextBlock
+                                                x:Uid="ProfilesPage_DiffAction"
+                                                Text="{Binding ActionCode}"
+                                                FontWeight="SemiBold" />
+                                            <TextBlock
+                                                x:Uid="ProfilesPage_DiffState"
+                                                Text="{Binding StateCode}"
+                                                Opacity="0.65" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </StackPanel>
             </Border>
 
