@@ -335,12 +335,7 @@ public sealed class ProvisioningEngine
                     var verificationPlan = await PlanAsync(operation.ProfileId, token);
                     var verified = verificationPlan.Items[index];
 
-                    if (verified.StateCode != ProvisioningStateCodes.Installed
-                        || verified.ActionCode != ProvisioningActionCodes.None)
-                    {
-                        throw new InvalidOperationException(
-                            $"Post-condition verification failed for '{component.Name}': {verified.Message}");
-                    }
+                    ValidatePostcondition(component, planned, verified);
 
                     operation.Steps.Add(
                         new ProvisioningStep(component.Id, component.Name, "completed"));
@@ -364,15 +359,28 @@ public sealed class ProvisioningEngine
             Save(operation);
 
             var finalPlan = await PlanAsync(operation.ProfileId, token);
-            var unresolved = finalPlan.Items
-                .Where(item => item.StateCode != ProvisioningStateCodes.Installed
-                    || item.ActionCode != ProvisioningActionCodes.None)
-                .ToArray();
-
-            if (unresolved.Length > 0)
+            for (var index = 0; index < plan.Items.Count; index++)
             {
-                throw new InvalidOperationException(
-                    $"Final state verification failed for: {string.Join(", ", unresolved.Select(x => x.ComponentName))}.");
+                var planned = plan.Items[index];
+                var verified = finalPlan.Items[index];
+
+                if (planned.ActionCode == ProvisioningActionCodes.None)
+                {
+                    if (verified.StateCode != ProvisioningStateCodes.Installed
+                        || verified.ActionCode != ProvisioningActionCodes.None)
+                    {
+                        throw new InvalidOperationException(
+                            $"Final state verification failed for '{planned.ComponentName}': {verified.Message}");
+                    }
+
+                    continue;
+                }
+
+                var componentId = profile.Components[index];
+                if (!components.TryGetValue(componentId, out var component))
+                    throw new InvalidOperationException($"Unknown component: {componentId}");
+
+                ValidatePostcondition(component, planned, verified);
             }
 
             operation.Status = ProvisioningOperationStatuses.Completed;
