@@ -1,22 +1,22 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using WorkspaceBootstrap;
+using WorkspaceControl.Application;
 using WorkspaceControl.Domain;
 
 namespace WorkspaceControl.Desktop;
 
 public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 {
-    private readonly EngineFacade _engine;
+    private readonly IWorkspaceControlApplication _application;
     private BaselineSnapshot? _baseline;
     private SoftwareInventorySnapshot? _software;
     private bool _isBusy;
     private string _status = "Ready";
     private string? _error;
 
-    public WorkspaceControlViewModel(EngineFacade engine) =>
-        _engine = engine ?? throw new ArgumentNullException(nameof(engine));
+    public WorkspaceControlViewModel(IWorkspaceControlApplication application) =>
+        _application = application ?? throw new ArgumentNullException(nameof(application));
 
     public BaselineSnapshot? Baseline
     {
@@ -77,15 +77,15 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
         try
         {
-            Baseline = _engine.GetBaseline();
+            Baseline = _application.GetBaseline();
             OnPropertyChanged(nameof(MemoryDisplay));
             OnPropertyChanged(nameof(CpuCoresDisplay));
             OnPropertyChanged(nameof(UptimeDisplay));
             Profiles.Clear();
-            foreach (var profile in _engine.GetProfiles())
+            foreach (var profile in _application.GetProfiles())
                 Profiles.Add(profile);
 
-            var software = await _engine.GetSoftwareInventoryAsync(cancellationToken);
+            var software = await _application.GetSoftwareInventoryAsync(cancellationToken);
             Software = software;
 
             SoftwareItems.Clear();

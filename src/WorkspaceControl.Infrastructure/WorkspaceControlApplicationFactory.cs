@@ -1,0 +1,29 @@
+using WorkspaceControl.Application;
+using WorkspaceControl.Domain;
+
+namespace WorkspaceBootstrap;
+
+public static class WorkspaceControlApplicationFactory
+{
+    public static IWorkspaceControlApplication Create()
+    {
+        var paths = new WorkspacePaths();
+        var configuration = new ConfigurationStore();
+        var installer = new InstallerEngine(paths);
+        var inventory = new InventoryScanner([
+            new WindowsRegistryUninstallInventoryProvider(),
+            new WinGetInventoryProvider()
+        ]);
+        var provisioning = new ProvisioningEngine(configuration, installer, paths, inventory);
+
+        return new WorkspaceControlApplication(
+            new Application.ProvisioningServiceAdapter(provisioning),
+            new Application.InventoryServiceAdapter(inventory),
+            new SoftwareInventoryService([
+                new Infrastructure.RegistrySoftwareInventorySource(),
+                new Infrastructure.WinGetSoftwareInventorySource()
+            ]),
+            new Application.WindowsAdministrationServiceAdapter(),
+            new Application.OptimizationServiceAdapter());
+    }
+}
