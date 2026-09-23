@@ -90,6 +90,26 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
+    public async Task Provisioning_plan_applies_minimum_version_policy()
+    {
+        var configuration = new ConfigurationStore(FindRepositoryRoot());
+        var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
+        var engine = new ProvisioningEngine(
+            configuration,
+            new InstallerEngine(paths),
+            paths,
+            new InventoryScanner([new VersionedInventoryProvider("EclipseAdoptium.Temurin.21.JDK", "21.0.0")]));
+
+        var plan = await engine.PlanAsync("development-extended");
+        var item = plan.Items.Single(item => item.ComponentId == "temurin21");
+
+        Assert.AreEqual(ProvisioningStateCodes.Installed, item.StateCode);
+        Assert.AreEqual(ProvisioningActionCodes.None, item.ActionCode);
+        Assert.AreEqual("21.0.0", item.InstalledVersion);
+        Assert.AreEqual("21.0.0", item.DesiredVersion);
+    }
+
+    [TestMethod]
     public async Task Provisioning_plan_blocks_mutation_when_inventory_is_incomplete()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
@@ -147,6 +167,33 @@ public sealed class ConfigurationTests
                         [new InventoryEvidence("installed", "installed", true, Id)],
                         DateTimeOffset.UtcNow,
                         "2.0.0")
+                ],
+                new InventoryProviderDiagnostic(Id, true, "Synthetic inventory.")));
+    }
+
+    private sealed class VersionedInventoryProvider(string packageId, string version) : IInventoryProvider
+    {
+        public string Id => "test.versioned";
+
+        public Task<InventoryProviderResult> ScanAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(new InventoryProviderResult(
+                [
+                    new InventoryObservation(
+                        packageId,
+                        packageId,
+                        version,
+                        null,
+                        Id,
+                        packageId,
+                        "test",
+                        InventoryScope.System,
+                        null,
+                        null,
+                        "Test",
+                        InventoryOwnership.PackageManagerManaged,
+                        [],
+                        [new InventoryEvidence("installed", "installed", true, Id)],
+                        DateTimeOffset.UtcNow)
                 ],
                 new InventoryProviderDiagnostic(Id, true, "Synthetic inventory.")));
     }
