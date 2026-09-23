@@ -58,6 +58,29 @@ public sealed class InstallerEngine
                 $"L'installation de '{component.Name}' a échoué (code {process.ExitCode}).");
     }
 
+    public async Task UninstallAsync(
+        ComponentManifest component,
+        CancellationToken token)
+    {
+        if (!string.Equals(
+            component.FallbackPackageManager,
+            "winget",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"Application '{component.Name}' does not declare a supported uninstall provider.");
+        }
+
+        if (string.IsNullOrWhiteSpace(component.PackageId))
+            throw new InvalidOperationException(
+                $"Application '{component.Name}' does not declare a package id.");
+
+        await RunWingetAsync(
+            BuildWingetArguments(component, ProvisioningActionCodes.Remove),
+            component.Name,
+            token);
+    }
+
     private async Task<InstallerArtifact?> ResolveArtifactAsync(
         ComponentManifest component,
         string actionCode,
@@ -262,33 +285,10 @@ public sealed class InstallerEngine
                 $"Aucune source d'installation prise en charge pour '{component.Name}'.");
         }
 
-        var psi = new ProcessStartInfo
-        {
-            FileName = "winget.exe",
-            UseShellExecute = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            CreateNoWindow = true
-        };
-
-        foreach (var argument in BuildWingetArguments(component, actionCode, desiredVersion))
-            psi.ArgumentList.Add(argument);
-
-        using var process = Process.Start(psi)
-            ?? throw new InvalidOperationException("WinGet est introuvable.");
-
-        var stdoutTask = process.StandardOutput.ReadToEndAsync(token);
-        var stderrTask = process.StandardError.ReadToEndAsync(token);
-        await process.WaitForExitAsync(token);
-
-        var stdout = await stdoutTask;
-        var stderr = await stderrTask;
-
-        if (process.ExitCode != 0)
-        {
-            throw new InvalidOperationException(
-                $"WinGet a échoué pour '{component.Name}' (code {process.ExitCode}) : {stderr.Trim()}");
-        }
+        await RunWingetAsync(
+            BuildWingetArguments(component, actionCode, desiredVersion),
+            component.Name,
+            token);
 
         return null;
     }
@@ -547,12 +547,13 @@ public sealed class InstallerEngine
         string? desiredVersion = null)
     {
         if (string.IsNullOrWhiteSpace(component.PackageId))
-            throw new InvalidOperationException("WinGet fallback requires a package id.");
+            throw new InvalidOperationException("WinGet operation requires a package id.");
 
         var command = actionCode switch
         {
             ProvisioningActionCodes.Install => "install",
             ProvisioningActionCodes.Update => "upgrade",
+            ProvisioningActionCodes.Remove => "uninstall",
             _ => throw new InvalidOperationException($"Unsupported WinGet provisioning action: {actionCode}")
         };
 
