@@ -68,6 +68,7 @@ public static class ProvisioningActionCodes
     public const string Install = "install";
     public const string Update = "update";
     public const string None = "none";
+    public const string Set = "set";
     public const string Blocked = "blocked";
 }
 
