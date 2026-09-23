@@ -21,7 +21,8 @@ public sealed class SoftwareInventoryServiceTests
 
         var snapshot = await service.ScanAsync();
 
-        Assert.AreEqual(1, snapshot.Items.Count);\n        var item = snapshot.Items[0];
+        Assert.AreEqual(1, snapshot.Items.Count);
+        var item = snapshot.Items[0];
         Assert.AreEqual("10.0", item.Version);
         Assert.AreEqual(SoftwareOwnership.PackageManagerManaged, item.Ownership);
         Assert.AreEqual(2, item.Evidence.Count);
