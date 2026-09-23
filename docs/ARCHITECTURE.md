@@ -31,7 +31,7 @@ Defines application, inventory, capability, desired state, plan, operation, risk
 Adapters communicate with Registry, Windows APIs, services, scheduled tasks, Windows Update, Event Log, WMI/CIM, WSL, package providers and installers. They return structured evidence/results.
 
 ## Capabilities
-Stable capabilities include `DetectApplication`, `InstallApplication`, `UpdateApplication`, `RemoveApplication`, `InspectResiduals`, `InspectDriver`, `UpdateDriver`, `InspectWindowsPolicy`, `ApplyWindowsPolicy`, `ApplyOptimization`, `RevertOptimization`, `RunDiagnostic`, `InstallWsl`, `ConfigureWsl`, `ApplyProfile`, `ManageCache` and related operations.
+Stable capabilities include `DetectApplication`, `InstallApplication`, `UpdateApplication`, `RemoveApplication`, `InspectResiduals`, `ObserveRegistrySetting`, `ApplyRegistrySetting`, `InspectDriver`, `UpdateDriver`, `InspectWindowsPolicy`, `ApplyWindowsPolicy`, `ApplyOptimization`, `RevertOptimization`, `RunDiagnostic`, `InstallWsl`, `ConfigureWsl`, `ApplyProfile`, `ManageCache` and related operations.
 
 Each capability declares inputs, preconditions, risk, elevation requirement, preview, execution, postconditions and rollback metadata where available.
 
@@ -59,7 +59,7 @@ Providers are replaceable adapters. Examples include official vendor installers,
 
 ## Provisioning operation lifecycle
 
-A provisioning mutation is never implied by computing a plan. The lifecycle is persisted as:
+A provisioning mutation is never implied by computing a plan. Registry mutations use the same persisted operation lifecycle as application provisioning: capture snapshot → write → post-condition verification → final verification, with reverse-order rollback on failure. The lifecycle is persisted as:
 
 Observed State → Desired State → Plan → awaiting-confirmation → queued → running → post-condition verification → completed
 
