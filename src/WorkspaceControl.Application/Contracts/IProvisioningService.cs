@@ -6,9 +6,9 @@ public interface IProvisioningService
 {
     IReadOnlyList<ProfileManifest> GetProfiles();
     Task<object> GetPlanAsync(string profileId, CancellationToken cancellationToken = default);
-    string Start(string profileId, bool cacheOnly = false);
-    Task RunAsync(string operationId, bool cacheOnly = false, CancellationToken cancellationToken = default);
+    string Start(string profileId);
+    Task RunAsync(string operationId, CancellationToken cancellationToken = default);
     ProvisioningOperation? Get(string operationId);
-    string Resume(string operationId, bool cacheOnly = false);
+    string Resume(string operationId);
     IReadOnlyList<ProvisioningOperation> GetHistory();
 }
