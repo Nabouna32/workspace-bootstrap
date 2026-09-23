@@ -208,6 +208,7 @@ public sealed class ConfigurationTests
                 new InstallerEngine(paths),
                 paths,
                 new InventoryScanner([new EmptyInventoryProvider()]),
+                null,
                 registry);
 
             var diff = await engine.DiffAsync("registry-only");
