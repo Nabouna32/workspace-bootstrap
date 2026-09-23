@@ -9,17 +9,20 @@ public sealed class ProvisioningEngine
     private readonly InstallerEngine _installer;
     private readonly WorkspacePaths _paths;
     private readonly InventoryScanner _inventory;
+    private readonly WindowsSystemService _windows;
 
     public ProvisioningEngine(
         ConfigurationStore config,
         InstallerEngine installer,
         WorkspacePaths paths,
-        InventoryScanner inventory)
+        InventoryScanner inventory,
+        WindowsSystemService? windows = null)
     {
         _config = config;
         _installer = installer;
         _paths = paths;
         _inventory = inventory;
+        _windows = windows ?? new WindowsSystemService();
     }
 
     public IReadOnlyList<ProfileManifest> Profiles() =>
@@ -59,6 +62,7 @@ public sealed class ProvisioningEngine
         }).ToList();
 
         AddUnsupportedDesiredStateItems(profile, items);
+        AddConditionDiffItems(profile, items);
 
         return new DesiredStateDiff(
             profile.Id,
@@ -76,7 +80,9 @@ public sealed class ProvisioningEngine
         var diff = await DiffAsync(profileId, token);
 
         var unsupported = diff.Items
-            .Where(item => item.Domain != DesiredStateDomainCodes.Application)
+            .Where(item =>
+                item.Domain != DesiredStateDomainCodes.Application &&
+                item.ActionCode == ProvisioningActionCodes.Blocked)
             .ToArray();
 
         if (unsupported.Length > 0)
@@ -667,6 +673,34 @@ public sealed class ProvisioningEngine
             DesiredStateDomainCodes.Condition,
             "conditions",
             items);
+    }
+
+    private void AddConditionDiffItems(
+        ProfileManifest profile,
+        List<DesiredStateDiffItem> items)
+    {
+        var conditions = profile.DesiredState?.Conditions;
+        if (conditions is null || conditions.Count == 0)
+            return;
+
+        var baseline = _windows.GetBaseline();
+        foreach (var evaluation in MachineConditionEvaluator.Evaluate(conditions, baseline))
+        {
+            items.Add(new DesiredStateDiffItem(
+                DesiredStateDomainCodes.Condition,
+                $"condition:{evaluation.Condition.Fact}:{evaluation.Condition.Operator}:{evaluation.Condition.Value}",
+                evaluation.Condition.Fact,
+                evaluation.IsSatisfied
+                    ? "COMPLIANT"
+                    : ProvisioningStateCodes.Unknown,
+                evaluation.IsSatisfied
+                    ? ProvisioningActionCodes.None
+                    : ProvisioningActionCodes.Blocked,
+                evaluation.IsKnown ? evaluation.Message : null,
+                null,
+                evaluation.Condition.Value,
+                evaluation.Message));
+        }
     }
 
     private static void AddUnsupportedSection(
