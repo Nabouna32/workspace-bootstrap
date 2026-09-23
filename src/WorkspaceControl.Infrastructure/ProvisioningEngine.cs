@@ -30,15 +30,20 @@ public sealed class ProvisioningEngine
         CancellationToken token = default)
     {
         var profile = GetProfile(profileId);
+        ValidateDesiredStateSupport(profile);
         var components = _config.LoadComponents();
         var inventory = await _inventory.ScanAsync(token);
 
-        var items = profile.Components.Select(id =>
-        {
-            var component = components.TryGetValue(id, out var value)
-                ? value
-                : throw new InvalidOperationException($"Unknown component: {id}");
+        var requests = profile.ApplicationRequests;
+        if (requests.Count == 0)
+            throw new InvalidOperationException($"Profile '{profile.Id}' does not declare any desired applications.");
 
+        var items = requests.Select(request =>
+        {
+            if (!components.TryGetValue(request.ComponentId, out var catalogComponent))
+                throw new InvalidOperationException($"Unknown component: {request.ComponentId}");
+
+            var component = ApplyProfileOverrides(catalogComponent, request);
             var match = FindInventoryMatch(component, inventory.Items);
             return BuildPlanItem(component, match, inventory.ProviderDiagnostics);
         }).ToArray();
@@ -312,7 +317,9 @@ public sealed class ProvisioningEngine
             return;
 
         var profile = GetProfile(operation.ProfileId);
+        ValidateDesiredStateSupport(profile);
         var components = _config.LoadComponents();
+        var requests = profile.ApplicationRequests;
         var plan = operation.Plan
             ?? throw new InvalidOperationException(
                 "The operation has no persisted provisioning plan.");
@@ -323,27 +330,28 @@ public sealed class ProvisioningEngine
             throw new InvalidOperationException(
                 "The provisioning operation is not in an executable state.");
 
-        if (plan.Items.Count != profile.Components.Length)
+        if (plan.Items.Count != requests.Count)
             throw new InvalidOperationException(
                 "Persisted provisioning plan is inconsistent with the current profile.");
 
         try
         {
             var currentPlan = await PlanAsync(operation.ProfileId, token);
-            ValidateUncompletedPlanState(operation, plan, currentPlan, profile.Components);
+            ValidateUncompletedPlanState(operation, plan, currentPlan, requests);
 
             operation.Status = ProvisioningOperationStatuses.Running;
             operation.Error = null;
             operation.CanResume = true;
             Save(operation);
 
-            for (var index = operation.Completed; index < profile.Components.Length; index++)
+            for (var index = operation.Completed; index < requests.Count; index++)
             {
                 token.ThrowIfCancellationRequested();
 
-                var componentId = profile.Components[index];
-                if (!components.TryGetValue(componentId, out var component))
-                    throw new InvalidOperationException($"Unknown component: {componentId}");
+                var request = requests[index];
+                if (!components.TryGetValue(request.ComponentId, out var catalogComponent))
+                    throw new InvalidOperationException($"Unknown component: {request.ComponentId}");
+                var component = ApplyProfileOverrides(catalogComponent, request);
 
                 var planned = plan.Items[index];
                 operation.CurrentComponentName = component.Name;
@@ -419,9 +427,10 @@ public sealed class ProvisioningEngine
                     continue;
                 }
 
-                var componentId = profile.Components[index];
-                if (!components.TryGetValue(componentId, out var component))
-                    throw new InvalidOperationException($"Unknown component: {componentId}");
+                var request = requests[index];
+                if (!components.TryGetValue(request.ComponentId, out var catalogComponent))
+                    throw new InvalidOperationException($"Unknown component: {request.ComponentId}");
+                var component = ApplyProfileOverrides(catalogComponent, request);
 
                 ValidatePostcondition(component, planned, verified);
             }
@@ -573,6 +582,30 @@ public sealed class ProvisioningEngine
         }
     }
 
+    private static ComponentManifest ApplyProfileOverrides(
+        ComponentManifest component,
+        ProfileApplication request)
+    {
+        if (request.VersionPolicy is null && request.MinimumVersion is null)
+            return component;
+
+        return component with
+        {
+            VersionPolicy = request.VersionPolicy ?? component.VersionPolicy,
+            MinimumVersion = request.MinimumVersion ?? component.MinimumVersion
+        };
+    }
+
+    private static void ValidateDesiredStateSupport(ProfileManifest profile)
+    {
+        if (profile.HasUnsupportedDesiredStateSections)
+        {
+            throw new InvalidOperationException(
+                $"Profile '{profile.Id}' contains desired-state sections that are not executable yet. " +
+                "Only applications are currently supported by the provisioning engine.");
+        }
+    }
+
     private ProfileManifest GetProfile(string id) =>
         _config.LoadProfiles().TryGetValue(id, out var profile)
             ? profile
@@ -582,9 +615,9 @@ public sealed class ProvisioningEngine
         ProvisioningOperation operation,
         ProvisioningPlan persistedPlan,
         ProvisioningPlan currentPlan,
-        IReadOnlyList<string> componentIds)
+        IReadOnlyList<ProfileApplication> requests)
     {
-        for (var index = operation.Completed; index < componentIds.Count; index++)
+        for (var index = operation.Completed; index < requests.Count; index++)
         {
             var expected = persistedPlan.Items[index];
             var observed = currentPlan.Items[index];
