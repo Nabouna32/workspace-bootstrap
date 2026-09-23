@@ -84,7 +84,7 @@ public sealed class RegistryDesiredStateWriter(IRegistryWriter? writer = null)
         {
             var hive = ParseHive(snapshot.Hive);
             using var baseKey = RegistryKey.OpenBaseKey(hive, RegistryView.Default);
-            using var key = baseKey.OpenSubKey(snapshot.Key, writable: snapshot.Exists);
+            using var key = baseKey.OpenSubKey(snapshot.Key, writable: true);
 
             if (snapshot.Exists)
             {
