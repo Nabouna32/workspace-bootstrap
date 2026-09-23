@@ -11,6 +11,7 @@ public sealed class ProvisioningEngine
     private readonly InventoryScanner _inventory;
     private readonly WindowsSystemService _windows;
     private readonly RegistryDesiredStateObserver _registry;
+    private readonly RegistryDesiredStateWriter _registryWriter;
 
     public ProvisioningEngine(
         ConfigurationStore config,
@@ -18,7 +19,8 @@ public sealed class ProvisioningEngine
         WorkspacePaths paths,
         InventoryScanner inventory,
         WindowsSystemService? windows = null,
-        RegistryDesiredStateObserver? registry = null)
+        RegistryDesiredStateObserver? registry = null,
+        RegistryDesiredStateWriter? registryWriter = null)
     {
         _config = config;
         _installer = installer;
@@ -26,6 +28,7 @@ public sealed class ProvisioningEngine
         _inventory = inventory;
         _windows = windows ?? new WindowsSystemService();
         _registry = registry ?? new RegistryDesiredStateObserver();
+        _registryWriter = registryWriter ?? new RegistryDesiredStateWriter();
     }
 
     public IReadOnlyList<ProfileManifest> Profiles() =>
@@ -40,8 +43,6 @@ public sealed class ProvisioningEngine
         var inventory = await _inventory.ScanAsync(token);
 
         var requests = profile.ApplicationRequests;
-        if (requests.Count == 0)
-            throw new InvalidOperationException($"Profile '{profile.Id}' does not declare any desired applications.");
 
         var items = requests.Select(request =>
         {
@@ -97,6 +98,7 @@ public sealed class ProvisioningEngine
         }
 
         var items = diff.Items
+            .Where(item => item.Domain != DesiredStateDomainCodes.Condition)
             .Select(item => new ProvisioningPlanItem(
                 item.TargetId,
                 item.TargetName,
@@ -105,7 +107,9 @@ public sealed class ProvisioningEngine
                 item.ObservedValue,
                 item.AvailableValue,
                 item.DesiredValue,
-                item.Message))
+                item.Message,
+                item.Domain,
+                item.TargetId))
             .ToArray();
 
         return new ProvisioningPlan(
@@ -396,7 +400,7 @@ public sealed class ProvisioningEngine
         try
         {
             var currentPlan = await PlanAsync(operation.ProfileId, token);
-            ValidateUncompletedPlanState(operation, plan, currentPlan, requests);
+            ValidateUncompletedPlanState(operation, plan, currentPlan);
 
             operation.Status = ProvisioningOperationStatuses.Running;
             operation.Error = null;
@@ -661,12 +665,6 @@ public sealed class ProvisioningEngine
             items);
 
         AddUnsupportedSection(
-            profile.DesiredState.RegistrySettings.Count,
-            DesiredStateDomainCodes.RegistrySetting,
-            "registrySettings",
-            items);
-
-        AddUnsupportedSection(
             profile.DesiredState.Optimizations.Count,
             DesiredStateDomainCodes.Optimization,
             "optimizations",
@@ -714,11 +712,11 @@ public sealed class ProvisioningEngine
                     targetId,
                     targetId,
                     ProvisioningStateCodes.Missing,
-                    ProvisioningActionCodes.Blocked,
+                    ProvisioningActionCodes.Set,
                     null,
                     null,
                     desired.Value,
-                    "Registry value is missing. Registry mutation is not enabled yet."));
+                    "Registry value is missing and will be created."));
                 continue;
             }
 
@@ -731,7 +729,7 @@ public sealed class ProvisioningEngine
                 targetId,
                 targetId,
                 matches ? DesiredStateStateCodes.Compliant : DesiredStateStateCodes.Drifted,
-                matches ? ProvisioningActionCodes.None : ProvisioningActionCodes.Blocked,
+                matches ? ProvisioningActionCodes.None : ProvisioningActionCodes.Set,
                 observation.Value,
                 observation.ValueType,
                 desired.Value,
@@ -812,15 +810,23 @@ public sealed class ProvisioningEngine
     private static void ValidateUncompletedPlanState(
         ProvisioningOperation operation,
         ProvisioningPlan persistedPlan,
-        ProvisioningPlan currentPlan,
-        IReadOnlyList<ProfileApplication> requests)
+        ProvisioningPlan currentPlan)
     {
-        for (var index = operation.Completed; index < requests.Count; index++)
+        if (persistedPlan.Items.Count != currentPlan.Items.Count)
+        {
+            operation.Status = ProvisioningOperationStatuses.Stale;
+            operation.CanResume = false;
+            operation.Error = "Provisioning plan is stale because the desired-state item set changed.";
+            throw new InvalidOperationException(operation.Error);
+        }
+
+        for (var index = operation.Completed; index < persistedPlan.Items.Count; index++)
         {
             var expected = persistedPlan.Items[index];
             var observed = currentPlan.Items[index];
 
-            if (!string.Equals(expected.ComponentId, observed.ComponentId, StringComparison.Ordinal)
+            if (!string.Equals(expected.Domain, observed.Domain, StringComparison.Ordinal)
+                || !string.Equals(expected.TargetId, observed.TargetId, StringComparison.Ordinal)
                 || !string.Equals(expected.StateCode, observed.StateCode, StringComparison.Ordinal)
                 || !string.Equals(expected.ActionCode, observed.ActionCode, StringComparison.Ordinal)
                 || !string.Equals(expected.InstalledVersion, observed.InstalledVersion, StringComparison.Ordinal)
@@ -836,6 +842,54 @@ public sealed class ProvisioningEngine
                 throw new InvalidOperationException(operation.Error);
             }
         }
+    }
+
+    private static RegistrySettingDesiredState FindRegistryDesired(
+        ProfileManifest profile,
+        string targetId)
+    {
+        var desired = profile.DesiredState?.RegistrySettings
+            .FirstOrDefault(item =>
+                string.Equals(
+                    $"registry:{item.Hive}:{item.Key}:{item.ValueName}",
+                    targetId,
+                    StringComparison.Ordinal));
+
+        return desired
+            ?? throw new InvalidOperationException($"Unknown registry desired-state target '{targetId}'.");
+    }
+
+    private static void ValidateRegistryPostcondition(
+        ProvisioningPlanItem planned,
+        ProvisioningPlanItem verified)
+    {
+        if (verified.StateCode != DesiredStateStateCodes.Compliant
+            || verified.ActionCode != ProvisioningActionCodes.None)
+        {
+            throw new InvalidOperationException(
+                $"Post-condition verification failed for registry target '{planned.ComponentName}': {verified.Message}");
+        }
+    }
+
+    private void RollbackRegistrySnapshots(ProvisioningOperation operation)
+    {
+        var failures = new List<string>();
+
+        foreach (var snapshot in operation.RegistrySnapshots.AsEnumerable().Reverse())
+        {
+            try
+            {
+                _registryWriter.Restore(snapshot);
+            }
+            catch (Exception ex)
+            {
+                failures.Add($"{snapshot.Hive}\\{snapshot.Key}\\{snapshot.ValueName}: {ex.Message}");
+            }
+        }
+
+        if (failures.Count > 0)
+            throw new InvalidOperationException(
+                "Registry rollback failed: " + string.Join(" | ", failures));
     }
 
     private void Save(ProvisioningOperation operation)
