@@ -30,14 +30,8 @@
              LinkBase="bootstrap\windows\profiles"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="Strings\en-US\Resources.resw"
-             Link="Strings\en-US\Resources.resw"
-             CopyToOutputDirectory="PreserveNewest"
-             CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="Strings\fr-FR\Resources.resw"
-             Link="Strings\fr-FR\Resources.resw"
-             CopyToOutputDirectory="PreserveNewest"
-             CopyToPublishDirectory="PreserveNewest" />
+    <PRIResource Include="Strings\en-US\Resources.resw" />
+    <PRIResource Include="Strings\fr-FR\Resources.resw" />
   </ItemGroup>
 
   <!-- The unpackaged MrtCore publish path generates the app PRI but does not wire it into publish output. -->
