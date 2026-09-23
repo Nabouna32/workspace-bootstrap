@@ -1,3 +1,4 @@
+using System.Text.Json;
 using WorkspaceControl.Domain;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WorkspaceControl.Infrastructure;
@@ -92,6 +93,58 @@ public sealed class ConfigurationTests
         }
     }
 
+
+    [TestMethod]
+    public void Profile_export_and_import_validate_and_require_explicit_overwrite()
+    {
+        var root = CreateConfigurationRoot();
+        var configuration = new ConfigurationStore(root);
+
+        var exported = Path.Combine(Path.GetTempPath(), $"workspace-control-export-{Guid.NewGuid():N}.json");
+        try
+        {
+            var exportedPath = configuration.ExportProfile("base", exported);
+            Assert.IsTrue(File.Exists(exportedPath));
+
+            var imported = configuration.ImportProfile(exported, overwrite: true);
+            Assert.AreEqual("base", imported.Id);
+
+            Assert.ThrowsExactly<IOException>(() => configuration.ImportProfile(exported));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+            if (File.Exists(exported))
+                File.Delete(exported);
+        }
+    }
+
+    [TestMethod]
+    public void Profile_import_rejects_path_traversal_identifier()
+    {
+        var root = CreateConfigurationRoot();
+        var configuration = new ConfigurationStore(root);
+        var source = Path.Combine(root, "malicious.json");
+
+        try
+        {
+            var malicious = new ProfileManifest(
+                "../outside",
+                "Malicious",
+                "Invalid identifier",
+                DesiredState: new DesiredStateManifest([], [], [], [], [], []),
+                SchemaVersion: 2);
+
+            File.WriteAllText(source, JsonSerializer.Serialize(malicious, JsonDefaults.Options));
+
+            Assert.ThrowsExactly<InvalidOperationException>(() => configuration.ImportProfile(source));
+            Assert.IsFalse(File.Exists(Path.Combine(root, "outside.json")));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
 
     [TestMethod]
     public void Registry_desired_state_observer_classifies_matching_values()
@@ -294,6 +347,32 @@ public sealed class ConfigurationTests
         Assert.IsTrue(plan.Items.All(item =>
             item.StateCode == "UNKNOWN" &&
             item.ActionCode == "blocked"));
+    }
+
+    private static string CreateConfigurationRoot()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "workspace-control-config-tests", Guid.NewGuid().ToString("N"));
+        var componentsRoot = Path.Combine(root, "bootstrap", "windows", "components");
+        var profilesRoot = Path.Combine(root, "bootstrap", "windows", "profiles");
+        Directory.CreateDirectory(componentsRoot);
+        Directory.CreateDirectory(profilesRoot);
+
+        File.WriteAllText(
+            Path.Combine(componentsRoot, "catalog.json"),
+            """{"components":[]}""");
+
+        var profile = new ProfileManifest(
+            "base",
+            "Base",
+            "Test profile",
+            DesiredState: new DesiredStateManifest([], [], [], [], [], []),
+            SchemaVersion: 2);
+
+        File.WriteAllText(
+            Path.Combine(profilesRoot, "base.json"),
+            JsonSerializer.Serialize(profile, JsonDefaults.Options));
+
+        return root;
     }
 
     private sealed class FakeRegistryReader(RegistryObservation observation) : IRegistryReader
