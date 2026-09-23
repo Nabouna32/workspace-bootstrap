@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 1,
   "id": "development-extended",
   "name": "Développement étendu",
   "description": "Outillage supplémentaire pour Python, Rust, Go, LLVM, IDE et développement Minecraft/modding.",
