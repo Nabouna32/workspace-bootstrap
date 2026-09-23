@@ -45,4 +45,5 @@
   <data name="ResumingProvisioning" xml:space="preserve"><value>Reprise du provisionnement…</value></data>
   <data name="ProvisioningResumed" xml:space="preserve"><value>Provisionnement repris</value></data>
   <data name="ProvisioningCouldNotResume" xml:space="preserve"><value>Impossible de reprendre le provisionnement</value></data>
+  <data name="MainWindow_Profiles.Content" xml:space="preserve"><value>Profils</value></data>
 </root>
