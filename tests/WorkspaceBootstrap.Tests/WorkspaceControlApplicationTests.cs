@@ -96,8 +96,14 @@ public sealed class WorkspaceControlApplicationTests
     private sealed class FakeProvisioningService(params ProvisioningOperation[] history) : IProvisioningService
     {
         public IReadOnlyList<ProfileManifest> GetProfiles() => [];
-        public Task<object> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
-            Task.FromResult<object>(new { profileId });
+        public Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(new ProvisioningPlan(
+                profileId,
+                profileId,
+                "test-scan",
+                [],
+                [],
+                DateTimeOffset.UtcNow));
         public string Start(string profileId) => "operation";
         public Task RunAsync(string operationId, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
