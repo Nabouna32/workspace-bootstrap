@@ -92,37 +92,26 @@ catch (Exception ex)
     return 1;
 }
 
-static object MapPlan(object plan)
+static object MapPlan(ProvisioningPlan plan)
 {
-    var json = JsonSerializer.SerializeToElement(plan);
-    var profile = json.GetProperty("Profile");
-    var items = json.GetProperty("Items").EnumerateArray()
-        .Select(x => new
-        {
-            Id = x.GetProperty("Id").GetString() ?? "",
-            Name = x.GetProperty("Name").GetString() ?? "",
-            StateCode = x.GetProperty("StateCode").GetString() ?? "UNKNOWN",
-            ActionCode = x.GetProperty("ActionCode").GetString() ?? "version-unverified",
-            Message = x.GetProperty("Message").GetString() ?? "État inconnu."
-        }).ToArray();
-
-    var diagnostics = json.TryGetProperty("InventoryDiagnostics", out var diagnosticElement)
-        ? diagnosticElement
-        : JsonSerializer.SerializeToElement(Array.Empty<object>());
-
     return new
     {
         Profile = new
         {
-            Id = profile.GetProperty("Id").GetString() ?? "",
-            Name = profile.GetProperty("Name").GetString() ?? "",
-            Description = profile.GetProperty("Description").GetString() ?? ""
+            Id = plan.ProfileId,
+            Name = plan.ProfileName
         },
-        InventoryScanId = json.TryGetProperty("InventoryScanId", out var scanId)
-            ? scanId.GetString()
-            : null,
-        InventoryDiagnostics = diagnostics,
-        Items = items
+        InventoryScanId = plan.InventoryScanId,
+        InventoryDiagnostics = plan.InventoryDiagnostics,
+        Items = plan.Items.Select(item => new
+        {
+            Id = item.ComponentId,
+            Name = item.ComponentName,
+            StateCode = item.StateCode,
+            ActionCode = item.ActionCode,
+            InstalledVersion = item.InstalledVersion,
+            Message = item.Message
+        }).ToArray()
     };
 }
 
