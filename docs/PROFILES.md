@@ -21,7 +21,7 @@ Profile
   └── conditions
 ```
 
-Applications reference the existing component catalog. Optional version constraints in a profile override the catalog policy for that profile only. The provisioning engine remains the single mutation engine; the desired-state model does not introduce a parallel installer path.
+Applications reference the existing component catalog. Each application may declare `state: present` (the default) or `state: absent`; optional version constraints override the catalog policy for that profile only. An absent application is planned as a persisted uninstall operation when reliable inventory and rollback evidence are available. Removal captures the installed version before mutation, verifies absence afterward and restores the exact version through the same provisioning engine if a later operation fails. The provisioning engine remains the single mutation engine; the desired-state model does not introduce a parallel installer path.
 
 The desired-state diff is now available through the shared application contract and CLI. Application items are observed from the same inventory used by provisioning planning. Registry settings are observed with explicit hive/key/value/type evidence and can now be planned as reversible mutations. Registry Apply captures the existing value before writing, persists the snapshot in the operation journal, verifies the post-condition and rolls back registry mutations if the operation fails or is cancelled. Other non-application sections remain explicit contracts and appear as blocked diff items when populated.
 
