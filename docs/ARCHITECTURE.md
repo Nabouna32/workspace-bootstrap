@@ -49,11 +49,21 @@ Observed state + Desired state
           ↓
     Postcondition
           ↓
-     New inventory
+     Final verification
+        ↓
+     Final state
 ```
 
 ## Providers
 Providers are replaceable adapters. Examples include official vendor installers, MSI/EXE, Store/package sources, WinGet, portable artifacts and future plugins. Providers expose evidence and provenance; they do not own product policy.
+
+## Provisioning operation lifecycle
+
+A provisioning mutation is never implied by computing a plan. The lifecycle is persisted as:
+
+Observed State → Desired State → Plan → awaiting-confirmation → queued → running → post-condition verification → completed
+
+ProvisioningOperation stores the exact ProvisioningPlan that the user confirmed. Apply executes that persisted plan rather than recomputing a replacement plan. Before each uncompleted mutation, current inventory is compared with the corresponding planned precondition. A divergence makes the operation stale and non-resumable until a new plan is created and explicitly confirmed. Recovery/resume reuses the same persisted plan and repeats the precondition check before any mutation.
 
 ## Privilege boundary
 The normal UI runs unelevated. A small privileged component accepts a narrow structured command contract and validates all arguments. An explicitly elevated application session may be offered as a convenience but is not the security foundation.

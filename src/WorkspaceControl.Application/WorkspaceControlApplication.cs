@@ -30,8 +30,11 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
     public Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
         _provisioning.GetPlanAsync(profileId, cancellationToken);
 
-    public string StartProvisioning(string profileId) =>
-        _provisioning.Start(profileId);
+    public Task<ProvisioningOperation> CreateProvisioningAsync(string profileId, CancellationToken cancellationToken = default) =>
+        _provisioning.CreateAsync(profileId, cancellationToken);
+
+    public string ConfirmProvisioning(string operationId) =>
+        _provisioning.Confirm(operationId);
 
     public Task RunProvisioningAsync(
         string operationId,
@@ -53,7 +56,10 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
             .OrderByDescending(x => x.UpdatedAt)
             .FirstOrDefault();
 
-        return latest?.Status is "starting" or "running" or "failed"
+        return latest?.Status is ProvisioningOperationStatuses.AwaitingConfirmation
+            or ProvisioningOperationStatuses.Queued
+            or ProvisioningOperationStatuses.Running
+            or ProvisioningOperationStatuses.Failed
             ? latest
             : null;
     }

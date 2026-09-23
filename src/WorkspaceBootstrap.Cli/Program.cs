@@ -49,10 +49,15 @@ try
             data = new { OperationId = operation, Status = "completed" };
             break;
         case "provisioning-start":
+            data = MapOperation(await application.CreateProvisioningAsync(
+                profile ?? throw new ArgumentException("--profile est requis.")));
+            break;
+        case "provisioning-confirm":
             data = new
             {
-                OperationId = application.StartProvisioning(profile ?? throw new ArgumentException("--profile est requis.")),
-                Status = "starting"
+                OperationId = application.ConfirmProvisioning(
+                    operation ?? throw new ArgumentException("--operation est requis.")),
+                Status = "queued"
             };
             break;
         case "provisioning-status":
@@ -87,37 +92,26 @@ catch (Exception ex)
     return 1;
 }
 
-static object MapPlan(object plan)
+static object MapPlan(ProvisioningPlan plan)
 {
-    var json = JsonSerializer.SerializeToElement(plan);
-    var profile = json.GetProperty("Profile");
-    var items = json.GetProperty("Items").EnumerateArray()
-        .Select(x => new
-        {
-            Id = x.GetProperty("Id").GetString() ?? "",
-            Name = x.GetProperty("Name").GetString() ?? "",
-            StateCode = x.GetProperty("StateCode").GetString() ?? "UNKNOWN",
-            ActionCode = x.GetProperty("ActionCode").GetString() ?? "version-unverified",
-            Message = x.GetProperty("Message").GetString() ?? "État inconnu."
-        }).ToArray();
-
-    var diagnostics = json.TryGetProperty("InventoryDiagnostics", out var diagnosticElement)
-        ? diagnosticElement
-        : JsonSerializer.SerializeToElement(Array.Empty<object>());
-
     return new
     {
         Profile = new
         {
-            Id = profile.GetProperty("Id").GetString() ?? "",
-            Name = profile.GetProperty("Name").GetString() ?? "",
-            Description = profile.GetProperty("Description").GetString() ?? ""
+            Id = plan.ProfileId,
+            Name = plan.ProfileName
         },
-        InventoryScanId = json.TryGetProperty("InventoryScanId", out var scanId)
-            ? scanId.GetString()
-            : null,
-        InventoryDiagnostics = diagnostics,
-        Items = items
+        InventoryScanId = plan.InventoryScanId,
+        InventoryDiagnostics = plan.InventoryDiagnostics,
+        Items = plan.Items.Select(item => new
+        {
+            Id = item.ComponentId,
+            Name = item.ComponentName,
+            StateCode = item.StateCode,
+            ActionCode = item.ActionCode,
+            InstalledVersion = item.InstalledVersion,
+            Message = item.Message
+        }).ToArray()
     };
 }
 
@@ -140,10 +134,12 @@ static object? MapOperation(ProvisioningOperation? operation)
         Percent = percent,
         MessageKey = operation.Status switch
         {
-            "starting" => "operation.starting",
+            "awaiting-confirmation" => "operation.awaitingConfirmation",
+            "queued" => "operation.queued",
             "running" => "component.running",
             "completed" => "operation.completed",
             "failed" => "operation.failed",
+            "stale" => "operation.stale",
             _ => "operation.unknown"
         },
         Error = operation.Error,
@@ -188,7 +184,13 @@ static object MapHistory(ProvisioningOperation operation) =>
         Completed = operation.Completed,
         Total = operation.Total,
         Percent = operation.Total == 0 ? 100 : operation.Completed * 100.0 / operation.Total,
-        MessageKey = operation.Status == "completed" ? "operation.completed" : "operation.failed",
+        MessageKey = operation.Status switch
+        {
+            "awaiting-confirmation" => "operation.awaitingConfirmation",
+            "completed" => "operation.completed",
+            "stale" => "operation.stale",
+            _ => "operation.failed"
+        },
         CanResume = operation.CanResume,
         UpdatedAt = operation.UpdatedAt
     };

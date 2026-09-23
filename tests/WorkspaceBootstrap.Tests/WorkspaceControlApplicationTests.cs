@@ -27,6 +27,46 @@ public sealed class WorkspaceControlApplicationTests
     }
 
     [TestMethod]
+    public async Task Provisioning_creation_is_delegated_without_applying()
+    {
+        var plan = new ProvisioningPlan(
+            "base",
+            "Base",
+            "scan-1",
+            [],
+            [],
+            DateTimeOffset.UtcNow);
+        var operation = new ProvisioningOperation
+        {
+            OperationId = "op-1",
+            ProfileId = "base",
+            Plan = plan,
+            Status = ProvisioningOperationStatuses.AwaitingConfirmation
+        };
+        var provisioning = new FakeProvisioningService(operation);
+        var application = CreateApplication(provisioning: provisioning);
+
+        var actual = await application.CreateProvisioningAsync("base");
+
+        Assert.AreSame(operation, actual);
+        Assert.AreEqual(ProvisioningOperationStatuses.AwaitingConfirmation, actual.Status);
+        Assert.AreSame(plan, actual.Plan);
+        Assert.IsFalse(provisioning.Confirmed);
+    }
+
+    [TestMethod]
+    public void Provisioning_confirmation_is_explicit()
+    {
+        var provisioning = new FakeProvisioningService();
+        var application = CreateApplication(provisioning: provisioning);
+
+        var operationId = application.ConfirmProvisioning("op-1");
+
+        Assert.AreEqual("op-1", operationId);
+        Assert.IsTrue(provisioning.Confirmed);
+    }
+
+    [TestMethod]
     public void Recovery_only_returns_the_latest_operation_when_recoverable()
     {
         var latestCompleted = new ProvisioningOperation
@@ -104,7 +144,23 @@ public sealed class WorkspaceControlApplicationTests
                 [],
                 [],
                 DateTimeOffset.UtcNow));
-        public string Start(string profileId) => "operation";
+        public bool Confirmed { get; private set; }
+
+        public Task<ProvisioningOperation> CreateAsync(string profileId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(history.FirstOrDefault() ?? new ProvisioningOperation
+            {
+                OperationId = "operation",
+                ProfileId = profileId,
+                Plan = new ProvisioningPlan(profileId, profileId, "test-scan", [], [], DateTimeOffset.UtcNow),
+                Status = ProvisioningOperationStatuses.AwaitingConfirmation
+            });
+
+        public string Confirm(string operationId)
+        {
+            Confirmed = true;
+            return operationId;
+        }
+
         public Task RunAsync(string operationId, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
         public ProvisioningOperation? Get(string operationId) =>

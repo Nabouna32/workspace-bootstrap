@@ -43,6 +43,16 @@ public static class ProvisioningStateCodes
     public const string Unknown = "UNKNOWN";
 }
 
+public static class ProvisioningOperationStatuses
+{
+    public const string AwaitingConfirmation = "awaiting-confirmation";
+    public const string Queued = "queued";
+    public const string Running = "running";
+    public const string Completed = "completed";
+    public const string Failed = "failed";
+    public const string Stale = "stale";
+}
+
 public static class ProvisioningActionCodes
 {
     public const string Install = "install";
@@ -77,12 +87,13 @@ public sealed class ProvisioningOperation
 {
     public string OperationId { get; init; } = Guid.NewGuid().ToString("N");
     public string ProfileId { get; init; } = "";
-    public string Status { get; set; } = "starting";
+    public string Status { get; set; } = ProvisioningOperationStatuses.AwaitingConfirmation;
+    public ProvisioningPlan? Plan { get; set; }
     public int Completed { get; set; }
     public int Total { get; set; }
     public string? CurrentComponentName { get; set; }
     public string? Error { get; set; }
-    public bool CanResume { get; set; } = true;
+    public bool CanResume { get; set; }
     public List<ProvisioningStep> Steps { get; init; } = [];
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }

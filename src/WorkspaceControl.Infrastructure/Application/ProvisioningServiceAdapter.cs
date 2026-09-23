@@ -12,7 +12,9 @@ internal sealed class ProvisioningServiceAdapter : IProvisioningService
     public IReadOnlyList<ProfileManifest> GetProfiles() => _engine.Profiles();
     public Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
         _engine.PlanAsync(profileId, cancellationToken);
-    public string Start(string profileId) => _engine.Start(profileId);
+    public Task<ProvisioningOperation> CreateAsync(string profileId, CancellationToken cancellationToken = default) =>
+        _engine.CreateAsync(profileId, cancellationToken);
+    public string Confirm(string operationId) => _engine.Confirm(operationId);
     public Task RunAsync(string operationId, CancellationToken cancellationToken = default) =>
         _engine.RunAsync(operationId, cancellationToken);
     public ProvisioningOperation? Get(string operationId) => _engine.Get(operationId);

@@ -9,6 +9,8 @@
 - Remove obsolete bootstrapper/job/WPF assumptions.
 
 ## Phase 1 — Local control center
+- Explicit provisioning lifecycle: observed state, desired state, persisted plan, confirmation, apply, post-condition verification and final-state verification.
+- Safe recovery with persisted plans and stale-plan detection.
 - Modern WinUI 3 shell.
 - Application inventory.
 - Install/update/uninstall.
