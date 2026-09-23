@@ -57,3 +57,14 @@ Keyboard navigation, visible focus, screen-reader names, sufficient contrast, sc
 
 ## Localization
 English is the default. French is supported from the beginning. Additional languages must be addable without domain-code changes.
+
+WinUI user-facing strings are stored in qualified `Strings/<language>/Resources.resw` files. XAML uses `x:Uid` for static UI text and accessibility names; view-model status and progress messages use the same resource set through the desktop localization service. Domain and application contracts remain language-neutral.
+
+The provisioning surface must localize:
+- page headings and actions;
+- operation status and progress messages;
+- recovery/stale-plan guidance;
+- error feedback labels;
+- accessibility names for lists, actions, status and progress controls.
+
+Locale changes must not change provisioning behavior or operation state.
