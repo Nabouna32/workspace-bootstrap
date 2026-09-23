@@ -29,5 +29,13 @@
              LinkBase="bootstrap\windows\profiles"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Strings\en-US\Resources.resw"
+             Link="Strings\en-US\Resources.resw"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Strings\fr-FR\Resources.resw"
+             Link="Strings\fr-FR\Resources.resw"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
