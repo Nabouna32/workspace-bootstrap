@@ -89,6 +89,23 @@ public sealed class WorkspaceControlApplicationTests
     }
 
     [TestMethod]
+    public void Recovery_does_not_offer_stale_operation()
+    {
+        var stale = new ProvisioningOperation
+        {
+            OperationId = "stale",
+            Status = ProvisioningOperationStatuses.Stale,
+            CanResume = false,
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+
+        var application = CreateApplication(
+            provisioning: new FakeProvisioningService(stale));
+
+        Assert.IsNull(application.GetProvisioningRecovery());
+    }
+
+    [TestMethod]
     public void Recovery_returns_latest_failed_operation()
     {
         var olderRunning = new ProvisioningOperation
