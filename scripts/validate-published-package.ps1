@@ -15,6 +15,7 @@ $readme = Join-Path $PackageRoot 'README.md'
 $license = Join-Path $PackageRoot 'LICENSE'
 $englishResources = Join-Path $PackageRoot 'WorkspaceControl\Strings\en-US\Resources.resw'
 $frenchResources = Join-Path $PackageRoot 'WorkspaceControl\Strings\fr-FR\Resources.resw'
+$applicationPri = Join-Path $PackageRoot 'WorkspaceControl\WorkspaceControl.pri'
 
 $requiredFiles = @(
     $desktop,
@@ -23,7 +24,8 @@ $requiredFiles = @(
     $readme,
     $license,
     $englishResources,
-    $frenchResources
+    $frenchResources,
+    $applicationPri
 )
 
 foreach ($path in $requiredFiles) {
