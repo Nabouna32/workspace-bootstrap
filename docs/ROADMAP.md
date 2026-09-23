@@ -13,7 +13,7 @@
 - Safe recovery with persisted plans and stale-plan detection.
 - Modern WinUI 3 shell.
 - Application inventory.
-- Install/update/uninstall.
+- Install/update/uninstall through the shared desired-state/provisioning engine, with persisted removal operations, post-condition verification and rollback when exact restoration is available.
 - Provider selection and interactive installers.
 - Reuse already-downloaded verified installers when they match the requested current version.
 - Diagnostics and operation history.
