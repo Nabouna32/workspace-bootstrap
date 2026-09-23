@@ -3,11 +3,15 @@
 Provisioning is one operation family inside Workspace Control, not the product's architectural center.
 
 ## Lifecycle
+
 ```text
-requested → planned → awaiting-confirmation → running
-running → waiting-reboot / partially-completed / failed / cancelled
-running → completed
+observed state → desired state → plan → awaiting-confirmation → queued → running
+running → post-condition verification → completed
+running → failed → recovery/resume
+running → stale
 ```
+
+A plan is read-only and is persisted as part of the `ProvisioningOperation`. Computing a plan never implies a mutation.
 
 ## Planning
 Planning compares requested capability, observed state, desired state, providers, prerequisites, cache availability, privilege and risk. Planning is read-only.
