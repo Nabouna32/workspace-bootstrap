@@ -601,6 +601,7 @@ public sealed class ProvisioningEngine
             operation.CurrentComponentName = null;
             operation.CanResume = false;
             operation.Error = null;
+            operation.RegistrySnapshots.Clear();
             Save(operation);
         }
         catch (OperationCanceledException)
