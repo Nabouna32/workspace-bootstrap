@@ -21,10 +21,24 @@ public sealed class WinGetInventoryProviderTests
 
         var sevenZip = items.Single(x => x.DisplayName == "7-Zip");
         Assert.AreEqual("24.09", sevenZip.Version);
+        Assert.AreEqual("25.00", sevenZip.AvailableVersion);
         Assert.AreEqual("winget:7zip.7zip", sevenZip.ProviderId);
         Assert.AreEqual(InventoryScope.Unknown, sevenZip.Scope);
         Assert.IsTrue(sevenZip.Evidence.Any(x => x.Kind == "available-update"));
         Assert.AreEqual(detectedAt, sevenZip.DetectedAtUtc);
+    }
+
+    [TestMethod]
+    public void ParseListOutput_does_not_invent_available_version_when_column_is_unknown()
+    {
+        var output = Table(
+            ["Example App", "Example.App", "1.0.0", "Unknown", "winget"]);
+
+        var items = WinGetInventoryProvider.ParseListOutput(output, DateTimeOffset.UtcNow);
+
+        Assert.AreEqual(1, items.Count);
+        Assert.IsNull(items[0].AvailableVersion);
+        Assert.IsFalse(items[0].Evidence.Any(x => x.Kind == "available-update"));
     }
 
     [TestMethod]
@@ -65,6 +79,7 @@ public sealed class WinGetInventoryProviderTests
             new[] { "1.0.0", "2.0.0" },
             items.Select(x => x.Version).ToArray());
     }
+
     private static string Table(params string[][] rows)
     {
         var header = new[] { "Name", "Id", "Version", "Available", "Source" };

@@ -51,5 +51,6 @@ internal sealed class WinGetSoftwareInventorySource : ISoftwareInventorySource
                     evidence.Description,
                     observation.DetectedAtUtc,
                     evidence.IsStrong))
-            .ToArray());
+            .ToArray(),
+            observation.AvailableVersion);
 }

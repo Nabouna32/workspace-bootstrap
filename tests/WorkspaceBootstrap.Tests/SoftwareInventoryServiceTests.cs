@@ -30,6 +30,25 @@ public sealed class SoftwareInventoryServiceTests
     }
 
     [TestMethod]
+    public async Task Available_version_is_preserved_when_inventory_items_are_merged()
+    {
+        var item = Item("tool", "Tool", "1.0", SoftwareOwnership.PackageManagerManaged, "winget", true)
+            with
+        {
+            AvailableVersion = "2.0"
+        };
+
+        var service = new SoftwareInventoryService([
+            new FakeSource("winget", item)
+        ]);
+
+        var snapshot = await service.ScanAsync();
+
+        Assert.AreEqual("1.0", snapshot.Items.Single().Version);
+        Assert.AreEqual("2.0", snapshot.Items.Single().AvailableVersion);
+    }
+
+    [TestMethod]
     public async Task Failed_source_becomes_diagnostic_without_hiding_other_sources()
     {
         var service = new SoftwareInventoryService([
