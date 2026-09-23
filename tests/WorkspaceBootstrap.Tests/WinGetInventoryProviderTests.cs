@@ -35,7 +35,8 @@ public sealed class WinGetInventoryProviderTests
 
         var items = WinGetInventoryProvider.ParseListOutput(output, DateTimeOffset.UtcNow);
 
-        var item = Assert.Single(items);
+        Assert.AreEqual(1, items.Count);
+        var item = items[0];
         Assert.AreEqual("msstore:Example.App", item.ProviderId);
         Assert.AreEqual("msstore", item.Source);
     }
