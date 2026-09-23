@@ -10,10 +10,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <StackPanel Spacing="4">
-            <TextBlock Text="Diagnostics" FontSize="32" FontWeight="SemiBold" />
-            <TextBlock Text="Provider and discovery signals collected during the latest scan." Opacity="0.72" />
+            <TextBlock x:Uid="DiagnosticsPage_Title" FontSize="32" FontWeight="SemiBold" />
+            <TextBlock x:Uid="DiagnosticsPage_Subtitle" Opacity="0.72" />
         </StackPanel>
 
-        <ListView Grid.Row="2" ItemsSource="{Binding Diagnostics}" SelectionMode="None" />
+        <ListView Grid.Row="2"
+            x:Uid="DiagnosticsPage_List" ItemsSource="{Binding Diagnostics}" SelectionMode="None" />
     </Grid>
 </Page>

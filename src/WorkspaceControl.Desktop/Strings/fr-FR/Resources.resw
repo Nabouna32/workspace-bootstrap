@@ -46,4 +46,42 @@
   <data name="ProvisioningResumed" xml:space="preserve"><value>Provisionnement repris</value></data>
   <data name="ProvisioningCouldNotResume" xml:space="preserve"><value>Impossible de reprendre le provisionnement</value></data>
   <data name="MainWindow_Profiles.Content" xml:space="preserve"><value>Profils</value></data>
+  <data name="MainWindow.Title" xml:space="preserve"><value>Workspace Control</value></data>
+  <data name="MainWindow_Navigation.AutomationProperties.Name" xml:space="preserve"><value>Navigation principale</value></data>
+  <data name="MainWindow_Overview.Content" xml:space="preserve"><value>Vue d’ensemble</value></data>
+  <data name="MainWindow_Overview.AutomationProperties.Name" xml:space="preserve"><value>Vue d’ensemble</value></data>
+  <data name="MainWindow_Software.Content" xml:space="preserve"><value>Logiciels</value></data>
+  <data name="MainWindow_Software.AutomationProperties.Name" xml:space="preserve"><value>Logiciels</value></data>
+  <data name="MainWindow_Windows.Content" xml:space="preserve"><value>Windows</value></data>
+  <data name="MainWindow_Windows.AutomationProperties.Name" xml:space="preserve"><value>Windows</value></data>
+  <data name="MainWindow_Diagnostics.Content" xml:space="preserve"><value>Diagnostics</value></data>
+  <data name="MainWindow_Diagnostics.AutomationProperties.Name" xml:space="preserve"><value>Diagnostics</value></data>
+  <data name="MainWindow_Profiles.Content" xml:space="preserve"><value>Profils</value></data>
+  <data name="MainWindow_Profiles.AutomationProperties.Name" xml:space="preserve"><value>Profils</value></data>
+  <data name="MainWindow_StatusInfoBar.Title" xml:space="preserve"><value>Workspace Control</value></data>
+  <data name="MainWindow_StatusInfoBar.AutomationProperties.Name" xml:space="preserve"><value>Erreur de l’application</value></data>
+  <data name="OverviewPage_Title.Text" xml:space="preserve"><value>Vue d’ensemble</value></data>
+  <data name="OverviewPage_Subtitle.Text" xml:space="preserve"><value>Une vue claire de ce PC Windows 11.</value></data>
+  <data name="OverviewPage_WindowsCard.Text" xml:space="preserve"><value>Windows</value></data>
+  <data name="OverviewPage_HardwareCard.Text" xml:space="preserve"><value>Matériel</value></data>
+  <data name="OverviewPage_SoftwareCard.Text" xml:space="preserve"><value>Logiciels</value></data>
+  <data name="OverviewPage_DetectedEntries.Text" xml:space="preserve"><value>Entrées détectées</value></data>
+  <data name="OverviewPage_StatusHeading.Text" xml:space="preserve"><value>État du système</value></data>
+  <data name="OverviewPage_ProgressRing.AutomationProperties.Name" xml:space="preserve"><value>Actualisation des informations système</value></data>
+  <data name="OverviewPage_Refresh.Content" xml:space="preserve"><value>Actualiser</value></data>
+  <data name="OverviewPage_Refresh.AutomationProperties.Name" xml:space="preserve"><value>Actualiser les informations système</value></data>
+  <data name="SoftwarePage_Title.Text" xml:space="preserve"><value>Logiciels</value></data>
+  <data name="SoftwarePage_Subtitle.Text" xml:space="preserve"><value>Inventaire d’abord. Les actions viennent après les preuves.</value></data>
+  <data name="SoftwarePage_Refresh.Content" xml:space="preserve"><value>Actualiser l’inventaire</value></data>
+  <data name="SoftwarePage_Refresh.AutomationProperties.Name" xml:space="preserve"><value>Actualiser l’inventaire logiciel</value></data>
+  <data name="SoftwarePage_ProgressRing.AutomationProperties.Name" xml:space="preserve"><value>Actualisation de l’inventaire logiciel</value></data>
+  <data name="SoftwarePage_List.AutomationProperties.Name" xml:space="preserve"><value>Inventaire logiciel</value></data>
+  <data name="WindowsPage_Title.Text" xml:space="preserve"><value>Windows</value></data>
+  <data name="WindowsPage_Subtitle.Text" xml:space="preserve"><value>État observé du système. Aucun changement n’est effectué depuis cette vue.</value></data>
+  <data name="WindowsPage_Processor.Text" xml:space="preserve"><value>Processeur</value></data>
+  <data name="WindowsPage_Runtime.Text" xml:space="preserve"><value>Exécution</value></data>
+  <data name="WindowsPage_Volumes.Text" xml:space="preserve"><value>Volumes</value></data>
+  <data name="DiagnosticsPage_Title.Text" xml:space="preserve"><value>Diagnostics</value></data>
+  <data name="DiagnosticsPage_Subtitle.Text" xml:space="preserve"><value>Signaux des fournisseurs et de la découverte recueillis lors de la dernière analyse.</value></data>
+  <data name="DiagnosticsPage_List.AutomationProperties.Name" xml:space="preserve"><value>Résultats des diagnostics</value></data>
 </root>

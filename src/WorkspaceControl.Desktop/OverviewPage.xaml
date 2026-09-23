@@ -6,8 +6,8 @@
     <ScrollViewer>
         <StackPanel Padding="28" Spacing="24">
             <StackPanel Spacing="4">
-                <TextBlock Text="Overview" FontSize="32" FontWeight="SemiBold" />
-                <TextBlock Text="A clear view of this Windows 11 PC." Opacity="0.72" />
+                <TextBlock x:Uid="OverviewPage_Title" FontSize="32" FontWeight="SemiBold" />
+                <TextBlock x:Uid="OverviewPage_Subtitle" Opacity="0.72" />
             </StackPanel>
 
             <Grid ColumnSpacing="16" RowSpacing="16">
@@ -18,33 +18,33 @@
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Windows" Opacity="0.68" />
+                        <TextBlock x:Uid="OverviewPage_WindowsCard" Opacity="0.68" />
                         <TextBlock Text="{Binding Baseline.Windows}" FontSize="22" FontWeight="SemiBold" />
                         <TextBlock Text="{Binding Baseline.Build}" Opacity="0.72" />
                     </StackPanel>
                 </Border>
                 <Border Grid.Column="1" Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Hardware" Opacity="0.68" />
+                        <TextBlock x:Uid="OverviewPage_HardwareCard" Opacity="0.68" />
                         <TextBlock Text="{Binding Baseline.Cpu}" FontSize="20" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                         <TextBlock Text="{Binding MemoryDisplay}" Opacity="0.72" />
                     </StackPanel>
                 </Border>
                 <Border Grid.Column="2" Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Software" Opacity="0.68" />
+                        <TextBlock x:Uid="OverviewPage_SoftwareCard" Opacity="0.68" />
                         <TextBlock Text="{Binding Software.Items.Count}" FontSize="22" FontWeight="SemiBold" />
-                        <TextBlock Text="Detected entries" Opacity="0.72" />
+                        <TextBlock x:Uid="OverviewPage_DetectedEntries" Opacity="0.72" />
                     </StackPanel>
                 </Border>
             </Grid>
 
             <Border Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="10">
-                    <TextBlock Text="System status" FontSize="20" FontWeight="SemiBold" />
+                    <TextBlock x:Uid="OverviewPage_StatusHeading" FontSize="20" FontWeight="SemiBold" />
                     <TextBlock Text="{Binding Status}" />
-                    <ProgressRing IsActive="{Binding IsBusy}" Width="24" Height="24" HorizontalAlignment="Left" />
-                    <Button Content="Refresh" Click="Refresh_Click" HorizontalAlignment="Left" />
+                    <ProgressRing x:Uid="OverviewPage_ProgressRing" IsActive="{Binding IsBusy}" Width="24" Height="24" HorizontalAlignment="Left" />
+                    <Button x:Uid="OverviewPage_Refresh" Click="Refresh_Click" HorizontalAlignment="Left" />
                 </StackPanel>
             </Border>
         </StackPanel>
