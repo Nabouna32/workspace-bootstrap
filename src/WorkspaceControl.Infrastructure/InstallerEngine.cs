@@ -62,15 +62,6 @@ public sealed class InstallerEngine
         ComponentManifest component,
         CancellationToken token)
     {
-        if (!string.Equals(
-            component.FallbackPackageManager,
-            "winget",
-            StringComparison.OrdinalIgnoreCase))
-        {
-            throw new InvalidOperationException(
-                $"Application '{component.Name}' does not declare a supported uninstall provider.");
-        }
-
         if (string.IsNullOrWhiteSpace(component.PackageId))
             throw new InvalidOperationException(
                 $"Application '{component.Name}' does not declare a package id.");
