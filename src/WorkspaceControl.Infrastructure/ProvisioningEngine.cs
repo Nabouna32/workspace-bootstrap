@@ -180,8 +180,11 @@ public sealed class ProvisioningEngine
 
     private static bool TryParseVersion(string? value, out Version version)
     {
-        if (Version.TryParse(value, out version!))
+        if (Version.TryParse(value, out var parsed) && parsed is not null)
+        {
+            version = parsed;
             return true;
+        }
 
         version = default!;
         return false;
