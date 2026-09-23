@@ -27,7 +27,7 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
 
     public IReadOnlyList<ProfileManifest> GetProfiles() => _provisioning.GetProfiles();
 
-    public Task<object> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
+    public Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
         _provisioning.GetPlanAsync(profileId, cancellationToken);
 
     public string StartProvisioning(string profileId) =>
