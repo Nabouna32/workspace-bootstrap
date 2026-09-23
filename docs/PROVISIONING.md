@@ -43,3 +43,7 @@ Cancellation is cooperative. If an external installer cannot safely stop, Worksp
 
 ## Safety
 Destructive and irreversible actions require explicit confirmation. Failed downloads never invalidate a valid previously downloaded artifact.
+
+### Version targeting during apply
+
+The confirmed `DesiredVersion` is passed to the installer when the selected action mutates a component. WinGet uses its exact `--version` option for install and upgrade operations. Official sources must resolve the requested version; if an official source cannot provide the requested version, the operation fails instead of silently installing a different release.
