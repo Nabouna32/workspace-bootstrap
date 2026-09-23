@@ -21,7 +21,7 @@ public sealed class InstallerEngine
         if (actionCode is not (ProvisioningActionCodes.Install or ProvisioningActionCodes.Update))
             throw new InvalidOperationException($"Unsupported provisioning action '{actionCode}' for '{component.Name}'.");
 
-        var artifact = await ResolveArtifactAsync(component, actionCode, token);
+        var artifact = await ResolveArtifactAsync(component, actionCode, desiredVersion, token);
         if (artifact is null)
             return;
 
@@ -61,6 +61,7 @@ public sealed class InstallerEngine
     private async Task<InstallerArtifact?> ResolveArtifactAsync(
         ComponentManifest component,
         string actionCode,
+        string? desiredVersion,
         CancellationToken token)
     {
         if (component.OfficialSource is null)
