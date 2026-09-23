@@ -1,0 +1,95 @@
+name: Windows published validation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '43 5 * * 0'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: workspace-control-windows-published-validation
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  validate-published-package:
+    name: Publish and validate Windows package
+    runs-on: windows-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.401
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'global.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore
+        shell: pwsh
+        run: |
+          dotnet restore src/WorkspaceControl.Infrastructure/WorkspaceControl.Infrastructure.csproj
+          dotnet restore src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj --runtime win-x64
+          dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
+          dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
+
+      - name: Build infrastructure
+        shell: pwsh
+        run: dotnet build src/WorkspaceControl.Infrastructure/WorkspaceControl.Infrastructure.csproj --configuration Release --no-restore --warnaserror
+
+      - name: Build desktop
+        shell: pwsh
+        run: |
+          $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe | Select-Object -First 1
+          if (-not $msbuild) { throw "Visual Studio MSBuild could not be located." }
+          & $msbuild src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj /t:Build /p:Configuration=Release /p:Platform=x64 /warnAsError
+          if ($LASTEXITCODE -ne 0) { throw "WinUI desktop build failed with exit code $LASTEXITCODE." }
+
+      - name: Test
+        run: dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=tests-Release.trx"
+
+      - name: Publish package
+        shell: pwsh
+        run: |
+          $package = Join-Path $env:RUNNER_TEMP "workspace-control-published"
+          New-Item -ItemType Directory -Force -Path $package | Out-Null
+          $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe | Select-Object -First 1
+          if (-not $msbuild) { throw "Visual Studio MSBuild could not be located." }
+          & $msbuild src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj /restore /t:Publish /p:Configuration=Release /p:Platform=x64 /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishDir="$package\WorkspaceControl\"
+          if ($LASTEXITCODE -ne 0) { throw "Workspace Control publish failed with exit code $LASTEXITCODE." }
+          dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
+          Copy-Item README.md (Join-Path $package "README.md") -Force
+          Copy-Item LICENSE (Join-Path $package "LICENSE") -Force
+
+      - name: Validate published package and launch smoke test
+        shell: pwsh
+        run: .\scripts\validate-published-package.ps1 -PackageRoot "$env:RUNNER_TEMP\workspace-control-published"
+
+      - name: Upload published package
+        uses: actions/upload-artifact@v6
+        with:
+          name: workspace-control-published-win-x64-${{ github.run_id }}
+          path: ${{ runner.temp }}/workspace-control-published
+          if-no-files-found: error
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: windows-published-test-results-${{ github.run_id }}
+          path: '**/TestResults/*.trx'
+          if-no-files-found: warn
