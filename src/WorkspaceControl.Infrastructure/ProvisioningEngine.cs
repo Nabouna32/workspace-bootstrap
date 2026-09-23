@@ -146,9 +146,23 @@ public sealed class ProvisioningEngine
         InventoryItem? match,
         IReadOnlyList<InventoryProviderDiagnostic> diagnostics)
     {
-        var desiredPresent = !string.Equals(
+        if (!string.Equals(request.State, "present", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(request.State, "absent", StringComparison.OrdinalIgnoreCase))
+        {
+            return new ProvisioningPlanItem(
+                component.Id,
+                component.Name,
+                ProvisioningStateCodes.Unknown,
+                ProvisioningActionCodes.Blocked,
+                match?.Version,
+                null,
+                null,
+                $"Unsupported application desired-state '{request.State}'.");
+        }
+
+        var desiredPresent = string.Equals(
             request.State,
-            "absent",
+            "present",
             StringComparison.OrdinalIgnoreCase);
 
         if (!desiredPresent)
