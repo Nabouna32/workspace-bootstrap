@@ -35,6 +35,38 @@ public sealed record InstallerArtifact(
     string Url,
     string Sha256);
 
+public static class ProvisioningStateCodes
+{
+    public const string Missing = "MISSING";
+    public const string Installed = "INSTALLED";
+    public const string Outdated = "OUTDATED";
+    public const string Unknown = "UNKNOWN";
+}
+
+public static class ProvisioningActionCodes
+{
+    public const string Install = "install";
+    public const string Update = "update";
+    public const string None = "none";
+    public const string Blocked = "blocked";
+}
+
+public sealed record ProvisioningPlan(
+    string ProfileId,
+    string ProfileName,
+    string InventoryScanId,
+    IReadOnlyList<InventoryProviderDiagnostic> InventoryDiagnostics,
+    IReadOnlyList<ProvisioningPlanItem> Items,
+    DateTimeOffset CreatedAtUtc);
+
+public sealed record ProvisioningPlanItem(
+    string ComponentId,
+    string ComponentName,
+    string StateCode,
+    string ActionCode,
+    string? InstalledVersion,
+    string Message);
+
 public sealed record ProvisioningStep(
     string ComponentId,
     string Name,
