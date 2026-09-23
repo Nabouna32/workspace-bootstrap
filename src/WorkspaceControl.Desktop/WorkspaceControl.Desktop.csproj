@@ -18,7 +18,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.4.0" />
-    <ProjectReference Include="..\WorkspaceBootstrap.Engine\WorkspaceBootstrap.Engine.csproj" />
+    <ProjectReference Include="..\WorkspaceControl.Infrastructure\WorkspaceControl.Infrastructure.csproj" />
     <Content Include="..\..\bootstrap\windows\components\**\*.json"
              LinkBase="bootstrap\windows\components"
              CopyToOutputDirectory="PreserveNewest"

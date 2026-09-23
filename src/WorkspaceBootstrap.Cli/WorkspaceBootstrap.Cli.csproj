@@ -11,7 +11,7 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WorkspaceBootstrap.Engine\WorkspaceBootstrap.Engine.csproj" />
+    <ProjectReference Include="..\WorkspaceControl.Infrastructure\WorkspaceControl.Infrastructure.csproj" />
     <Content Include="..\..\bootstrap\windows\components\**\*.json" LinkBase="bootstrap\windows\components" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="..\..\bootstrap\windows\profiles\*.json" LinkBase="bootstrap\windows\profiles" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>

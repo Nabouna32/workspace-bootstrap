@@ -44,7 +44,7 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Build engine
-        run: dotnet build src/WorkspaceBootstrap.Engine/WorkspaceBootstrap.Engine.csproj --configuration Release
+        run: dotnet build src/WorkspaceControl.Infrastructure/WorkspaceControl.Infrastructure.csproj --configuration Release
 
       - name: Build WinUI desktop
         shell: pwsh
