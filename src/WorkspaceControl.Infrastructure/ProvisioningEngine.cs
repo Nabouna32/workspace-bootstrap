@@ -648,11 +648,11 @@ public sealed class ProvisioningEngine
 
                     try
                     {
-                        RollbackSnapshotsAsync(operation, components, token);
+                        await RollbackSnapshotsAsync(operation, components, token);
                     }
                     catch (Exception rollbackEx)
                     {
-                        operation.Error = $"{ex.Message} Registry rollback also failed: {rollbackEx.Message}";
+                        operation.Error = $"{ex.Message} Rollback also failed: {rollbackEx.Message}";
                         operation.Status = ProvisioningOperationStatuses.Failed;
                         operation.CanResume = false;
                         Save(operation);
@@ -763,7 +763,7 @@ public sealed class ProvisioningEngine
             catch (Exception rollbackEx)
             {
                 operation.Status = ProvisioningOperationStatuses.Failed;
-                operation.Error = $"{ex.Message} Registry rollback also failed: {rollbackEx.Message}";
+                operation.Error = $"{ex.Message} Rollback also failed: {rollbackEx.Message}";
                 operation.CanResume = false;
                 Save(operation);
                 throw;
