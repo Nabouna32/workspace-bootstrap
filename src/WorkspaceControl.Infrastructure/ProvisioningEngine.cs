@@ -1112,8 +1112,28 @@ public sealed class ProvisioningEngine
         IReadOnlyDictionary<string, ComponentManifest> components,
         CancellationToken token)
     {
-        await RollbackApplicationSnapshotsAsync(operation, components, CancellationToken.None);
-        RollbackRegistrySnapshots(operation);
+        var failures = new List<string>();
+
+        try
+        {
+            await RollbackApplicationSnapshotsAsync(operation, components, CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            failures.Add(ex.Message);
+        }
+
+        try
+        {
+            RollbackRegistrySnapshots(operation);
+        }
+        catch (Exception ex)
+        {
+            failures.Add(ex.Message);
+        }
+
+        if (failures.Count > 0)
+            throw new InvalidOperationException(string.Join(" | ", failures));
     }
 
     private async Task RollbackApplicationSnapshotsAsync(
