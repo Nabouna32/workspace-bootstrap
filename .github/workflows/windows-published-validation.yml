@@ -2,6 +2,9 @@ name: Windows published validation
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
   schedule:
     - cron: '43 5 * * 0'
 
