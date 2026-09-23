@@ -17,7 +17,7 @@ public sealed partial class ProfilesPage : Page
         _viewModel = ((App)Microsoft.UI.Xaml.Application.Current).ViewModel;
         DataContext = _viewModel;
 
-        _pollTimer = DispatcherQueue.CreateTimer();
+        _pollTimer = DispatcherQueue.GetForCurrentThread()?.CreateTimer()\n            ?? throw new InvalidOperationException("The provisioning page must be created on the UI thread.");
         _pollTimer.Interval = TimeSpan.FromMilliseconds(750);
         _pollTimer.Tick += PollTimer_Tick;
 
