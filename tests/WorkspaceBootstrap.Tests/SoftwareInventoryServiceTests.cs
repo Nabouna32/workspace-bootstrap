@@ -33,7 +33,10 @@ public sealed class SoftwareInventoryServiceTests
     public async Task Available_version_is_preserved_when_inventory_items_are_merged()
     {
         var item = Item("tool", "Tool", "1.0", SoftwareOwnership.PackageManagerManaged, "winget", true)
-            with { AvailableVersion = "2.0" };
+            with
+        {
+            AvailableVersion = "2.0"
+        };
 
         var service = new SoftwareInventoryService([
             new FakeSource("winget", item)
