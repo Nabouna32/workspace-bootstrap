@@ -111,6 +111,27 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
+    public async Task Provisioning_plan_preserves_stable_compatible_policy()
+    {
+        var configuration = new ConfigurationStore(FindRepositoryRoot());
+        var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
+        var engine = new ProvisioningEngine(
+            configuration,
+            new InstallerEngine(paths),
+            paths,
+            new InventoryScanner([new VersionedInventoryProvider("Microsoft.VisualStudio.2022.BuildTools", "17.14.0", "17.14.1")]));
+
+        var plan = await engine.PlanAsync("development");
+        var item = plan.Items.Single(item => item.ComponentId == "visual-studio");
+
+        Assert.AreEqual(ProvisioningStateCodes.Outdated, item.StateCode);
+        Assert.AreEqual(ProvisioningActionCodes.Update, item.ActionCode);
+        Assert.AreEqual("17.14.0", item.InstalledVersion);
+        Assert.AreEqual("17.14.1", item.AvailableVersion);
+        Assert.AreEqual("17.14.1", item.DesiredVersion);
+    }
+
+    [TestMethod]
     public async Task Provisioning_plan_applies_minimum_version_policy()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
