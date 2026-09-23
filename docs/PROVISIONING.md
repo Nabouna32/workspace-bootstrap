@@ -18,8 +18,8 @@ Execution acquires resources, handles elevation, performs provider work, records
 ## Interactive installers
 Resolve and verify the installer, launch it, wait for completion, rescan the machine and verify the expected state.
 
-## Offline
-Cache-only mode never downloads and succeeds only with a verified compatible artifact.
+## Installer reuse
+Installation is online-first. If a verified local artifact already matches the requested current version, it is reused without another download. There is no cache-only/offline provisioning mode.
 
 ## Recovery
 Durable operations survive restart where technically possible. Recovery rescans the machine before continuing and avoids duplicate work.
@@ -28,4 +28,4 @@ Durable operations survive restart where technically possible. Recovery rescans 
 Cancellation is cooperative. If an external installer cannot safely stop, Workspace Control waits for a safe boundary.
 
 ## Safety
-Destructive and irreversible actions require explicit confirmation. Failed downloads never invalidate valid cache artifacts.
+Destructive and irreversible actions require explicit confirmation. Failed downloads never invalidate a valid previously downloaded artifact.
