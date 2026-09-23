@@ -49,6 +49,9 @@ Never use color alone to communicate state.
 ## Progressive disclosure
 Every mutation starts with: what, why, scope, risk, reversibility and restart impact. Technical implementation, registry/policy paths, provider details and logs are one step deeper.
 
+## Desired-state review
+Profiles use progressive disclosure in an explicit sequence: choose profile → observe and compare → review the generated plan → confirm → apply → verify. The observation/diff step is read-only and must show observed, available and desired values where applicable. Unsupported desired-state domains are visible as blocked comparison items rather than silently omitted.
+
 ## Operations
 Long operations show current step, progress where measurable, affected item, elapsed time, cancellation, details and recovery status. The UI must never leave the user unsure whether work is still running.
 
