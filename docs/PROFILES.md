@@ -55,7 +55,7 @@ Conditions use explicit operators (`equals`, `not-equals`, `contains`, `greater-
 
 ## Import/export
 
-Profiles are versioned and portable. Exports never contain passwords, access tokens or other secrets.
+Profiles are versioned and portable. Export serializes a validated profile to a caller-selected path. Import validates the schema version, identifier contract and desired-state structure before writing it. Imports are written to a temporary file and atomically replace the destination only when serialization succeeds; an existing profile requires explicit overwrite. Profile content is data only and is never executed during import. Exports never contain passwords, access tokens or other secrets.
 
 ## Automation
 
