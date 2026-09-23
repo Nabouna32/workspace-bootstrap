@@ -33,6 +33,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public string MemoryDisplay => Baseline is null ? "—" : $"{Baseline.MemoryGB:F1} GB RAM";
     public string CpuCoresDisplay => Baseline is null ? "—" : $"{Baseline.CpuCores} logical cores";
     public string UptimeDisplay => Baseline is null ? "—" : $"{Baseline.UptimeHours:F1} hours uptime";
+    public string SoftwareCountDisplay => $"{SoftwareItems.Count} detected entries";
+    public bool HasError => !string.IsNullOrWhiteSpace(Error);
 
     public ObservableCollection<SoftwareItem> SoftwareItems { get; } = [];
     public ObservableCollection<string> Diagnostics { get; } = [];
@@ -53,7 +55,13 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public string? Error
     {
         get => _error;
-        private set => SetField(ref _error, value);
+        private set
+        {
+            if (!SetField(ref _error, value))
+                return;
+
+            OnPropertyChanged(nameof(HasError));
+        }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -83,6 +91,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             SoftwareItems.Clear();
             foreach (var item in software.Items)
                 SoftwareItems.Add(item);
+            OnPropertyChanged(nameof(SoftwareCountDisplay));
 
             Diagnostics.Clear();
             foreach (var diagnostic in software.Diagnostics)
@@ -109,12 +118,13 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     private void OnPropertyChanged(string propertyName) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-    private void SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
         if (EqualityComparer<T>.Default.Equals(field, value))
-            return;
+            return false;
 
         field = value;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        return true;
     }
 }

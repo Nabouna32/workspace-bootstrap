@@ -8,7 +8,7 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid>
+    <Grid x:Name="RootGrid">
         <NavigationView
             x:Name="NavView"
             PaneDisplayMode="Left"
@@ -34,8 +34,11 @@
                     x:Name="StatusInfoBar"
                     Grid.Row="0"
                     Margin="12,12,12,0"
-                    IsOpen="False"
-                    IsClosable="True" />
+                    IsOpen="{Binding HasError}"
+                    IsClosable="True"
+                    Title="Workspace Control"
+                    Message="{Binding Error}"
+                    Severity="Error" />
 
                 <Frame
                     x:Name="ContentFrame"

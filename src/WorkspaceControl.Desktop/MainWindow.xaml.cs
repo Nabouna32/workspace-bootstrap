@@ -9,6 +9,7 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        RootGrid.DataContext = ((App)Microsoft.UI.Xaml.Application.Current).ViewModel;
         NavView.SelectedItem = NavView.MenuItems[0];
         Activated += MainWindow_Activated;
     }
