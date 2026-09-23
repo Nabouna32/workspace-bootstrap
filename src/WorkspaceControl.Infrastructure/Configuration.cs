@@ -110,6 +110,20 @@ public sealed class ConfigurationStore
             })
             .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
+    private static bool IsValidProfileId(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id) || id.Length > 128)
+            return false;
+
+        if (!char.IsAsciiLower(id[0]) && !char.IsAsciiDigit(id[0]))
+            return false;
+
+        return id.All(character =>
+            char.IsAsciiLower(character) ||
+            char.IsAsciiDigit(character) ||
+            character is '.' or '_' or '-');
+    }
+
     private void ValidateLayout()
     {
         var catalogPath = Path.Combine(ComponentsRoot, "catalog.json");
