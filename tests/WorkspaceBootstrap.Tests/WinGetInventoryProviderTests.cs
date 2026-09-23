@@ -11,7 +11,7 @@ public sealed class WinGetInventoryProviderTests
     {
         const string output = """
 Name                 Id                   Version        Available      Source
---------------------------------------------------------------------------------
+-------------------- ------------------- -------------- -------------- ------
 7-Zip                7zip.7zip            24.09          25.00          winget
 Git                  Git.Git              2.49.0         2.50.1         winget
 """;
@@ -34,7 +34,7 @@ Git                  Git.Git              2.49.0         2.50.1         winget
     {
         const string output = """
 Name                 Id                   Version        Available      Source
---------------------------------------------------------------------------------
+-------------------- ------------------- -------------- -------------- ------
 Example App          Example.App         1.0.0                         msstore
 """;
 
@@ -60,7 +60,7 @@ Example App          Example.App         1.0.0                         msstore
     {
         const string output = """
 Name                 Id                   Version        Available      Source
---------------------------------------------------------------------------------
+-------------------- ------------------- -------------- -------------- ------
 Runtime               Runtime.App         1.0.0                         winget
 Runtime               Runtime.App         2.0.0                         winget
 """;
