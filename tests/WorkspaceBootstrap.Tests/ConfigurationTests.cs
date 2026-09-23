@@ -71,6 +71,7 @@ public sealed class ConfigurationTests
             Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Id));
             Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Name));
             Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Description));
+            Assert.AreEqual(1, profile.SchemaVersion);
             Assert.IsNotEmpty(profile.Components);
 
             Assert.AreEqual(
