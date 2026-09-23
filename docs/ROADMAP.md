@@ -34,6 +34,8 @@
 - WSL-aware profiles.
 
 ## Phase 4 — Profiles and extensibility
+- Versioned desired-state profile contract.
+- Desired-state observation and diff engine.
 - Desired-state profile editor.
 - Conditions and heterogeneous-machine support.
 - Import/export.
