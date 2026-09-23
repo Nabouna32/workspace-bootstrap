@@ -68,4 +68,4 @@ Plugins are planned as a controlled extension boundary for providers, diagnostic
 Cloud desired state resolves into the same local engine model. There is no second implementation of Windows mutation logic.
 
 ## Technology
-C#/.NET 10, WinUI 3/Windows App SDK, Windows 11 x64 and a .NET CLI. WPF is legacy presentation technology during migration; new UI work targets WinUI 3.
+C#/.NET 10, WinUI 3/Windows App SDK, Windows 11 x64 and a .NET CLI. WPF is retired; WinUI 3 is the only desktop presentation technology.

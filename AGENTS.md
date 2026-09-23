@@ -36,8 +36,8 @@ Workspace Control
 ├── CLI
 ├── Core / Domain
 ├── Application / Use cases
-├── Engine
-├── Windows integration
+├── Application / use cases
+├── Infrastructure / Windows integration
 ├── Software providers
 ├── Drivers
 ├── WSL
@@ -49,7 +49,7 @@ Workspace Control
 └── Plugins
 ```
 
-Presentation, application orchestration, domain rules and OS/provider adapters stay separated.
+Presentation depends on Application contracts. Application owns use-case orchestration and depends only on Domain. Infrastructure implements Application-facing adapters and composes Windows/provider integrations. Domain remains independent of Windows and provider implementations.
 
 ## UX rules
 - Modern Windows 11 Fluent-inspired experience.

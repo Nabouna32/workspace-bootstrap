@@ -1,7 +1,7 @@
 # Status
 
 ## Product direction
-The product is now **Workspace Control**, a permanent Windows 11 control center. The previous Workspace Bootstrap implementation is being migrated rather than extended indefinitely.
+The product is **Workspace Control**, a permanent Windows 11 control center. The migration from the historical Workspace Bootstrap implementation is now structurally established and future work should extend the new architecture rather than revive retired layers.
 
 ## Confirmed decisions
 - Windows 11 only.
@@ -19,15 +19,29 @@ The product is now **Workspace Control**, a permanent Windows 11 control center.
 - Elevated session is optional; least privilege remains the architecture.
 - GitHub-hosted CI only; self-hosted runners are abandoned and must not be reintroduced.
 
-## Current migration state
-The architecture migration is now active in code:
-- a native WinUI 3 shell exists under `src/WorkspaceControl.Desktop`;
-- inventory contracts have moved into `WorkspaceControl.Domain`;
-- mutable cache/state/log data no longer defaults to the application installation directory;
-- packaged configuration is resolved from the application's content root rather than searching the repository tree;
-- Legacy WPF desktop removed; WinUI 3 is now the only desktop UI target.
+## Current architecture state
+- Native WinUI 3 shell exists under `src/WorkspaceControl.Desktop`.
+- Domain models and Application contracts are separated from Windows implementation.
+- `WorkspaceControl.Infrastructure` is a real project with its own physical source tree; the retired `WorkspaceBootstrap.Engine` project has been removed.
+- Desktop and CLI consume the Application contract through an explicit Infrastructure composition root; the old `EngineFacade` service-locator layer is removed.
+- Infrastructure namespaces are aligned with `WorkspaceControl.Infrastructure`.
+- Software inventory aggregation has provider isolation, deterministic merge behavior, provenance/evidence preservation and partial-failure diagnostics.
+- Mutable cache/state/log data defaults to LocalAppData rather than the installation directory.
+- Packaged configuration is resolved from the application content root.
+- Legacy WPF desktop has been removed; WinUI 3 is the only desktop UI target.
 
-## Existing foundations worth migrating
+## Next engineering priorities
+1. Harden Application contracts and operation lifecycle.
+2. Introduce provider-contract tests and strengthen software inventory provenance/update semantics.
+3. Replace remaining infrastructure composition with a testable dependency-injection/composition strategy where it materially improves lifetime management.
+4. Complete Windows administration, policy, diagnostics, driver and WSL capability boundaries.
+5. Build first-class desired-state diff/plan/confirm/apply/postcondition flows.
+6. Expand cache/offline retention, export/import and integrity verification.
+7. Add Windows integration, published-artifact, UI/accessibility and security validation.
+8. Continue WinUI UX hardening and runtime binding verification.
+9. Remove remaining historical names/dead documentation as each boundary becomes authoritative.
+
+## Reusable foundations
 - inventory providers and evidence/ownership;
 - installer verification;
 - cache staging and atomic promotion;
@@ -36,15 +50,4 @@ The architecture migration is now active in code:
 - optimization scaffolding;
 - profile/configuration manifests.
 
-These are reusable foundations, not proof that the current architecture is final.
-
-## Migration order
-1. Documentation and architectural contracts. **Done.**
-2. New domain/application boundaries. **In progress.**
-3. WinUI 3 shell. **Started.**
-4. Migrate inventory, software, cache and operations.
-5. Replace and remove legacy WPF/WorkspaceBootstrap desktop code.
-6. Expand Windows administration, optimization, drivers and WSL.
-7. Build desired-state profiles.
-8. Add plugin boundary.
-9. Add broad Windows integration/E2E validation.
+These foundations are reusable implementation starting points, not proof that every product capability is complete.
