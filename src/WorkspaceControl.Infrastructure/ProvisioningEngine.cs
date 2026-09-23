@@ -794,12 +794,6 @@ public sealed class ProvisioningEngine
             "optimizations",
             items);
 
-        AddUnsupportedSection(
-            profile.DesiredState.Conditions.Count,
-            DesiredStateDomainCodes.Condition,
-            "conditions",
-            items);
-    }
 
     private void AddRegistryDiffItems(
         ProfileManifest profile,
