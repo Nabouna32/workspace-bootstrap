@@ -71,15 +71,17 @@ public sealed class ConfigurationTests
             Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Id));
             Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Name));
             Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Description));
-            Assert.AreEqual(1, profile.SchemaVersion);
-            Assert.IsNotEmpty(profile.Components);
+            Assert.AreEqual(2, profile.SchemaVersion);
+            Assert.IsNotNull(profile.DesiredState);
+            Assert.IsNotEmpty(profile.ApplicationRequests);
 
+            var componentIds = profile.ApplicationRequests.Select(x => x.ComponentId).ToArray();
             Assert.AreEqual(
-                profile.Components.Length,
-                profile.Components.Distinct(StringComparer.OrdinalIgnoreCase).Count(),
-                $"{profile.Id} contains duplicate components.");
+                componentIds.Length,
+                componentIds.Distinct(StringComparer.OrdinalIgnoreCase).Count(),
+                $"{profile.Id} contains duplicate applications.");
 
-            foreach (var componentId in profile.Components)
+            foreach (var componentId in componentIds)
                 Assert.IsTrue(components.ContainsKey(componentId), $"{profile.Id} references unknown component {componentId}.");
         }
 
@@ -109,6 +111,31 @@ public sealed class ConfigurationTests
         Assert.AreEqual("1.0.0", item.InstalledVersion);
         Assert.AreEqual("2.0.0", item.AvailableVersion);
         Assert.AreEqual("2.0.0", item.DesiredVersion);
+    }
+
+
+    [TestMethod]
+    public void Desired_state_profile_maps_applications_to_requests()
+    {
+        var profile = new ProfileManifest(
+            "test",
+            "Test",
+            "Test profile",
+            DesiredState: new DesiredStateManifest(
+                [new ProfileApplication("vscode", "minimum", "1.2.3")],
+                [],
+                [],
+                [],
+                [],
+                []),
+            SchemaVersion: 2);
+
+        var request = profile.ApplicationRequests.Single();
+
+        Assert.AreEqual("vscode", request.ComponentId);
+        Assert.AreEqual("minimum", request.VersionPolicy);
+        Assert.AreEqual("1.2.3", request.MinimumVersion);
+        Assert.IsTrue(profile.DesiredState is not null);
     }
 
     [TestMethod]

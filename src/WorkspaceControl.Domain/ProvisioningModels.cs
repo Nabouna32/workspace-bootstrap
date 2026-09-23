@@ -27,8 +27,23 @@ public sealed record ProfileManifest(
     string Id,
     string Name,
     string Description,
-    string[] Components,
-    int SchemaVersion = 1);
+    string[]? Components = null,
+    int SchemaVersion = 1,
+    DesiredStateManifest? DesiredState = null)
+{
+    public IReadOnlyList<ProfileApplication> ApplicationRequests =>
+        SchemaVersion >= 2
+            ? DesiredState?.Applications ?? []
+            : (Components ?? []).Select(componentId => new ProfileApplication(componentId)).ToArray();
+
+    public bool HasUnsupportedDesiredStateSections =>
+        DesiredState is not null && (
+            DesiredState.WindowsSettings.Count > 0 ||
+            DesiredState.Policies.Count > 0 ||
+            DesiredState.RegistrySettings.Count > 0 ||
+            DesiredState.Optimizations.Count > 0 ||
+            DesiredState.Conditions.Count > 0);
+}
 
 public sealed record InstallerArtifact(
     string ComponentId,
