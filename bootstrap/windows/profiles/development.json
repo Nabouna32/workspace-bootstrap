@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 1,
   "id": "development",
   "name": "Environnement développeur",
   "description": "Toolchain Windows pour Next.js/React, Flutter Android/Windows, debug et tests locaux.",
