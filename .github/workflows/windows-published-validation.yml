@@ -80,7 +80,9 @@ jobs:
 
       - name: Validate published package and launch smoke test
         shell: pwsh
-        run: .\scripts\validate-published-package.ps1 -PackageRoot "$env:RUNNER_TEMP\workspace-control-published"
+        run: |
+          $diagnostics = Join-Path $env:RUNNER_TEMP "workspace-control-published-diagnostics"
+          & .\scripts\validate-published-package.ps1 -PackageRoot "$env:RUNNER_TEMP\workspace-control-published" -DiagnosticsDirectory $diagnostics
 
       - name: Upload published package
         uses: actions/upload-artifact@v6
@@ -88,6 +90,14 @@ jobs:
           name: workspace-control-published-win-x64-${{ github.run_id }}
           path: ${{ runner.temp }}/workspace-control-published
           if-no-files-found: error
+
+      - name: Upload native crash diagnostics
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: windows-published-crash-diagnostics-${{ github.run_id }}
+          path: ${{ runner.temp }}/workspace-control-published-diagnostics
+          if-no-files-found: warn
 
       - name: Upload test results
         if: always()
