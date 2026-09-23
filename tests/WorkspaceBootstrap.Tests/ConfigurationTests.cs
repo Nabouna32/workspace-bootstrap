@@ -172,7 +172,10 @@ public sealed class ConfigurationTests
 
         File.WriteAllText(
             Path.Combine(root, "bootstrap", "windows", "components", "catalog.json"),
-            JsonSerializer.Serialize(new { components = new[] { component } }, JsonDefaults.Options));
+            """{"components":["test-app"]}""");
+        File.WriteAllText(
+            Path.Combine(root, "bootstrap", "windows", "components", "test-app.json"),
+            JsonSerializer.Serialize(component, JsonDefaults.Options));
 
         var profile = new ProfileManifest(
             "remove-app",
