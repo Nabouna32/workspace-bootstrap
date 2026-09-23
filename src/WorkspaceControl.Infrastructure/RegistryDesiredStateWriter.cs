@@ -146,7 +146,7 @@ public sealed class RegistryDesiredStateWriter(IRegistryWriter? writer = null)
                     $"Unsupported registry value type '{valueType}'.")
             };
 
-        private static int ParseInteger(string value, int size)
+        private static object ParseInteger(string value, int size)
         {
             if (!long.TryParse(
                     value,
@@ -160,7 +160,7 @@ public sealed class RegistryDesiredStateWriter(IRegistryWriter? writer = null)
 
             return size == sizeof(int)
                 ? checked((int)parsed)
-                : checked((int)parsed);
+                : parsed;
         }
 
         private static object ParseBinary(string value)
