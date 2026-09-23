@@ -41,7 +41,7 @@ The product is **Workspace Control**, a permanent Windows 11 control center. The
 
 ## Next engineering priorities
 1. Execute and document the real Windows 11 UI validation pass for the provisioning surface: navigation, localization, keyboard/focus, accessibility, DPI/scaling, long-running states, stale recovery and error presentation.
-2. Strengthen software inventory/provider contracts and update semantics.
+2. Strengthen software inventory/provider contracts and update/removal semantics.
 3. Replace remaining infrastructure composition with a testable dependency-injection/composition strategy where it materially improves lifetime management.
 4. Complete Windows administration, policy, diagnostics, driver and WSL capability boundaries.
 5. Build richer desired-state diff presentation and risk/reversibility metadata.
