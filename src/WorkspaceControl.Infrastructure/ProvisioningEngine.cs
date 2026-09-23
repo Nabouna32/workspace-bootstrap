@@ -201,7 +201,7 @@ public sealed class ProvisioningEngine
 
                 try
                 {
-                    await _installer.InstallAsync(component, token);
+                    await _installer.InstallAsync(component, planned.ActionCode, token);
 
                     var verificationPlan = await PlanAsync(operation.ProfileId, token);
                     var verified = verificationPlan.Items[index];

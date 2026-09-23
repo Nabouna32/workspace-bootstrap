@@ -181,4 +181,51 @@ public sealed class ProvisioningPlanContractTests
 [TestClass]
 public sealed class InstallerEngineTests
 {
+    [TestMethod]
+    public void WinGet_install_action_uses_install_command()
+    {
+        var component = new ComponentManifest(
+            "test-component",
+            "Test component",
+            null,
+            "Test.Package",
+            null,
+            "exe",
+            null,
+            "x64",
+            null,
+            [],
+            "winget");
+
+        var arguments = InstallerEngine.BuildWingetArguments(
+            component,
+            ProvisioningActionCodes.Install);
+
+        Assert.AreEqual("install", arguments[0]);
+        CollectionAssert.Contains(arguments.ToArray(), "Test.Package");
+    }
+
+    [TestMethod]
+    public void WinGet_update_action_uses_upgrade_command()
+    {
+        var component = new ComponentManifest(
+            "test-component",
+            "Test component",
+            null,
+            "Test.Package",
+            null,
+            "exe",
+            null,
+            "x64",
+            null,
+            [],
+            "winget");
+
+        var arguments = InstallerEngine.BuildWingetArguments(
+            component,
+            ProvisioningActionCodes.Update);
+
+        Assert.AreEqual("upgrade", arguments[0]);
+        CollectionAssert.Contains(arguments.ToArray(), "Test.Package");
+    }
 }
