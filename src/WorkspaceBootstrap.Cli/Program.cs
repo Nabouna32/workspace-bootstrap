@@ -143,6 +143,7 @@ static object MapPlan(ProvisioningPlan plan)
             InstalledVersion = item.InstalledVersion,
             AvailableVersion = item.AvailableVersion,
             DesiredVersion = item.DesiredVersion,
+            ObservedValue = item.ObservedValue,
             Message = item.Message
         }).ToArray()
     };
