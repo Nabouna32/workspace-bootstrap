@@ -79,12 +79,16 @@ jobs:
           $catalog = Join-Path $package "bootstrap/windows/components/catalog.json"
           $profiles = Join-Path $package "bootstrap/windows/profiles"
           $readme = Join-Path $package "README.md"
+          $license = Join-Path $package "LICENSE"
+          Copy-Item README.md $readme -Force
+          Copy-Item LICENSE $license -Force
 
           if (-not (Test-Path $winUiDesktop)) { throw "Workspace Control WinUI executable is missing: $winUiDesktop" }
           if (-not (Test-Path $cli)) { throw "CLI executable is missing: $cli" }
           if (-not (Test-Path $catalog)) { throw "Bundled component catalog is missing: $catalog" }
           if (-not (Test-Path $profiles -PathType Container)) { throw "Bundled profiles directory is missing: $profiles" }
           if (-not (Test-Path $readme)) { throw "Portable package README is missing: $readme" }
+          if (-not (Test-Path $license)) { throw "Portable package LICENSE is missing: $license" }
 
           & $cli capabilities
           if ($LASTEXITCODE -ne 0) { throw "Portable CLI smoke test failed with exit code $LASTEXITCODE." }
@@ -93,17 +97,17 @@ jobs:
         shell: pwsh
         run: |
           $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-release"
-          $zip = Join-Path $env:RUNNER_TEMP "WorkspaceBootstrap-win-x64.zip"
+          $zip = Join-Path $env:RUNNER_TEMP "WorkspaceControl-win-x64.zip"
           Compress-Archive -Path (Join-Path $package '*') -DestinationPath $zip -Force
           $hash = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash
-          "$hash  WorkspaceBootstrap-win-x64.zip" | Set-Content -Encoding ascii (Join-Path $env:RUNNER_TEMP "SHA256SUMS.txt")
+          "$hash  WorkspaceControl-win-x64.zip" | Set-Content -Encoding ascii (Join-Path $env:RUNNER_TEMP "SHA256SUMS.txt")
 
       - name: Upload release package
         uses: actions/upload-artifact@v6
         with:
-          name: workspace-bootstrap-win-x64-${{ github.ref_name }}
+          name: workspace-control-win-x64-${{ github.ref_name }}
           path: |
-            ${{ runner.temp }}/WorkspaceBootstrap-win-x64.zip
+            ${{ runner.temp }}/WorkspaceControl-win-x64.zip
             ${{ runner.temp }}/SHA256SUMS.txt
           if-no-files-found: error
 
@@ -112,4 +116,4 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" "${{ runner.temp }}/WorkspaceBootstrap-win-x64.zip" "${{ runner.temp }}/SHA256SUMS.txt" --generate-notes
+        run: gh release create "${{ github.ref_name }}" "${{ runner.temp }}/WorkspaceControl-win-x64.zip" "${{ runner.temp }}/SHA256SUMS.txt" --generate-notes
