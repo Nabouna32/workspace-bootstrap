@@ -35,14 +35,6 @@ public sealed record ProfileManifest(
         SchemaVersion >= 2
             ? DesiredState?.Applications ?? []
             : (Components ?? []).Select(componentId => new ProfileApplication(componentId)).ToArray();
-
-    public bool HasUnsupportedDesiredStateSections =>
-        DesiredState is not null && (
-            DesiredState.WindowsSettings.Count > 0 ||
-            DesiredState.Policies.Count > 0 ||
-            DesiredState.RegistrySettings.Count > 0 ||
-            DesiredState.Optimizations.Count > 0 ||
-            DesiredState.Conditions.Count > 0);
 }
 
 public sealed record InstallerArtifact(

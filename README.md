@@ -17,6 +17,7 @@ It brings software management, Windows configuration, diagnostics, maintenance, 
 - Inspect and manage drivers with appropriate caution.
 - Install and configure WSL.
 - Create, import, export and apply desired-state profiles.
+- Inspect a read-only desired-state diff before provisioning.
 - Use the same capabilities from the CLI.
 - Extend the product through providers/plugins.
 

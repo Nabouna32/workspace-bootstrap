@@ -153,6 +153,15 @@ public sealed class WorkspaceControlApplicationTests
     private sealed class FakeProvisioningService(params ProvisioningOperation[] history) : IProvisioningService
     {
         public IReadOnlyList<ProfileManifest> GetProfiles() => [];
+        public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string profileId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(new DesiredStateDiff(
+                profileId,
+                profileId,
+                "test-scan",
+                [],
+                [],
+                DateTimeOffset.UtcNow));
+
         public Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
             Task.FromResult(new ProvisioningPlan(
                 profileId,

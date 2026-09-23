@@ -39,3 +39,32 @@ public sealed record MachineCondition(
     string Fact,
     string Operator,
     string Value);
+
+public static class DesiredStateDomainCodes
+{
+    public const string Application = "application";
+    public const string WindowsSetting = "windows-setting";
+    public const string Policy = "policy";
+    public const string RegistrySetting = "registry-setting";
+    public const string Optimization = "optimization";
+    public const string Condition = "condition";
+}
+
+public sealed record DesiredStateDiffItem(
+    string Domain,
+    string TargetId,
+    string TargetName,
+    string StateCode,
+    string ActionCode,
+    string? ObservedValue,
+    string? AvailableValue,
+    string? DesiredValue,
+    string Message);
+
+public sealed record DesiredStateDiff(
+    string ProfileId,
+    string ProfileName,
+    string InventoryScanId,
+    IReadOnlyList<InventoryProviderDiagnostic> InventoryDiagnostics,
+    IReadOnlyList<DesiredStateDiffItem> Items,
+    DateTimeOffset CreatedAtUtc);
