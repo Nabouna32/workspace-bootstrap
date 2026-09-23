@@ -29,16 +29,17 @@ The product is **Workspace Control**, a permanent Windows 11 control center. The
 - Mutable cache/state/log data defaults to LocalAppData rather than the installation directory.
 - Packaged configuration is resolved from the application content root.
 - Legacy WPF desktop has been removed; WinUI 3 is the only desktop UI target.
+- The desktop Profiles surface now exposes profile selection, persisted plan review, explicit confirmation, live apply progress, verification results, stale-plan handling and safe resume for resumable failures.
 
 ## Next engineering priorities
-1. Harden Application contracts and operation lifecycle.
-2. Introduce provider-contract tests and strengthen software inventory provenance/update semantics.
+1. Add first-class Windows integration, published-artifact, UI/accessibility and security validation for the provisioning surface.
+2. Strengthen software inventory/provider contracts and update semantics.
 3. Replace remaining infrastructure composition with a testable dependency-injection/composition strategy where it materially improves lifetime management.
 4. Complete Windows administration, policy, diagnostics, driver and WSL capability boundaries.
-5. Build first-class desired-state diff/plan/confirm/apply/postcondition flows.
+5. Build richer desired-state diff presentation and risk/reversibility metadata.
 6. Harden verified installer reuse, artifact retention and integrity verification.
 7. Add Windows integration, published-artifact, UI/accessibility and security validation.
-8. Continue WinUI UX hardening and runtime binding verification.
+7. Continue WinUI UX hardening, localization and runtime binding verification.
 9. Remove remaining historical names/dead documentation as each boundary becomes authoritative.
 
 ## Reusable foundations
