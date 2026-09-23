@@ -38,10 +38,19 @@ public sealed class ConfigurationStore
 
     public IReadOnlyDictionary<string, ProfileManifest> LoadProfiles() =>
         Directory.EnumerateFiles(ProfilesRoot, "*.json")
-            .Select(path => JsonSerializer.Deserialize<ProfileManifest>(
-                File.ReadAllText(path), JsonDefaults.Options)
-                ?? throw new InvalidOperationException(
-                    $"Invalid profile: {Path.GetFileName(path)}"))
+            .Select(path =>
+            {
+                var profile = JsonSerializer.Deserialize<ProfileManifest>(
+                    File.ReadAllText(path), JsonDefaults.Options)
+                    ?? throw new InvalidOperationException(
+                        $"Invalid profile: {Path.GetFileName(path)}");
+
+                if (profile.SchemaVersion != 1)
+                    throw new InvalidOperationException(
+                        $"Unsupported profile schema version '{profile.SchemaVersion}' in {Path.GetFileName(path)}.");
+
+                return profile;
+            })
             .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
     private void ValidateLayout()
