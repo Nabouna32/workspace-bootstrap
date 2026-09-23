@@ -16,7 +16,7 @@ A plan is read-only and is persisted as part of the `ProvisioningOperation`. Com
 ## Planning
 Planning compares requested capability, observed state, desired state, providers, prerequisites, inventory diagnostics, privilege and risk. The resulting `ProvisioningPlan` contains the exact actions and observed preconditions that will be reviewed by the user.
 
-Version policy is evaluated explicitly during planning. `latest-stable` uses the provider-reported available version as the desired version when an update is available. `minimum` compares the installed version with the component minimum version and does not request an update merely because a newer version exists. Unsupported or malformed version policy data blocks mutation rather than guessing.
+Version policy is evaluated explicitly during planning. `latest-stable` and `stable-compatible` use the provider-reported available version as the desired version when an update is available. `minimum` compares the installed version with the component minimum version and does not request an update merely because a newer version exists. Unsupported or malformed version policy data blocks mutation rather than guessing.
 
 Each plan item keeps installed, available and desired versions as structured data. The desktop Profiles surface exposes these values before mutation. The user must explicitly confirm the persisted operation.
 
