@@ -1112,7 +1112,7 @@ public sealed class ProvisioningEngine
         IReadOnlyDictionary<string, ComponentManifest> components,
         CancellationToken token)
     {
-        await RollbackApplicationSnapshotsAsync(operation, components, token);
+        await RollbackApplicationSnapshotsAsync(operation, components, CancellationToken.None);
         RollbackRegistrySnapshots(operation);
     }
 
