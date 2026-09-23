@@ -532,6 +532,43 @@ public sealed class InstallerEngine
         return Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
     }
 
+    private static async Task RunWingetAsync(
+        IReadOnlyList<string> arguments,
+        string componentName,
+        CancellationToken token)
+    {
+        using var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "winget.exe",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            }
+        };
+
+        foreach (var argument in arguments)
+            process.StartInfo.ArgumentList.Add(argument);
+
+        if (!process.Start())
+            throw new InvalidOperationException("WinGet est introuvable.");
+
+        var stdoutTask = process.StandardOutput.ReadToEndAsync(token);
+        var stderrTask = process.StandardError.ReadToEndAsync(token);
+        await process.WaitForExitAsync(token);
+
+        var stdout = await stdoutTask;
+        var stderr = await stderrTask;
+
+        if (process.ExitCode != 0)
+        {
+            throw new InvalidOperationException(
+                $"WinGet a échoué pour '{componentName}' (code {process.ExitCode}) : {stderr.Trim()}");
+        }
+    }
+
     internal static IReadOnlyList<string> BuildWingetArguments(
         ComponentManifest component,
         string actionCode,
