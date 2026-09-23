@@ -110,16 +110,48 @@ public sealed class ConfigurationStore
             })
             .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
+    private static void ValidateProfile(ProfileManifest profile, string sourceName)
+    {
+        if (profile.SchemaVersion is not (1 or 2))
+            throw new InvalidOperationException(
+                $"Unsupported profile schema version '{profile.SchemaVersion}' in {sourceName}.");
+
+        if (!IsValidProfileId(profile.Id))
+            throw new InvalidOperationException($"Profile id '{profile.Id}' is not a valid profile identifier.");
+
+        if (profile.SchemaVersion == 1 && (profile.Components is null || profile.Components.Length == 0))
+            throw new InvalidOperationException(
+                $"Legacy profile '{sourceName}' must declare at least one component.");
+
+        if (profile.SchemaVersion == 2)
+        {
+            if (profile.DesiredState is null)
+                throw new InvalidOperationException(
+                    $"Profile '{sourceName}' must declare desiredState for schema version 2.");
+
+            if (profile.DesiredState.Applications is null ||
+                profile.DesiredState.WindowsSettings is null ||
+                profile.DesiredState.Policies is null ||
+                profile.DesiredState.RegistrySettings is null ||
+                profile.DesiredState.Optimizations is null ||
+                profile.DesiredState.Conditions is null)
+            {
+                throw new InvalidOperationException(
+                    $"Profile '{sourceName}' contains an incomplete desiredState.");
+            }
+        }
+    }
+
     private static bool IsValidProfileId(string id)
     {
         if (string.IsNullOrWhiteSpace(id) || id.Length > 128)
             return false;
 
-        if (!char.IsAsciiLower(id[0]) && !char.IsAsciiDigit(id[0]))
+        if (!(id[0] >= 'a' && id[0] <= 'z') && !char.IsAsciiDigit(id[0]))
             return false;
 
         return id.All(character =>
-            char.IsAsciiLower(character) ||
+            (character >= 'a' && character <= 'z') ||
             char.IsAsciiDigit(character) ||
             character is '.' or '_' or '-');
     }
