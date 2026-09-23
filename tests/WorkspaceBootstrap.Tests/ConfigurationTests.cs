@@ -333,6 +333,40 @@ public sealed class InstallerEngineTests
     }
 
     [TestMethod]
+    public void WinGet_version_target_is_passed_to_install_and_upgrade()
+    {
+        var component = new ComponentManifest(
+            "test-component",
+            "Test component",
+            null,
+            "Test.Package",
+            null,
+            "exe",
+            null,
+            "x64",
+            null,
+            [],
+            "winget");
+
+        var installArguments = InstallerEngine.BuildWingetArguments(
+            component,
+            ProvisioningActionCodes.Install,
+            "2.0.0");
+
+        var upgradeArguments = InstallerEngine.BuildWingetArguments(
+            component,
+            ProvisioningActionCodes.Update,
+            "2.0.0");
+
+        CollectionAssert.AreEqual(
+            new[] { "install", "--id", "Test.Package", "--exact", "--accept-source-agreements", "--accept-package-agreements", "--silent", "--version", "2.0.0" },
+            installArguments.ToArray());
+        CollectionAssert.AreEqual(
+            new[] { "upgrade", "--id", "Test.Package", "--exact", "--accept-source-agreements", "--accept-package-agreements", "--silent", "--version", "2.0.0" },
+            upgradeArguments.ToArray());
+    }
+
+    [TestMethod]
     public void WinGet_update_action_uses_upgrade_command()
     {
         var component = new ComponentManifest(
