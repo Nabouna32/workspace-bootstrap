@@ -53,13 +53,15 @@ public sealed record InventoryObservation(
     InventoryOwnership Ownership,
     IReadOnlyList<string> Capabilities,
     IReadOnlyList<InventoryEvidence> Evidence,
-    DateTimeOffset DetectedAtUtc);
+    DateTimeOffset DetectedAtUtc,
+    string? AvailableVersion = null);
 
 public sealed class InventoryItem
 {
     public required string Id { get; init; }
     public required string DisplayName { get; init; }
     public string? Version { get; init; }
+    public string? AvailableVersion { get; init; }
     public string? FamilyId { get; init; }
     public InventoryScope Scope { get; init; }
     public string? InstallLocation { get; init; }
