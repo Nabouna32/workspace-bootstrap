@@ -45,9 +45,17 @@ public sealed class ConfigurationStore
                     ?? throw new InvalidOperationException(
                         $"Invalid profile: {Path.GetFileName(path)}");
 
-                if (profile.SchemaVersion != 1)
+                if (profile.SchemaVersion is not (1 or 2))
                     throw new InvalidOperationException(
                         $"Unsupported profile schema version '{profile.SchemaVersion}' in {Path.GetFileName(path)}.");
+
+                if (profile.SchemaVersion == 1 && (profile.Components is null || profile.Components.Length == 0))
+                    throw new InvalidOperationException(
+                        $"Legacy profile '{Path.GetFileName(path)}' must declare at least one component.");
+
+                if (profile.SchemaVersion == 2 && profile.DesiredState is null)
+                    throw new InvalidOperationException(
+                        $"Profile '{Path.GetFileName(path)}' must declare desiredState for schema version 2.");
 
                 return profile;
             })
