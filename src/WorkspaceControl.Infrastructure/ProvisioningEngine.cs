@@ -322,7 +322,7 @@ public sealed class ProvisioningEngine
 
                 try
                 {
-                    await _installer.InstallAsync(component, planned.ActionCode, planned.DesiredVersion, token);
+                    await _installer.InstallAsync(\n                        component,\n                        planned.ActionCode,\n                        string.Equals(component.VersionPolicy, "minimum", StringComparison.OrdinalIgnoreCase)\n                            ? null\n                            : planned.DesiredVersion,\n                        token);
 
                     operation.CurrentComponentName = $"Verifying: {component.Name}";
                     Save(operation);
