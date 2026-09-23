@@ -12,7 +12,7 @@ Fast validation covers restore, build, unit tests, architecture/static analysis,
 The repository validates the native WinUI desktop and the shared .NET application/infrastructure stack. WPF is retired.
 
 ## Main / scheduled validation
-Heavier validation may run on main, scheduled or manual workflows: full Release builds, published artifacts, CLI smoke tests, Windows integration, provisioning simulations, cache/offline scenarios, install/update/remove integration, UI/accessibility tests, WSL scenarios and security analysis.
+Heavier validation may run on main, scheduled or manual workflows: full Release builds, published artifacts, CLI smoke tests, Windows integration, provisioning simulations, artifact reuse scenarios, install/update/remove integration, UI/accessibility tests, WSL scenarios and security analysis.
 
 Heavy suites do not need to run on every commit when that provides poor feedback, but they must run regularly and before releases.
 
