@@ -109,7 +109,8 @@ public sealed class ProvisioningEngine
                 item.DesiredValue,
                 item.Message,
                 item.Domain,
-                item.TargetId))
+                item.TargetId,
+                item.ObservedValue))
             .ToArray();
 
         return new ProvisioningPlan(
@@ -949,7 +950,8 @@ public sealed class ProvisioningEngine
                 || !string.Equals(expected.ActionCode, observed.ActionCode, StringComparison.Ordinal)
                 || !string.Equals(expected.InstalledVersion, observed.InstalledVersion, StringComparison.Ordinal)
                 || !string.Equals(expected.AvailableVersion, observed.AvailableVersion, StringComparison.Ordinal)
-                || !string.Equals(expected.DesiredVersion, observed.DesiredVersion, StringComparison.Ordinal))
+                || !string.Equals(expected.DesiredVersion, observed.DesiredVersion, StringComparison.Ordinal)
+                || !string.Equals(expected.ObservedValue, observed.ObservedValue, StringComparison.Ordinal))
             {
                 operation.Status = ProvisioningOperationStatuses.Stale;
                 operation.CanResume = false;
