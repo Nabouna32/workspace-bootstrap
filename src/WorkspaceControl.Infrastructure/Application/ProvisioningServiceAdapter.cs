@@ -10,6 +10,8 @@ internal sealed class ProvisioningServiceAdapter : IProvisioningService
         _engine = engine ?? throw new ArgumentNullException(nameof(engine));
 
     public IReadOnlyList<ProfileManifest> GetProfiles() => _engine.Profiles();
+    public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string profileId, CancellationToken cancellationToken = default) =>
+        _engine.DiffAsync(profileId, cancellationToken);
     public Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
         _engine.PlanAsync(profileId, cancellationToken);
     public Task<ProvisioningOperation> CreateAsync(string profileId, CancellationToken cancellationToken = default) =>
