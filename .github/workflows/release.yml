@@ -82,11 +82,6 @@ jobs:
           $license = Join-Path $package "LICENSE"
           Copy-Item README.md $readme -Force
           Copy-Item LICENSE $license -Force
-          $desktopStrings = Join-Path $package "WorkspaceControl/Strings"
-          New-Item -ItemType Directory -Force -Path (Join-Path $desktopStrings "en-US") | Out-Null
-          New-Item -ItemType Directory -Force -Path (Join-Path $desktopStrings "fr-FR") | Out-Null
-          Copy-Item "src/WorkspaceControl.Desktop/Strings/en-US/Resources.resw" (Join-Path $desktopStrings "en-US/Resources.resw") -Force
-          Copy-Item "src/WorkspaceControl.Desktop/Strings/fr-FR/Resources.resw" (Join-Path $desktopStrings "fr-FR/Resources.resw") -Force
 
           if (-not (Test-Path $winUiDesktop)) { throw "Workspace Control WinUI executable is missing: $winUiDesktop" }
           if (-not (Test-Path $cli)) { throw "CLI executable is missing: $cli" }
