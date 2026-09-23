@@ -435,7 +435,7 @@ public sealed class ProvisioningEngine
                         var desired = FindRegistryDesired(profile, planned.TargetId ?? planned.ComponentId);
                         var snapshot = _registryWriter.Capture(desired);
 
-                        operation.RegistrySnapshots.Add(snapshot);
+                        operation.RegistrySnapshots.Add(snapshot with { PlanIndex = index });
                         Save(operation);
 
                         _registryWriter.Write(desired);
@@ -993,6 +993,11 @@ public sealed class ProvisioningEngine
     {
         var failures = new List<string>();
 
+        var rollbackStartIndex = operation.RegistrySnapshots
+            .Select(snapshot => snapshot.PlanIndex)
+            .DefaultIfEmpty(operation.Completed)
+            .Min();
+
         foreach (var snapshot in operation.RegistrySnapshots.AsEnumerable().Reverse())
         {
             try
@@ -1009,6 +1014,7 @@ public sealed class ProvisioningEngine
             throw new InvalidOperationException(
                 "Registry rollback failed: " + string.Join(" | ", failures));
 
+        operation.Completed = Math.Min(operation.Completed, rollbackStartIndex);
         operation.RegistrySnapshots.Clear();
     }
 
