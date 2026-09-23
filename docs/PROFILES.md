@@ -49,7 +49,9 @@ Verify
 
 ## Heterogeneous machines
 
-One profile may serve different machines. Conditions and future per-machine overrides allow a common baseline without assuming identical hardware or software.
+One profile may serve different machines. Conditions are evaluated against observed machine facts before a provisioning plan can be created. Current facts include Windows version/build, architecture, CPU, CPU cores, memory and uptime. Unknown facts fail closed: they produce a blocked diff rather than allowing mutation.
+
+Conditions use explicit operators (`equals`, `not-equals`, `contains`, `greater-than`, `less-than`, `greater-or-equal`, `less-or-equal`). Numeric and version comparisons are handled as typed values where possible. Future per-machine overrides can build on this contract without changing the provisioning engine.
 
 ## Import/export
 

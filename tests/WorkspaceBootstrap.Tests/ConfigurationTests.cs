@@ -94,6 +94,38 @@ public sealed class ConfigurationTests
 
 
     [TestMethod]
+    public void Machine_condition_evaluator_supports_numeric_and_version_comparisons()
+    {
+        var baseline = new BaselineSnapshot(
+            "Windows 11",
+            "26100",
+            "x64",
+            "Test CPU",
+            12,
+            32,
+            4,
+            [],
+            []);
+
+        var conditions = MachineConditionEvaluator.Evaluate(
+        [
+            new MachineCondition("cpuCores", "greater-or-equal", "8"),
+            new MachineCondition("memoryGB", "greater-than", "16"),
+            new MachineCondition("build", "greater-or-equal", "26000"),
+            new MachineCondition("architecture", "equals", "x64"),
+            new MachineCondition("unknown.fact", "equals", "x")
+        ],
+        baseline);
+
+        Assert.IsTrue(conditions[0].IsSatisfied);
+        Assert.IsTrue(conditions[1].IsSatisfied);
+        Assert.IsTrue(conditions[2].IsSatisfied);
+        Assert.IsTrue(conditions[3].IsSatisfied);
+        Assert.IsFalse(conditions[4].IsKnown);
+        Assert.IsFalse(conditions[4].IsSatisfied);
+    }
+
+    [TestMethod]
     public async Task Desired_state_diff_exposes_application_observation_without_mutation()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
