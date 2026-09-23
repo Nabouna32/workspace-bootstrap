@@ -150,6 +150,18 @@ public sealed class ConfigurationStore
         if (profile.SchemaVersion < 2 || profile.DesiredState is null)
             return;
 
+        var duplicateIds = profile.DesiredState.Applications
+            .GroupBy(application => application.ComponentId, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToArray();
+
+        if (duplicateIds.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"Profile '{sourceName}' contains duplicate desired applications: {string.Join(", ", duplicateIds)}.");
+        }
+
         foreach (var application in profile.DesiredState.Applications)
         {
             if (!string.Equals(application.State, "present", StringComparison.OrdinalIgnoreCase)
