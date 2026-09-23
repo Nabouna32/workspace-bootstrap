@@ -5,7 +5,7 @@ namespace WorkspaceControl.Application;
 public interface IWorkspaceControlApplication
 {
     IReadOnlyList<ProfileManifest> GetProfiles();
-    Task<object> GetPlanAsync(string profileId, CancellationToken cancellationToken = default);
+    Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default);
     string StartProvisioning(string profileId);
     Task RunProvisioningAsync(string operationId, CancellationToken cancellationToken = default);
     ProvisioningOperation? GetProvisioningStatus(string operationId);
