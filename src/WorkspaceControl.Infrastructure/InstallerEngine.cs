@@ -71,7 +71,7 @@ public sealed class InstallerEngine
             "github-release" => await ResolveGitHubReleaseAsync(component, component.OfficialSource, token),
             "rarlab-localized" => await ResolveRarLabAsync(component, token),
             "chrome-enterprise" => await ResolveChromeAsync(component, token),
-            _ => await InstallViaWingetFallbackAsync(component, token)
+            _ => await InstallViaWingetFallbackAsync(component, actionCode, token)
         };
     }
 
