@@ -7,7 +7,7 @@ Workspace Control is a permanent Windows 11 control center. It turns fragmented 
 - Install, update and uninstall software.
 - Discover software even when no curated definition exists.
 - Identify residuals conservatively.
-- Maintain a verified local/offline cache.
+- Reuse a verified local installer when the requested current version is already present.
 - Inspect and configure supported Windows settings and policies.
 - Recommend and apply documented optimizations.
 - Diagnose Windows and application problems.
@@ -29,7 +29,7 @@ Every meaningful mutation explains what changes, why, affected scope, risk, reve
 Workspace Control will never become an antivirus, VPN, password manager or generic endpoint-security suite. It may manage Windows security-related configuration where that is legitimately part of Windows administration.
 
 ## Local-first
-Core local operation does not require an account or cloud. Profiles and cache can be exported/imported and used offline.
+Core local operation does not require an account or cloud. Profiles can be exported/imported; installation remains online-first.
 
 ## Future SaaS
 A future optional service may add accounts, synchronized profiles, machine groups, fleet inventory, compliance/diff views, remote orchestration, reports and alerts. The local engine remains responsible for executing Windows operations.
