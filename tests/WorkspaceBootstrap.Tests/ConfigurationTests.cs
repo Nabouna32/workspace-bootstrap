@@ -90,6 +90,27 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
+    public async Task Provisioning_plan_uses_available_version_for_latest_stable()
+    {
+        var configuration = new ConfigurationStore(FindRepositoryRoot());
+        var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
+        var engine = new ProvisioningEngine(
+            configuration,
+            new InstallerEngine(paths),
+            paths,
+            new InventoryScanner([new VersionedInventoryProvider("Microsoft.VisualStudioCode", "1.0.0", "2.0.0")]));
+
+        var plan = await engine.PlanAsync("development-extended");
+        var item = plan.Items.Single(item => item.ComponentId == "vscode");
+
+        Assert.AreEqual(ProvisioningStateCodes.Outdated, item.StateCode);
+        Assert.AreEqual(ProvisioningActionCodes.Update, item.ActionCode);
+        Assert.AreEqual("1.0.0", item.InstalledVersion);
+        Assert.AreEqual("2.0.0", item.AvailableVersion);
+        Assert.AreEqual("2.0.0", item.DesiredVersion);
+    }
+
+    [TestMethod]
     public async Task Provisioning_plan_applies_minimum_version_policy()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
@@ -171,7 +192,7 @@ public sealed class ConfigurationTests
                 new InventoryProviderDiagnostic(Id, true, "Synthetic inventory.")));
     }
 
-    private sealed class VersionedInventoryProvider(string packageId, string version) : IInventoryProvider
+    private sealed class VersionedInventoryProvider(string packageId, string version, string? availableVersion = null) : IInventoryProvider
     {
         public string Id => "test.versioned";
 
@@ -193,7 +214,8 @@ public sealed class ConfigurationTests
                         InventoryOwnership.PackageManagerManaged,
                         [],
                         [new InventoryEvidence("installed", "installed", true, Id)],
-                        DateTimeOffset.UtcNow)
+                        DateTimeOffset.UtcNow,
+                        availableVersion)
                 ],
                 new InventoryProviderDiagnostic(Id, true, "Synthetic inventory.")));
     }
