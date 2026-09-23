@@ -6,8 +6,8 @@
     <ScrollViewer>
         <StackPanel Padding="28" Spacing="24">
             <StackPanel Spacing="4">
-                <TextBlock Text="Windows" FontSize="32" FontWeight="SemiBold" />
-                <TextBlock Text="Observed system state. No changes are made from this view." Opacity="0.72" />
+                <TextBlock x:Uid="WindowsPage_Title" FontSize="32" FontWeight="SemiBold" />
+                <TextBlock x:Uid="WindowsPage_Subtitle" Opacity="0.72" />
             </StackPanel>
 
             <Grid ColumnSpacing="16" RowSpacing="16">
@@ -17,7 +17,7 @@
                 </Grid.ColumnDefinitions>
                 <Border Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Processor" Opacity="0.68" />
+                        <TextBlock x:Uid="WindowsPage_Processor" Opacity="0.68" />
                         <TextBlock Text="{Binding Baseline.Cpu}" FontSize="20" FontWeight="SemiBold" />
                         <TextBlock Text="{Binding CpuCoresDisplay}" />
                         <TextBlock Text="{Binding Baseline.Architecture}" Opacity="0.72" />
@@ -25,7 +25,7 @@
                 </Border>
                 <Border Grid.Column="1" Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Runtime" Opacity="0.68" />
+                        <TextBlock x:Uid="WindowsPage_Runtime" Opacity="0.68" />
                         <TextBlock Text="{Binding UptimeDisplay}" FontSize="20" FontWeight="SemiBold" />
                         <TextBlock Text="{Binding MemoryDisplay}" />
                     </StackPanel>
@@ -34,7 +34,7 @@
 
             <Border Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Volumes" FontSize="20" FontWeight="SemiBold" />
+                    <TextBlock x:Uid="WindowsPage_Volumes" FontSize="20" FontWeight="SemiBold" />
                     <ItemsControl ItemsSource="{Binding Baseline.Volumes}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>

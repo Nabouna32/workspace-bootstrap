@@ -61,7 +61,7 @@ jobs:
           dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
           dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
 
-      - name: Validate provisioning localization and accessibility resources
+      - name: Validate desktop localization and accessibility resources
         shell: pwsh
         run: |
           [xml]$english = Get-Content src/WorkspaceControl.Desktop/Strings/en-US/Resources.resw
@@ -75,15 +75,19 @@ jobs:
             throw "English and French resource key sets differ."
           }
 
-          $profilesPage = Get-Content src/WorkspaceControl.Desktop/ProfilesPage.xaml -Raw
-          if ($profilesPage -match '(?m)Text="(?!\{)[^"]+"' -or
-              $profilesPage -match '(?m)Content="(?!\{)[^"]+"') {
-            throw "ProfilesPage.xaml contains hard-coded Text or Content literals."
+          $desktopXaml = Get-ChildItem src/WorkspaceControl.Desktop -File -Filter '*.xaml'
+          foreach ($page in $desktopXaml) {
+            $content = Get-Content $page.FullName -Raw
+            if ($content -match '(?m)\b(?:Text|Content|Title)="(?!\{)[^"]+"') {
+              throw "$($page.Name) contains hard-coded user-facing Text, Content or Title literals."
+            }
           }
 
-          $mainWindow = Get-Content src/WorkspaceControl.Desktop/MainWindow.xaml -Raw
-          if ($mainWindow -match '<NavigationViewItem Content="Profiles"') {
-            throw "The Profiles navigation item must use a localized x:Uid."
+          $profilesPage = Get-Content src/WorkspaceControl.Desktop/ProfilesPage.xaml -Raw
+          if ($profilesPage -notmatch 'x:Uid="ProfilesPage_ProfileList"' -or
+              $profilesPage -notmatch 'x:Uid="ProfilesPage_PlanList"' -or
+              $profilesPage -notmatch 'x:Uid="ProfilesPage_ProgressRing"') {
+            throw "ProfilesPage.xaml is missing required accessibility resource bindings."
           }
 
       - name: Build

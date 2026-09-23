@@ -11,16 +11,16 @@
         </Grid.RowDefinitions>
 
         <StackPanel Spacing="4">
-            <TextBlock Text="Software" FontSize="32" FontWeight="SemiBold" />
-            <TextBlock Text="Inventory first. Actions come after evidence." Opacity="0.72" />
+            <TextBlock x:Uid="SoftwarePage_Title" FontSize="32" FontWeight="SemiBold" />
+            <TextBlock x:Uid="SoftwarePage_Subtitle" Opacity="0.72" />
         </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12" Margin="0,20,0,12">
-            <Button Content="Refresh inventory" Click="Refresh_Click" />
-            <ProgressRing IsActive="{Binding IsBusy}" Width="20" Height="20" />
+            <Button x:Uid="SoftwarePage_Refresh" Click="Refresh_Click" />
+            <ProgressRing x:Uid="SoftwarePage_ProgressRing" IsActive="{Binding IsBusy}" Width="20" Height="20" />
         </StackPanel>
 
-        <ListView Grid.Row="2" ItemsSource="{Binding SoftwareItems}" SelectionMode="None">
+        <ListView Grid.Row="2" x:Uid="SoftwarePage_List" ItemsSource="{Binding SoftwareItems}" SelectionMode="None">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <Grid Padding="8" ColumnSpacing="16">
