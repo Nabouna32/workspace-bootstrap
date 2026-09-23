@@ -9,7 +9,7 @@ All workflows use **GitHub-hosted Windows runners**. **Self-hosted runners are n
 ## PR validation
 Fast validation covers restore, build, unit tests, architecture/static analysis, formatting and contract/schema checks.
 
-The repository currently validates both the legacy WPF desktop and the new native WinUI desktop while migration is in progress.
+The repository validates the native WinUI desktop and the shared .NET application/infrastructure stack. WPF is retired.
 
 ## Main / scheduled validation
 Heavier validation may run on main, scheduled or manual workflows: full Release builds, published artifacts, CLI smoke tests, Windows integration, provisioning simulations, cache/offline scenarios, install/update/remove integration, UI/accessibility tests, WSL scenarios and security analysis.

@@ -166,12 +166,16 @@ jobs:
           $catalog = Join-Path $package "bootstrap/windows/components/catalog.json"
           $profiles = Join-Path $package "bootstrap/windows/profiles"
           $readme = Join-Path $package "README.md"
+          $license = Join-Path $package "LICENSE"
+          Copy-Item README.md $readme -Force
+          Copy-Item LICENSE $license -Force
 
           if (-not (Test-Path $desktop)) { throw "Workspace Control executable is missing: $desktop" }
           if (-not (Test-Path $cli)) { throw "CLI executable is missing: $cli" }
           if (-not (Test-Path $catalog)) { throw "Bundled component catalog is missing: $catalog" }
           if (-not (Test-Path $profiles -PathType Container)) { throw "Bundled profiles directory is missing: $profiles" }
           if (-not (Test-Path $readme)) { throw "Portable package README is missing: $readme" }
+          if (-not (Test-Path $license)) { throw "Portable package LICENSE is missing: $license" }
 
           & $cli capabilities
           if ($LASTEXITCODE -ne 0) { throw "Portable CLI smoke test failed with exit code $LASTEXITCODE." }
