@@ -8,7 +8,7 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid>
+    <Grid x:Name="RootGrid">
         <NavigationView
             x:Name="NavView"
             PaneDisplayMode="Left"
