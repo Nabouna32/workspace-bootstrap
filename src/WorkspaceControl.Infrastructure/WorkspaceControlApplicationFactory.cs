@@ -1,7 +1,7 @@
 using WorkspaceControl.Application;
 using WorkspaceControl.Domain;
 
-namespace WorkspaceBootstrap;
+namespace WorkspaceControl.Infrastructure;
 
 public static class WorkspaceControlApplicationFactory
 {
@@ -20,8 +20,8 @@ public static class WorkspaceControlApplicationFactory
             new Application.ProvisioningServiceAdapter(provisioning),
             new Application.InventoryServiceAdapter(inventory),
             new SoftwareInventoryService([
-                new Infrastructure.RegistrySoftwareInventorySource(),
-                new Infrastructure.WinGetSoftwareInventorySource()
+                new Software.RegistrySoftwareInventorySource(),
+                new Software.WinGetSoftwareInventorySource()
             ]),
             new Application.WindowsAdministrationServiceAdapter(),
             new Application.OptimizationServiceAdapter());

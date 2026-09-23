@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>WorkspaceControl.Infrastructure</AssemblyName>
-    <RootNamespace>WorkspaceBootstrap</RootNamespace>
+    <RootNamespace>WorkspaceControl.Infrastructure</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\WorkspaceControl.Domain\WorkspaceControl.Domain.csproj" />

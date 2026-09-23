@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace WorkspaceBootstrap;
+namespace WorkspaceControl.Infrastructure;
 
 public sealed class ConfigurationStore
 {

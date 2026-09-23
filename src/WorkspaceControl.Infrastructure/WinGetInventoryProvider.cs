@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-namespace WorkspaceBootstrap;
+namespace WorkspaceControl.Infrastructure;
 
 public sealed class WinGetInventoryProvider : IInventoryProvider
 {

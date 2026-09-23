@@ -1,6 +1,6 @@
 using WorkspaceControl.Application.Contracts;
 
-namespace WorkspaceBootstrap.Application;
+namespace WorkspaceControl.Infrastructure.Application;
 
 internal sealed class ProvisioningServiceAdapter : IProvisioningService
 {

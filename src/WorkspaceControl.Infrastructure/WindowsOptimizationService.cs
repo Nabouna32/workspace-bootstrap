@@ -1,7 +1,7 @@
 using Microsoft.Win32;
 using System.Text.Json;
 
-namespace WorkspaceBootstrap;
+namespace WorkspaceControl.Infrastructure;
 
 public sealed class WindowsOptimizationService
 {

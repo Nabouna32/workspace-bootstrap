@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace WorkspaceBootstrap;
+namespace WorkspaceControl.Infrastructure;
 
 public sealed class InstallerEngine
 {

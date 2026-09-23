@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 
-namespace WorkspaceBootstrap;
+namespace WorkspaceControl.Infrastructure;
 
 public sealed class ProvisioningEngine
 {

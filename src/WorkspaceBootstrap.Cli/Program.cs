@@ -1,6 +1,6 @@
 using System.Text.Json;
 using WorkspaceControl.Application;
-using WorkspaceBootstrap;
+using WorkspaceControl.Infrastructure;
 using WorkspaceControl.Domain;
 
 try

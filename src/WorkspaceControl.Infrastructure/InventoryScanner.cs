@@ -1,4 +1,4 @@
-namespace WorkspaceBootstrap;
+namespace WorkspaceControl.Infrastructure;
 
 public sealed class InventoryScanner
 {
