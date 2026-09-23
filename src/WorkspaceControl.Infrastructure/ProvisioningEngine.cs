@@ -25,12 +25,11 @@ public sealed class ProvisioningEngine
     public IReadOnlyList<ProfileManifest> Profiles() =>
         _config.LoadProfiles().Values.OrderBy(x => x.Id).ToArray();
 
-    public async Task<ProvisioningPlan> PlanAsync(
+    public async Task<DesiredStateDiff> DiffAsync(
         string profileId,
         CancellationToken token = default)
     {
         var profile = GetProfile(profileId);
-        ValidateDesiredStateSupport(profile);
         var components = _config.LoadComponents();
         var inventory = await _inventory.ScanAsync(token);
 
@@ -45,16 +44,67 @@ public sealed class ProvisioningEngine
 
             var component = ApplyProfileOverrides(catalogComponent, request);
             var match = FindInventoryMatch(component, inventory.Items);
-            return BuildPlanItem(component, match, inventory.ProviderDiagnostics);
-        }).ToArray();
+            var planItem = BuildPlanItem(component, match, inventory.ProviderDiagnostics);
 
-        return new ProvisioningPlan(
+            return new DesiredStateDiffItem(
+                DesiredStateDomainCodes.Application,
+                planItem.ComponentId,
+                planItem.ComponentName,
+                planItem.StateCode,
+                planItem.ActionCode,
+                planItem.InstalledVersion,
+                planItem.AvailableVersion,
+                planItem.DesiredVersion,
+                planItem.Message);
+        }).ToList();
+
+        AddUnsupportedDesiredStateItems(profile, items);
+
+        return new DesiredStateDiff(
             profile.Id,
             profile.Name,
             inventory.ScanId,
             inventory.ProviderDiagnostics,
             items,
             DateTimeOffset.UtcNow);
+    }
+
+    public async Task<ProvisioningPlan> PlanAsync(
+        string profileId,
+        CancellationToken token = default)
+    {
+        var diff = await DiffAsync(profileId, token);
+
+        var unsupported = diff.Items
+            .Where(item => item.Domain != DesiredStateDomainCodes.Application)
+            .ToArray();
+
+        if (unsupported.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"Profile '{diff.ProfileId}' contains desired-state sections that are not executable yet. " +
+                "The diff identifies these sections explicitly; no mutation plan was created.");
+        }
+
+        var items = diff.Items
+            .Select(item => new ProvisioningPlanItem(
+                item.TargetId,
+                item.TargetName,
+                item.StateCode,
+                item.ActionCode,
+                item.ObservedValue,
+                item.AvailableValue,
+                item.DesiredValue,
+                item.Message))
+            .ToArray();
+
+        return new ProvisioningPlan(
+            diff.ProfileId,
+            diff.ProfileName,
+            diff.InventoryScanId,
+            diff.InventoryDiagnostics,
+            items,
+            diff.CreatedAtUtc);
     }
 
     private static InventoryItem? FindInventoryMatch(
@@ -317,7 +367,6 @@ public sealed class ProvisioningEngine
             return;
 
         var profile = GetProfile(operation.ProfileId);
-        ValidateDesiredStateSupport(profile);
         var components = _config.LoadComponents();
         var requests = profile.ApplicationRequests;
         var plan = operation.Plan
@@ -582,6 +631,65 @@ public sealed class ProvisioningEngine
         }
     }
 
+    private static void AddUnsupportedDesiredStateItems(
+        ProfileManifest profile,
+        List<DesiredStateDiffItem> items)
+    {
+        if (profile.DesiredState is null)
+            return;
+
+        AddUnsupportedSection(
+            profile.DesiredState.WindowsSettings.Count,
+            DesiredStateDomainCodes.WindowsSetting,
+            "windowsSettings",
+            items);
+
+        AddUnsupportedSection(
+            profile.DesiredState.Policies.Count,
+            DesiredStateDomainCodes.Policy,
+            "policies",
+            items);
+
+        AddUnsupportedSection(
+            profile.DesiredState.RegistrySettings.Count,
+            DesiredStateDomainCodes.RegistrySetting,
+            "registrySettings",
+            items);
+
+        AddUnsupportedSection(
+            profile.DesiredState.Optimizations.Count,
+            DesiredStateDomainCodes.Optimization,
+            "optimizations",
+            items);
+
+        AddUnsupportedSection(
+            profile.DesiredState.Conditions.Count,
+            DesiredStateDomainCodes.Condition,
+            "conditions",
+            items);
+    }
+
+    private static void AddUnsupportedSection(
+        int count,
+        string domain,
+        string sectionName,
+        List<DesiredStateDiffItem> items)
+    {
+        if (count == 0)
+            return;
+
+        items.Add(new DesiredStateDiffItem(
+            domain,
+            sectionName,
+            sectionName,
+            ProvisioningStateCodes.Unknown,
+            ProvisioningActionCodes.Blocked,
+            null,
+            null,
+            count.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            $"Desired-state section '{sectionName}' contains {count} item(s), but observation and execution are not implemented yet."));
+    }
+
     private static ComponentManifest ApplyProfileOverrides(
         ComponentManifest component,
         ProfileApplication request)
@@ -594,16 +702,6 @@ public sealed class ProvisioningEngine
             VersionPolicy = request.VersionPolicy ?? component.VersionPolicy,
             MinimumVersion = request.MinimumVersion ?? component.MinimumVersion
         };
-    }
-
-    private static void ValidateDesiredStateSupport(ProfileManifest profile)
-    {
-        if (profile.HasUnsupportedDesiredStateSections)
-        {
-            throw new InvalidOperationException(
-                $"Profile '{profile.Id}' contains desired-state sections that are not executable yet. " +
-                "Only applications are currently supported by the provisioning engine.");
-        }
     }
 
     private ProfileManifest GetProfile(string id) =>
