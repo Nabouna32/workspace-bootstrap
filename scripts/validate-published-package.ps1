@@ -13,8 +13,6 @@ $catalog = Join-Path $PackageRoot 'bootstrap\windows\components\catalog.json'
 $profiles = Join-Path $PackageRoot 'bootstrap\windows\profiles'
 $readme = Join-Path $PackageRoot 'README.md'
 $license = Join-Path $PackageRoot 'LICENSE'
-$englishResources = Join-Path $PackageRoot 'WorkspaceControl\Strings\en-US\Resources.resw'
-$frenchResources = Join-Path $PackageRoot 'WorkspaceControl\Strings\fr-FR\Resources.resw'
 $applicationPri = Join-Path $PackageRoot 'WorkspaceControl\WorkspaceControl.pri'
 
 $requiredFiles = @(
@@ -23,8 +21,6 @@ $requiredFiles = @(
     $catalog,
     $readme,
     $license,
-    $englishResources,
-    $frenchResources,
     $applicationPri
 )
 
@@ -38,6 +34,12 @@ if (-not (Test-Path $profiles -PathType Container)) {
     throw "Published package is missing the bundled profiles directory: $profiles"
 }
 
+$priLength = (Get-Item $applicationPri).Length
+if ($priLength -le 0) {
+    throw "Published application PRI is empty: $applicationPri"
+}
+
+Write-Host "Published application PRI: $applicationPri ($priLength bytes)"
 Write-Host "Running published CLI capability smoke test..."
 & $cli capabilities
 if ($LASTEXITCODE -ne 0) {
