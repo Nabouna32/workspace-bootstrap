@@ -40,6 +40,12 @@ public sealed record MachineCondition(
     string Operator,
     string Value);
 
+public static class DesiredStateStateCodes
+{
+    public const string Compliant = "COMPLIANT";
+    public const string Drifted = "DRIFTED";
+}
+
 public static class DesiredStateDomainCodes
 {
     public const string Application = "application";
