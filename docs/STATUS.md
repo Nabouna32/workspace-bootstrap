@@ -30,6 +30,7 @@ The product is **Workspace Control**, a permanent Windows 11 control center. The
 - Packaged configuration is resolved from the application content root.
 - Legacy WPF desktop has been removed; WinUI 3 is the only desktop UI target.
 - The desktop Profiles surface now exposes profile selection, persisted plan review, explicit confirmation, live apply progress, verification results, stale-plan handling and safe resume for resumable failures.
+- The provisioning surface uses WinUI .resw localization for English and French, localized view-model status/progress messages, and explicit accessibility names for provisioning controls and status regions.
 
 ## Next engineering priorities
 1. Add first-class Windows integration, published-artifact, UI/accessibility and security validation for the provisioning surface.
