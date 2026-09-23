@@ -237,7 +237,7 @@ public sealed class ProvisioningEngine
 
         try
         {
-            LaunchWorker(operation.OperationId, cacheOnly);
+            LaunchWorker(operation.OperationId);
         }
         catch (Exception ex)
         {
