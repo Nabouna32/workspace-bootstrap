@@ -10,6 +10,7 @@ public sealed record DesiredStateManifest(
 
 public sealed record ProfileApplication(
     string ComponentId,
+    string State = "present",
     string? VersionPolicy = null,
     string? MinimumVersion = null);
 
