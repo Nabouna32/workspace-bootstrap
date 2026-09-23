@@ -13,6 +13,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     private BaselineSnapshot? _baseline;
     private SoftwareInventorySnapshot? _software;
     private ProvisioningOperation? _provisioningOperation;
+    private DesiredStateDiff? _desiredStateDiff;
+    private string? _desiredStateDiffProfileId;
     private bool _isBusy;
     private string _status;
     private string? _error;
@@ -62,6 +64,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         }
     }
 
+    public DesiredStateDiff? DesiredStateDiff => _desiredStateDiff;
+    public bool HasDesiredStateDiff => DesiredStateDiff is not null;
     public ProvisioningPlan? ProvisioningPlan => ProvisioningOperation?.Plan;
     public bool HasProvisioningOperation => ProvisioningOperation is not null;
     public bool IsAwaitingConfirmation =>
@@ -116,6 +120,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public ObservableCollection<SoftwareItem> SoftwareItems { get; } = [];
     public ObservableCollection<string> Diagnostics { get; } = [];
     public ObservableCollection<ProfileManifest> Profiles { get; } = [];
+    public ObservableCollection<DesiredStateDiffItem> DesiredStateDiffItems { get; } = [];
 
     public bool IsBusy
     {
@@ -159,6 +164,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(CpuCoresDisplay));
             OnPropertyChanged(nameof(UptimeDisplay));
 
+            ClearDesiredStateDiff();
+
             Profiles.Clear();
             foreach (var profile in _application.GetProfiles())
                 Profiles.Add(profile);
@@ -194,6 +201,61 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         {
             IsBusy = false;
         }
+    }
+
+    public async Task ObserveDesiredStateAsync(
+        string profileId,
+        CancellationToken cancellationToken = default)
+    {
+        if (IsBusy)
+            return;
+
+        IsBusy = true;
+        Error = null;
+        Status = _localizer.Get("ObservingDesiredState");
+
+        try
+        {
+            var diff = await _application.GetDesiredStateDiffAsync(profileId, cancellationToken);
+            _desiredStateDiff = diff;
+            _desiredStateDiffProfileId = profileId;
+
+            DesiredStateDiffItems.Clear();
+            foreach (var item in diff.Items)
+                DesiredStateDiffItems.Add(item);
+
+            OnPropertyChanged(nameof(DesiredStateDiff));
+            OnPropertyChanged(nameof(HasDesiredStateDiff));
+            Status = _localizer.Get("DesiredStateDiffReady");
+        }
+        catch (OperationCanceledException)
+        {
+            ClearDesiredStateDiff();
+            Status = _localizer.Get("DesiredStateObservationCancelled");
+        }
+        catch (Exception ex)
+        {
+            ClearDesiredStateDiff();
+            Error = ex.Message;
+            Status = _localizer.Get("DesiredStateObservationFailed");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    public bool HasDesiredStateDiffFor(string profileId) =>
+        HasDesiredStateDiff &&
+        string.Equals(_desiredStateDiffProfileId, profileId, StringComparison.OrdinalIgnoreCase);
+
+    public void ClearDesiredStateDiff()
+    {
+        _desiredStateDiff = null;
+        _desiredStateDiffProfileId = null;
+        DesiredStateDiffItems.Clear();
+        OnPropertyChanged(nameof(DesiredStateDiff));
+        OnPropertyChanged(nameof(HasDesiredStateDiff));
     }
 
     public async Task CreateProvisioningAsync(
