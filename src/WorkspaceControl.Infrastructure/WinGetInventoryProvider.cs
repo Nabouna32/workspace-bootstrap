@@ -100,8 +100,6 @@ public sealed class WinGetInventoryProvider : IInventoryProvider
                 : columns.Count == 4 ? NormalizeUnknown(columns[3]) : null;
             var available = columns.Count >= 5 ? NormalizeUnknown(columns[3]) : null;
 
-            // WinGet's list command exposes installed applications, including
-            // applications installed by mechanisms other than WinGet.
             var providerId = string.IsNullOrWhiteSpace(source)
                 ? id
                 : $"{source}:{id}";
@@ -128,7 +126,8 @@ public sealed class WinGetInventoryProvider : IInventoryProvider
                         $"WinGet reports an available version: {available}.",
                         false,
                         "winget")],
-                detectedAtUtc));
+                detectedAtUtc,
+                available));
         }
 
         return observations;
