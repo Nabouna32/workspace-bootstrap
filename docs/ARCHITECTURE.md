@@ -37,9 +37,9 @@ Each capability declares inputs, preconditions, risk, elevation requirement, pre
 
 ## Desired state
 ```text
-Observed state + Desired state
+Desired state + observed evidence
           ↓
-        Diff
+        Desired-state Diff
           ↓
          Plan
           ↓
