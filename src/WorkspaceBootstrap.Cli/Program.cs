@@ -49,10 +49,15 @@ try
             data = new { OperationId = operation, Status = "completed" };
             break;
         case "provisioning-start":
+            data = MapOperation(await application.CreateProvisioningAsync(
+                profile ?? throw new ArgumentException("--profile est requis.")));
+            break;
+        case "provisioning-confirm":
             data = new
             {
-                OperationId = application.StartProvisioning(profile ?? throw new ArgumentException("--profile est requis.")),
-                Status = "starting"
+                OperationId = application.ConfirmProvisioning(
+                    operation ?? throw new ArgumentException("--operation est requis.")),
+                Status = "queued"
             };
             break;
         case "provisioning-status":
@@ -140,10 +145,12 @@ static object? MapOperation(ProvisioningOperation? operation)
         Percent = percent,
         MessageKey = operation.Status switch
         {
-            "starting" => "operation.starting",
+            "awaiting-confirmation" => "operation.awaitingConfirmation",
+            "queued" => "operation.queued",
             "running" => "component.running",
             "completed" => "operation.completed",
             "failed" => "operation.failed",
+            "stale" => "operation.stale",
             _ => "operation.unknown"
         },
         Error = operation.Error,
@@ -188,7 +195,13 @@ static object MapHistory(ProvisioningOperation operation) =>
         Completed = operation.Completed,
         Total = operation.Total,
         Percent = operation.Total == 0 ? 100 : operation.Completed * 100.0 / operation.Total,
-        MessageKey = operation.Status == "completed" ? "operation.completed" : "operation.failed",
+        MessageKey = operation.Status switch
+        {
+            "awaiting-confirmation" => "operation.awaitingConfirmation",
+            "completed" => "operation.completed",
+            "stale" => "operation.stale",
+            _ => "operation.failed"
+        },
         CanResume = operation.CanResume,
         UpdatedAt = operation.UpdatedAt
     };
