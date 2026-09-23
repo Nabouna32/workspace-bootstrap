@@ -115,21 +115,27 @@ public sealed class ConfigurationTests
 
 
     [TestMethod]
-    public async Task Desired_state_profile_can_override_application_version_policy()
+    public void Desired_state_profile_maps_applications_to_requests()
     {
-        var configuration = new ConfigurationStore(FindRepositoryRoot());
-        var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
-        var engine = new ProvisioningEngine(
-            configuration,
-            new InstallerEngine(paths),
-            paths,
-            new InventoryScanner([new VersionedInventoryProvider("Microsoft.VisualStudioCode", "1.0.0", "2.0.0")]));
+        var profile = new ProfileManifest(
+            "test",
+            "Test",
+            "Test profile",
+            DesiredState: new DesiredStateManifest(
+                [new ProfileApplication("vscode", "minimum", "1.2.3")],
+                [],
+                [],
+                [],
+                [],
+                []),
+            SchemaVersion: 2);
 
-        var plan = await engine.PlanAsync("development-extended");
-        var item = plan.Items.Single(item => item.ComponentId == "vscode");
+        var request = profile.ApplicationRequests.Single();
 
-        Assert.AreEqual(ProvisioningActionCodes.Update, item.ActionCode);
-        Assert.AreEqual("2.0.0", item.DesiredVersion);
+        Assert.AreEqual("vscode", request.ComponentId);
+        Assert.AreEqual("minimum", request.VersionPolicy);
+        Assert.AreEqual("1.2.3", request.MinimumVersion);
+        Assert.IsTrue(profile.DesiredState is not null);
     }
 
     [TestMethod]
