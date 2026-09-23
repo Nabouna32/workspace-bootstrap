@@ -43,7 +43,8 @@ public sealed record SoftwareItem(
     SoftwareOwnership Ownership,
     SoftwareScope Scope,
     IReadOnlyList<SoftwareSignal> Signals,
-    IReadOnlyList<SoftwareEvidence> Evidence);
+    IReadOnlyList<SoftwareEvidence> Evidence,
+    string? AvailableVersion = null);
 
 public sealed record SoftwareInventorySnapshot(
     string ScanId,
