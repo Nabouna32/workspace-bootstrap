@@ -20,7 +20,7 @@ public sealed class WinGetInventoryProviderTests
 
         var sevenZip = items.Single(x => x.DisplayName == "7-Zip");
         Assert.AreEqual("24.09", sevenZip.Version);
-        Assert.AreEqual("windows.winget", sevenZip.ProviderId);
+        Assert.AreEqual("winget:7zip.7zip", sevenZip.ProviderId);
         Assert.AreEqual(InventoryScope.Unknown, sevenZip.Scope);
         Assert.IsTrue(sevenZip.Evidence.Any(x => x.Kind == "available-update"));
         Assert.AreEqual(detectedAt, sevenZip.DetectedAtUtc);
