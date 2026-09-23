@@ -1014,6 +1014,8 @@ public sealed class ProvisioningEngine
         if (failures.Count > 0)
             throw new InvalidOperationException(
                 "Registry rollback failed: " + string.Join(" | ", failures));
+
+        operation.RegistrySnapshots.Clear();
     }
 
     private void Save(ProvisioningOperation operation)
