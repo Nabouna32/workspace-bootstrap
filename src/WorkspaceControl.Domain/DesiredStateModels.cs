@@ -50,15 +50,6 @@ public static class DesiredStateDomainCodes
     public const string Condition = "condition";
 }
 
-public static class DesiredStateChangeCodes
-{
-    public const string Compliant = "compliant";
-    public const string Install = "install";
-    public const string Update = "update";
-    public const string Blocked = "blocked";
-    public const string Unknown = "unknown";
-}
-
 public sealed record DesiredStateDiffItem(
     string Domain,
     string TargetId,
