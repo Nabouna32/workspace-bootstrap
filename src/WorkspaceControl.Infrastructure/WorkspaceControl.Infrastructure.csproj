@@ -7,8 +7,6 @@
     <RootNamespace>WorkspaceBootstrap</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\WorkspaceBootstrap.Engine\**\*.cs"
-             Exclude="..\WorkspaceBootstrap.Engine\bin\**;..\WorkspaceBootstrap.Engine\obj\**" />
     <ProjectReference Include="..\WorkspaceControl.Domain\WorkspaceControl.Domain.csproj" />
     <ProjectReference Include="..\WorkspaceControl.Application\WorkspaceControl.Application.csproj" />
     <PackageReference Include="System.Management" Version="10.0.0" />

@@ -12,7 +12,7 @@
     <PackageReference Include="MSTest.TestFramework" Version="3.8.3" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\WorkspaceBootstrap.Engine\WorkspaceBootstrap.Engine.csproj" />
+    <ProjectReference Include="..\..\src\WorkspaceControl.Infrastructure\WorkspaceControl.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\WorkspaceControl.Application\WorkspaceControl.Application.csproj" />
   </ItemGroup>
 </Project>
