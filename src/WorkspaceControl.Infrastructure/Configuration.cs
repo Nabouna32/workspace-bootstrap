@@ -106,6 +106,7 @@ public sealed class ConfigurationStore
                     throw new InvalidOperationException(
                         $"Profile '{Path.GetFileName(path)}' must declare desiredState for schema version 2.");
 
+                ValidateApplicationStates(profile, Path.GetFileName(path));
                 return profile;
             })
             .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
@@ -138,6 +139,36 @@ public sealed class ConfigurationStore
             {
                 throw new InvalidOperationException(
                     $"Profile '{sourceName}' contains an incomplete desiredState.");
+            }
+
+            ValidateApplicationStates(profile, sourceName);
+        }
+    }
+
+    private static void ValidateApplicationStates(ProfileManifest profile, string sourceName)
+    {
+        if (profile.SchemaVersion < 2 || profile.DesiredState is null)
+            return;
+
+        var duplicateIds = profile.DesiredState.Applications
+            .GroupBy(application => application.ComponentId, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Key)
+            .ToArray();
+
+        if (duplicateIds.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"Profile '{sourceName}' contains duplicate desired applications: {string.Join(", ", duplicateIds)}.");
+        }
+
+        foreach (var application in profile.DesiredState.Applications)
+        {
+            if (!string.Equals(application.State, "present", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(application.State, "absent", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    $"Profile '{sourceName}' contains unsupported application state '{application.State}' for '{application.ComponentId}'.");
             }
         }
     }

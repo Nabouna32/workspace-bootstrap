@@ -147,6 +147,91 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
+    public async Task Desired_state_plan_uses_remove_for_absent_application()
+    {
+        var root = CreateConfigurationRoot();
+        var configuration = new ConfigurationStore(root);
+        var paths = new WorkspacePaths(Path.Combine(
+            Path.GetTempPath(),
+            "workspace-control-remove-plan-tests",
+            Guid.NewGuid().ToString("N")));
+
+        var component = new ComponentManifest(
+            "test-app",
+            "Test app",
+            null,
+            "Test.Package",
+            null,
+            "exe",
+            null,
+            "x64",
+            null,
+            [],
+            "winget",
+            "latest-stable");
+
+        var componentDirectory = Path.Combine(
+            root,
+            "bootstrap",
+            "windows",
+            "components",
+            "test-app");
+        Directory.CreateDirectory(componentDirectory);
+        File.WriteAllText(
+            Path.Combine(root, "bootstrap", "windows", "components", "catalog.json"),
+            """{"components":["test-app"]}""");
+        File.WriteAllText(
+            Path.Combine(componentDirectory, "component.json"),
+            JsonSerializer.Serialize(component, JsonDefaults.Options));
+
+        var profile = new ProfileManifest(
+            "remove-app",
+            "Remove app",
+            "Application removal test",
+            DesiredState: new DesiredStateManifest(
+                [new ProfileApplication("test-app", null, null, "absent")],
+                [],
+                [],
+                [],
+                [],
+                []),
+            SchemaVersion: 2);
+
+        File.WriteAllText(
+            Path.Combine(root, "bootstrap", "windows", "profiles", "remove-app.json"),
+            JsonSerializer.Serialize(profile, JsonDefaults.Options));
+
+        try
+        {
+            var engine = new ProvisioningEngine(
+                configuration,
+                new InstallerEngine(paths),
+                paths,
+                new InventoryScanner([
+                    new VersionedInventoryProvider("Test.Package", "2.0.0")
+                ]));
+
+            var diff = await engine.DiffAsync("remove-app");
+            var diffItem = diff.Items.Single(item => item.TargetId == "test-app");
+
+            Assert.AreEqual(ProvisioningStateCodes.Installed, diffItem.StateCode);
+            Assert.AreEqual(ProvisioningActionCodes.Remove, diffItem.ActionCode);
+            Assert.AreEqual("2.0.0", diffItem.ObservedValue);
+
+            var plan = await engine.PlanAsync("remove-app");
+            var planItem = plan.Items.Single(item => item.ComponentId == "test-app");
+
+            Assert.AreEqual(ProvisioningActionCodes.Remove, planItem.ActionCode);
+            Assert.AreEqual("2.0.0", planItem.InstalledVersion);
+            Assert.IsNull(planItem.DesiredVersion);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public void Registry_desired_state_observer_classifies_matching_values()
     {
         var observer = new RegistryDesiredStateObserver(new FakeRegistryReader(
@@ -616,7 +701,7 @@ public sealed class ProvisioningPlanContractTests
             Assert.IsFalse(string.IsNullOrWhiteSpace(item.StateCode));
             Assert.IsFalse(string.IsNullOrWhiteSpace(item.ActionCode));
             Assert.IsFalse(string.IsNullOrWhiteSpace(item.Message));
-            Assert.IsTrue(item.StateCode is "MISSING" or "INSTALLED" or "OUTDATED" or "UNKNOWN");
+            Assert.IsTrue(item.StateCode is "MISSING" or "INSTALLED" or "OUTDATED" or "ABSENT" or "UNKNOWN");
         }
     }
 
@@ -696,6 +781,31 @@ public sealed class InstallerEngineTests
         CollectionAssert.AreEqual(
             new[] { "upgrade", "--id", "Test.Package", "--exact", "--accept-source-agreements", "--accept-package-agreements", "--silent", "--version", "2.0.0" },
             upgradeArguments.ToArray());
+    }
+
+    [TestMethod]
+    public void WinGet_remove_action_uses_uninstall_command()
+    {
+        var component = new ComponentManifest(
+            "test-component",
+            "Test component",
+            null,
+            "Test.Package",
+            null,
+            "exe",
+            null,
+            "x64",
+            null,
+            [],
+            "winget");
+
+        var arguments = InstallerEngine.BuildWingetArguments(
+            component,
+            ProvisioningActionCodes.Remove);
+
+        CollectionAssert.AreEqual(
+            new[] { "uninstall", "--id", "Test.Package", "--exact", "--accept-source-agreements", "--accept-package-agreements", "--silent" },
+            arguments.ToArray());
     }
 
     [TestMethod]

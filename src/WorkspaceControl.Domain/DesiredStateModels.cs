@@ -11,7 +11,8 @@ public sealed record DesiredStateManifest(
 public sealed record ProfileApplication(
     string ComponentId,
     string? VersionPolicy = null,
-    string? MinimumVersion = null);
+    string? MinimumVersion = null,
+    string State = "present");
 
 public sealed record WindowsSettingDesiredState(
     string Id,

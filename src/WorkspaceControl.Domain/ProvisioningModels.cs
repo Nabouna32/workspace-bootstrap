@@ -51,6 +51,7 @@ public static class ProvisioningStateCodes
     public const string Installed = "INSTALLED";
     public const string Outdated = "OUTDATED";
     public const string Unknown = "UNKNOWN";
+    public const string Absent = "ABSENT";
 }
 
 public static class ProvisioningOperationStatuses
@@ -67,6 +68,7 @@ public static class ProvisioningActionCodes
 {
     public const string Install = "install";
     public const string Update = "update";
+    public const string Remove = "remove";
     public const string None = "none";
     public const string Set = "set";
     public const string Blocked = "blocked";
@@ -111,9 +113,15 @@ public sealed class ProvisioningOperation
     public string? Error { get; set; }
     public bool CanResume { get; set; }
     public List<ProvisioningStep> Steps { get; init; } = [];
+    public List<ProvisioningApplicationSnapshot> ApplicationSnapshots { get; init; } = [];
     public List<ProvisioningRegistrySnapshot> RegistrySnapshots { get; init; } = [];
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
+
+public sealed record ProvisioningApplicationSnapshot(
+    string ComponentId,
+    string? InstalledVersion,
+    int PlanIndex = 0);
 
 public sealed record ProvisioningRegistrySnapshot(
     string Hive,
