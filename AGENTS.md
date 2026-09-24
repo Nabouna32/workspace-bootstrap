@@ -45,9 +45,10 @@ When documents disagree, resolve them in this order:
 1. `docs/PRODUCT-EXPERIENCE.md` — canonical user-facing product and UX contract.
 2. `docs/PRODUCT-VISION.md` — mission, scope, audience and product boundaries.
 3. `docs/UX-DESIGN.md` — detailed design system and interaction rules.
-4. `docs/PROFILES.md`, `docs/SOFTWARE.md`, `docs/INVENTORY.md`, `docs/PROVISIONING.md`, `docs/CONFIGURATION.md` — domain contracts.
+4. `docs/PROFILES.md`, `docs/SOFTWARE.md`, `docs/INVENTORY.md`, `docs/PROVISIONING.md`, `docs/CONFIGURATION.md`, `docs/PORTABILITY.md` — domain and cross-cutting contracts.
 5. `docs/ARCHITECTURE.md` — technical architecture implementing the product contracts.
-6. `docs/ROADMAP.md` and `docs/STATUS.md` — implementation state and sequencing.
+6. `docs/DECISIONS.md` — reconstructed decision record and anti-drift ledger.
+7. `docs/ROADMAP.md` and `docs/STATUS.md` — implementation state and sequencing.
 
 ### Anti-drift rules
 - Never wholesale-replace product/UX Markdown with a summary derived from the latest engine work.
@@ -62,6 +63,29 @@ When documents disagree, resolve them in this order:
 - Roadmap/status documents must not be used as a reason to overwrite canonical product/UX documents.
 - Documentation changes must be checked for contradictions across all affected Markdown files before merge.
 
+## Portability and application-owned storage — non-negotiable
+
+Workspace Control is a **portable, self-contained, unpackaged Windows application**.
+
+Application-owned mutable data must stay under the explicit portable application root. The default root is `AppContext.BaseDirectory`; tests and controlled composition may inject an explicit root.
+
+This applies to:
+- user Workspaces;
+- application configuration and preferences;
+- installer cache and metadata;
+- staging data;
+- operation state and recovery journals;
+- optimization state;
+- application-owned logs and diagnostics;
+- future application-owned mutable state.
+
+**Never silently introduce** `%LOCALAPPDATA%`, `%APPDATA%`, `ApplicationData.Current`, another implicit per-user store, or Registry-backed application configuration/state.
+
+Windows Registry/services/tasks/etc. remain valid when they are the **system being managed**, not as hidden Workspace Control storage. User-selected import/export destinations are explicit user choices and are not hidden persistence.
+
+The application must not silently fall back to AppData when the portable root is not writable. A different deployment/storage model requires an explicit product/architecture decision and documentation impact audit.
+
+Before changing persistence, read and obey `docs/PORTABILITY.md` and `docs/DECISIONS.md`. Treat this as a product/architecture invariant, not an implementation preference.
 ## Target technology
 - C# / .NET 10.
 - WinUI 3 / Windows App SDK for the desktop.
