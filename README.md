@@ -2,9 +2,12 @@
 
 **Workspace Control** is a permanent Windows 11 control center for managing a PC throughout its lifetime.
 
-It brings software management, Windows configuration, diagnostics, maintenance, optimization, drivers, WSL and desired-state profiles into one understandable application.
+It brings software management, Windows configuration, diagnostics, maintenance, optimization, drivers, WSL and user-built desired-state Workspaces into one understandable application.
 
 ## Main capabilities
+
+- Build a personal **My Workspace** by choosing what should be managed instead of being forced into a predefined setup.
+- Compare the Workspace with the real PC and review risk/impact before applying changes.
 
 - Install, update and uninstall applications.
 - Discover applications even without a curated definition.
@@ -16,7 +19,7 @@ It brings software management, Windows configuration, diagnostics, maintenance, 
 - Diagnose Windows and application problems.
 - Inspect and manage drivers with appropriate caution.
 - Install and configure WSL.
-- Create, import, export and apply desired-state profiles.
+- Create, edit, import, export and apply user-owned Workspaces (technical `ProfileManifest` documents).
 - Inspect a read-only desired-state diff before provisioning.
 - Use the same capabilities from the CLI.
 - Extend the product through providers/plugins.
@@ -34,6 +37,8 @@ C#/.NET 10, WinUI 3 / Windows App SDK and Windows 11 x64. The CLI shares the sam
 The GitHub repository is **Workspace Control**; the product identity and repository are intentionally aligned.
 
 ## Documentation
+
+The product/UX contract is [Product experience](docs/PRODUCT-EXPERIENCE.md). It is authoritative for user-facing behavior and must not be replaced by implementation-specific summaries.
 
 The complete documentation index is in [docs/README.md](docs/README.md).
 
