@@ -300,6 +300,7 @@ public sealed class ConfigurationTests
             var diffItem = diff.Items.Single(item => item.Domain == DesiredStateDomainCodes.RegistrySetting);
             Assert.AreEqual(ProvisioningStateCodes.Missing, diffItem.StateCode);
             Assert.AreEqual(ProvisioningActionCodes.Set, diffItem.ActionCode);
+            StringAssert.Contains(diffItem.Message, "will be updated after explicit confirmation");
 
             var plan = await engine.PlanAsync("registry-only");
             var planItem = plan.Items.Single();
