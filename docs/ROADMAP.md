@@ -52,8 +52,7 @@ The technical desired-state foundation is established. The user-facing Workspace
 - Consistent risk, reversibility and restart-impact presentation.
 - Full light/dark/system visual polish, accessibility and English/French coverage across new surfaces.
 
-
-## Phase 5 — Optional cloud/fleet
+## Phase 6 — Optional cloud/fleet
 - Accounts and synchronized profiles.
 - Machine groups and per-machine overrides.
 - Fleet inventory.
