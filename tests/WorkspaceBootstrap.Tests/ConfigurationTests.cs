@@ -298,7 +298,7 @@ public sealed class ConfigurationTests
 
             var diff = await engine.DiffAsync("registry-only");
             var diffItem = diff.Items.Single(item => item.Domain == DesiredStateDomainCodes.RegistrySetting);
-            Assert.AreEqual(ProvisioningStateCodes.Drifted, diffItem.StateCode);
+            Assert.AreEqual(DesiredStateStateCodes.Drifted, diffItem.StateCode);
             Assert.AreEqual(ProvisioningActionCodes.Set, diffItem.ActionCode);
             StringAssert.Contains(diffItem.Message, "will be updated after explicit confirmation");
 
