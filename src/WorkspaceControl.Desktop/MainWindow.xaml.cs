@@ -12,7 +12,6 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
         RootGrid.DataContext = ((App)Microsoft.UI.Xaml.Application.Current).ViewModel;
-        NavView.SelectedItem = NavView.MenuItems[0];
         Activated += MainWindow_Activated;
         TryApplyMicaBackdrop();
     }
@@ -32,6 +31,10 @@ public sealed partial class MainWindow : Window
     private async void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
     {
         Activated -= MainWindow_Activated;
+
+        // WinUI NavigationView has a startup-time native XAML regression when SelectedItem is assigned
+        // from the constructor. Defer the initial selection until the window has been activated.
+        NavView.SelectedItem = NavView.MenuItems[0];
 
         try
         {
