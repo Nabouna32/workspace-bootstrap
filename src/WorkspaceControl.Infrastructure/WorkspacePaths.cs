@@ -12,11 +12,12 @@ public sealed class WorkspacePaths
 
     public WorkspacePaths(string? root = null)
     {
+        // Workspace Control is distributed as a portable, unpackaged application.
+        // Application-owned mutable data therefore stays beside the application rather
+        // than being redirected to AppData or another hidden per-user location.
         Root = Path.GetFullPath(
             string.IsNullOrWhiteSpace(root)
-                ? Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "WorkspaceControl")
+                ? AppContext.BaseDirectory
                 : root);
 
         CacheRoot = Path.Combine(Root, "cache");

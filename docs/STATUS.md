@@ -29,10 +29,10 @@ The canonical product/UX contract is `docs/PRODUCT-EXPERIENCE.md`. Engine founda
 - Desktop and CLI consume the Application contract through an explicit Infrastructure composition root; the old `EngineFacade` service-locator layer is removed.
 - Infrastructure namespaces are aligned with `WorkspaceControl.Infrastructure`.
 - Software inventory aggregation has provider isolation, deterministic merge behavior, provenance/evidence preservation and partial-failure diagnostics.
-- Mutable cache/state/log data defaults to LocalAppData rather than the installation directory.
+- Workspace Control is distributed as a portable, self-contained, unpackaged application; application-owned mutable data stays under the explicit portable application root and never silently falls back to AppData.
 - Packaged configuration is resolved from the application content root.
 - Legacy WPF desktop has been removed; WinUI 3 is the only desktop UI target.
-- The desktop currently exposes the desired-state/provisioning foundation, including persisted plan review, explicit confirmation, live apply progress, verification results, stale-plan handling and safe resume for resumable failures. The target user experience is the richer My Workspace builder defined in `docs/PRODUCT-EXPERIENCE.md`.
+- The desktop now exposes a first My Workspace builder: user-owned schema-2 Workspaces are persisted under the portable application root, applications can be searched and checked/unchecked from the catalog, optional built-in templates can be copied into a user-owned Workspace, and the existing persisted provisioning lifecycle remains the safety boundary.
 - The provisioning surface uses WinUI .resw localization for English and French, localized view-model status/progress messages, and explicit accessibility names for provisioning controls and status regions.
 - A dedicated Windows published-validation workflow now builds a self-contained x64 package, validates its required payload, runs the published CLI smoke test, launches the published WinUI executable for a timed smoke test, and uploads the validated package as an artifact.
 
@@ -43,18 +43,18 @@ The canonical product/UX contract is `docs/PRODUCT-EXPERIENCE.md`. Engine founda
 - Real interactive UI behavior still requires a human Windows 11 validation pass; automated launch validation is not a substitute for visual, keyboard, accessibility, localization and DPI checks.
 
 ## Current product-experience gap
-The backend desired-state/provisioning foundations exist, but the current WinUI experience is not yet the full product described by the product contract. In particular, the application catalogue, user-built My Workspace editor, richer Home dashboard, semantic state presentation and broader domain surfaces remain implementation work.
+The first My Workspace editor is now functional end-to-end for application desired state, but the broader product experience remains incomplete. The portable-storage contract is now explicit and guarded by regression tests and CI policy. The richer Home dashboard, first-class Applications management actions, semantic state presentation across domains, and Windows/Optimizations/Drivers/WSL/Diagnostics/Cleanup surfaces remain implementation work.
 
 ## Next engineering priorities
-1. Build the My Workspace user experience on top of the existing desired-state/provisioning foundation.
-2. Build the first-class Applications catalogue and management experience.
-3. Replace implementation-centric profile selection UX with user-owned Workspace creation/editing while preserving the existing safe provisioning lifecycle.
+1. Expand My Workspace beyond application desired state to Windows settings, policies, optimizations and other supported capabilities.
+2. Build the first-class Applications catalogue and management actions on top of the shared inventory/provider contracts.
+3. Build the richer Home control-center dashboard and semantic state presentation.
 4. Execute and document real Windows 11 UI validation: navigation, localization, keyboard/focus, accessibility, DPI/scaling, long-running states, stale recovery, error presentation and visual clarity.
-6. Replace remaining infrastructure composition with a testable dependency-injection/composition strategy where it materially improves lifetime management.
-7. Complete Windows administration, policy, diagnostics, driver and WSL capability boundaries.
-8. Build richer desired-state diff presentation and risk/reversibility metadata.
-9. Harden verified installer reuse, artifact retention and integrity verification.
-10. Remove remaining historical names/dead documentation as each boundary becomes authoritative.
+5. Replace remaining infrastructure composition with a testable dependency-injection/composition strategy where it materially improves lifetime management.
+6. Complete Windows administration, policy, diagnostics, driver and WSL capability boundaries.
+7. Build richer desired-state diff presentation and risk/reversibility metadata.
+8. Harden verified installer reuse, artifact retention and integrity verification.
+9. Remove remaining historical names/dead documentation as each boundary becomes authoritative.
 
 ## Reusable foundations
 - inventory providers and evidence/ownership;

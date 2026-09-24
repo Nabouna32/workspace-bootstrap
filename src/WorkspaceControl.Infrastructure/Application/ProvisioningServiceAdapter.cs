@@ -1,4 +1,5 @@
 using WorkspaceControl.Application.Contracts;
+using WorkspaceControl.Domain;
 
 namespace WorkspaceControl.Infrastructure.Application;
 
@@ -10,6 +11,10 @@ internal sealed class ProvisioningServiceAdapter : IProvisioningService
         _engine = engine ?? throw new ArgumentNullException(nameof(engine));
 
     public IReadOnlyList<ProfileManifest> GetProfiles() => _engine.Profiles();
+    public IReadOnlyList<ComponentManifest> GetApplicationCatalog() => _engine.ApplicationCatalog();
+    public ProfileManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
+        _engine.CreateWorkspace(name, description, componentIds);
+    public void SaveWorkspace(ProfileManifest workspace) => _engine.SaveWorkspace(workspace);
     public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string profileId, CancellationToken cancellationToken = default) =>
         _engine.DiffAsync(profileId, cancellationToken);
     public Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>

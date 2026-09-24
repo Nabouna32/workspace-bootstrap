@@ -40,6 +40,81 @@ jobs:
             throw "CI policy violation: unsupported runner label detected."
           }
 
+      - name: Enforce portable application storage contract
+        shell: pwsh
+        run: |
+          $forbidden = @(
+            'Environment\.GetFolderPath\(\s*Environment\.SpecialFolder\.(LocalApplicationData|ApplicationData|RoamingApplicationData|CommonApplicationData)',
+            'ApplicationData\.Current',
+            'Windows\.Storage\.ApplicationData'
+          )
+
+          $matches = Get-ChildItem src -Recurse -File -Filter '*.cs' |
+            Select-String -Pattern $forbidden
+
+          if ($matches) {
+            $matches | ForEach-Object { $_.ToString() } | Write-Error
+            throw "CI policy violation: application-owned code introduced hidden per-user persistence."
+          }
+
+      - name: Validate canonical documentation contracts
+        shell: pwsh
+        run: |
+          $required = @{
+            'AGENTS.md' = @(
+              'Documentation is a product contract',
+              'Portability and application-owned storage',
+              'Context reconstruction and decision audit'
+            )
+            'docs/PRODUCT-EXPERIENCE.md' = @(
+              'My Workspace',
+              'predefined profiles',
+              'Observe current PC',
+              'Review changes, risk and impact'
+            )
+            'docs/PORTABILITY.md' = @(
+              'portable',
+              'must not silently fall back to AppData',
+              'application-owned data'
+            )
+            'docs/DECISIONS.md' = @(
+              'repository history',
+              'does not invent them',
+              'Anti-drift rule'
+            )
+            'docs/ARCHITECTURE.md' = @(
+              'user-facing Workspace model',
+              'must not silently change the user-facing'
+            )
+          }
+
+          foreach ($file in $required.Keys) {
+            if (-not (Test-Path $file)) {
+              throw "Documentation contract missing: $file"
+            }
+
+            $content = Get-Content $file -Raw
+            foreach ($assertion in $required[$file]) {
+              if ($content -notmatch [regex]::Escape($assertion)) {
+                throw "Documentation contract assertion missing in ${file}: $assertion"
+              }
+            }
+          }
+
+          $forbiddenDocPatterns = @(
+            'Mutable cache/state/log data defaults to LocalAppData',
+            'user-owned Workspaces are persisted under LocalAppData',
+            'predefined profile must be required'
+          )
+
+          $matches = Get-ChildItem docs -Recurse -File -Filter '*.md' |
+            Select-String -Pattern $forbiddenDocPatterns
+
+          if ($matches) {
+            $matches | ForEach-Object { $_.ToString() } | Write-Error
+            throw "Documentation contract contradiction detected."
+          }
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
@@ -84,9 +159,9 @@ jobs:
           }
 
           $profilesPage = Get-Content src/WorkspaceControl.Desktop/ProfilesPage.xaml -Raw
-          if ($profilesPage -notmatch 'x:Uid="ProfilesPage_ProfileList"' -or
-              $profilesPage -notmatch 'x:Uid="ProfilesPage_PlanList"' -or
-              $profilesPage -notmatch 'x:Uid="ProfilesPage_ProgressRing"') {
+          if ($profilesPage -notmatch 'x:Uid="WorkspacePage_WorkspaceList"' -or
+              $profilesPage -notmatch 'x:Uid="WorkspacePage_PlanList"' -or
+              $profilesPage -notmatch 'x:Uid="WorkspacePage_ProgressRing"') {
             throw "ProfilesPage.xaml is missing required accessibility resource bindings."
           }
 

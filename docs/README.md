@@ -22,7 +22,9 @@
 - [Prerequisites](PREREQUISITES.md) — machine capability detection.
 - [Security](SECURITY.md) — elevation, downloads, registry/policy safety, plugins and secrets.
 - [Configuration](CONFIGURATION.md) — product settings versus desired-state profiles.
+- [Portability](PORTABILITY.md) — portable package root and application-owned storage contract.
 - [Logging](LOGGING.md) — configurable diagnostics and operation logs.
+- [Decision audit](DECISIONS.md) — reconstructed architecture decisions and anti-drift record.
 - [Reinstall and recovery](REINSTALL.md) — preserving profiles/cache across Windows reinstallation.
 - [Version policy](VERSION-POLICY.md) — per-application and provider version semantics.
 

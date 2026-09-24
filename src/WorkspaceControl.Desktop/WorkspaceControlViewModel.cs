@@ -15,6 +15,10 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     private ProvisioningOperation? _provisioningOperation;
     private DesiredStateDiff? _desiredStateDiff;
     private string? _desiredStateDiffProfileId;
+    private string? _selectedWorkspaceId;
+    private string _workspaceName = string.Empty;
+    private string _workspaceDescription = string.Empty;
+    private string _applicationSearchText = string.Empty;
     private bool _isBusy;
     private string _status;
     private string? _error;
@@ -120,7 +124,37 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public ObservableCollection<SoftwareItem> SoftwareItems { get; } = [];
     public ObservableCollection<string> Diagnostics { get; } = [];
     public ObservableCollection<ProfileManifest> Profiles { get; } = [];
+    public ObservableCollection<WorkspaceApplicationOption> ApplicationOptions { get; } = [];
+    public ObservableCollection<WorkspaceApplicationOption> VisibleApplicationOptions { get; } = [];
     public ObservableCollection<DesiredStateDiffItem> DesiredStateDiffItems { get; } = [];
+
+    public string? SelectedWorkspaceId
+    {
+        get => _selectedWorkspaceId;
+        private set => SetField(ref _selectedWorkspaceId, value);
+    }
+
+    public string WorkspaceName
+    {
+        get => _workspaceName;
+        set => SetField(ref _workspaceName, value);
+    }
+
+    public string WorkspaceDescription
+    {
+        get => _workspaceDescription;
+        set => SetField(ref _workspaceDescription, value);
+    }
+
+    public string ApplicationSearchText
+    {
+        get => _applicationSearchText;
+        private set => SetField(ref _applicationSearchText, value);
+    }
+
+    public bool HasSelectedWorkspace => !string.IsNullOrWhiteSpace(SelectedWorkspaceId);
+    public bool IsSelectedWorkspaceUserOwned =>
+        SelectedWorkspaceId?.StartsWith("workspace-", StringComparison.OrdinalIgnoreCase) == true;
 
     public bool IsBusy
     {
@@ -169,6 +203,28 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             Profiles.Clear();
             foreach (var profile in _application.GetProfiles())
                 Profiles.Add(profile);
+
+            var catalog = _application.GetApplicationCatalog();
+            ApplicationOptions.Clear();
+            foreach (var component in catalog)
+            {
+                ApplicationOptions.Add(new WorkspaceApplicationOption(
+                    component.Id,
+                    component.Name,
+                    component.Source));
+            }
+
+            SetApplicationSearchText(string.Empty);
+
+            var selected = Profiles.FirstOrDefault(profile =>
+                string.Equals(profile.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase))
+                ?? Profiles.FirstOrDefault(profile =>
+                    profile.Id.StartsWith("workspace-", StringComparison.OrdinalIgnoreCase));
+
+            if (selected is not null)
+                SelectWorkspace(selected.Id);
+            else
+                ClearWorkspaceEditor();
 
             var recovery = _application.GetProvisioningRecovery();
             SetProvisioningOperation(recovery);
@@ -256,6 +312,146 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         DesiredStateDiffItems.Clear();
         OnPropertyChanged(nameof(DesiredStateDiff));
         OnPropertyChanged(nameof(HasDesiredStateDiff));
+    }
+
+    public void SelectWorkspace(string workspaceId)
+    {
+        var workspace = Profiles.FirstOrDefault(profile =>
+            string.Equals(profile.Id, workspaceId, StringComparison.OrdinalIgnoreCase));
+
+        if (workspace is null)
+            return;
+
+        SelectedWorkspaceId = workspace.Id;
+        WorkspaceName = workspace.Name;
+        WorkspaceDescription = workspace.Description;
+
+        var selectedApplications = workspace.ApplicationRequests
+            .Where(application => string.Equals(application.State, "present", StringComparison.OrdinalIgnoreCase))
+            .Select(application => application.ComponentId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var option in ApplicationOptions)
+            option.IsSelected = selectedApplications.Contains(option.ComponentId);
+
+        ClearDesiredStateDiff();
+        OnPropertyChanged(nameof(HasSelectedWorkspace));
+        OnPropertyChanged(nameof(IsSelectedWorkspaceUserOwned));
+    }
+
+    public void ClearWorkspaceEditor()
+    {
+        SelectedWorkspaceId = null;
+        WorkspaceName = _localizer.Get("DefaultWorkspaceName");
+        WorkspaceDescription = _localizer.Get("DefaultWorkspaceDescription");
+
+        foreach (var option in ApplicationOptions)
+            option.IsSelected = false;
+
+        ClearDesiredStateDiff();
+        OnPropertyChanged(nameof(HasSelectedWorkspace));
+        OnPropertyChanged(nameof(IsSelectedWorkspaceUserOwned));
+    }
+
+    public void SetApplicationSearchText(string value)
+    {
+        ApplicationSearchText = value ?? string.Empty;
+        VisibleApplicationOptions.Clear();
+
+        foreach (var option in ApplicationOptions)
+        {
+            if (string.IsNullOrWhiteSpace(ApplicationSearchText)
+                || option.Name.Contains(ApplicationSearchText, StringComparison.OrdinalIgnoreCase)
+                || option.ComponentId.Contains(ApplicationSearchText, StringComparison.OrdinalIgnoreCase)
+                || option.Source?.Contains(ApplicationSearchText, StringComparison.OrdinalIgnoreCase) == true)
+            {
+                VisibleApplicationOptions.Add(option);
+            }
+        }
+    }
+
+    public void CreateBlankWorkspace()
+    {
+        try
+        {
+            var workspace = _application.CreateWorkspace(
+                _localizer.Get("DefaultWorkspaceName"),
+                _localizer.Get("DefaultWorkspaceDescription"),
+                []);
+
+            Profiles.Add(workspace);
+            SelectWorkspace(workspace.Id);
+            Status = _localizer.Get("WorkspaceCreated");
+            Error = null;
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+            Status = _localizer.Get("WorkspaceCreationFailed");
+        }
+    }
+
+    public void SaveWorkspace()
+    {
+        if (string.IsNullOrWhiteSpace(WorkspaceName))
+        {
+            Error = _localizer.Get("WorkspaceNameRequired");
+            return;
+        }
+
+        var selectedApplications = ApplicationOptions
+            .Where(option => option.IsSelected)
+            .Select(option => option.ComponentId)
+            .ToArray();
+
+        try
+        {
+            if (IsSelectedWorkspaceUserOwned && SelectedWorkspaceId is not null)
+            {
+                var current = Profiles.First(profile =>
+                    string.Equals(profile.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase));
+
+                var desiredState = current.DesiredState
+                    ?? new DesiredStateManifest([], [], [], [], [], []);
+
+                var updated = current with
+                {
+                    Name = WorkspaceName.Trim(),
+                    Description = WorkspaceDescription.Trim(),
+                    SchemaVersion = 2,
+                    DesiredState = desiredState with
+                    {
+                        Applications = selectedApplications
+                            .Select(componentId => new ProfileApplication(componentId))
+                            .ToArray()
+                    }
+                };
+
+                _application.SaveWorkspace(updated);
+
+                var index = Profiles.IndexOf(current);
+                Profiles[index] = updated;
+                SelectWorkspace(updated.Id);
+                Status = _localizer.Get("WorkspaceSaved");
+                Error = null;
+                return;
+            }
+
+            var created = _application.CreateWorkspace(
+                WorkspaceName.Trim(),
+                WorkspaceDescription.Trim(),
+                selectedApplications);
+
+            Profiles.Add(created);
+            SelectWorkspace(created.Id);
+            Status = _localizer.Get("WorkspaceCreatedFromTemplate");
+            Error = null;
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+            Status = _localizer.Get("WorkspaceSaveFailed");
+        }
     }
 
     public async Task CreateProvisioningAsync(
@@ -362,4 +558,36 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         return true;
     }
+}
+
+
+public sealed class WorkspaceApplicationOption : INotifyPropertyChanged
+{
+    private bool _isSelected;
+
+    public WorkspaceApplicationOption(string componentId, string name, string? source)
+    {
+        ComponentId = componentId;
+        Name = name;
+        Source = source;
+    }
+
+    public string ComponentId { get; }
+    public string Name { get; }
+    public string? Source { get; }
+
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set
+        {
+            if (_isSelected == value)
+                return;
+
+            _isSelected = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 }

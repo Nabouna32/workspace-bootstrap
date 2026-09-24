@@ -6,9 +6,9 @@
     <ScrollViewer>
         <StackPanel Padding="28" Spacing="20">
             <StackPanel Spacing="4">
-                <TextBlock x:Uid="ProfilesPage_Title" FontSize="32" FontWeight="SemiBold" />
+                <TextBlock x:Uid="WorkspacePage_Title" FontSize="32" FontWeight="SemiBold" />
                 <TextBlock
-                    x:Uid="ProfilesPage_Subtitle"
+                    x:Uid="WorkspacePage_Subtitle"
                     Opacity="0.72"
                     TextWrapping="Wrap" />
             </StackPanel>
@@ -18,38 +18,48 @@
                 CornerRadius="12"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="12">
-                    <TextBlock x:Uid="ProfilesPage_ChooseHeading" FontSize="20" FontWeight="SemiBold" />
-                    <ListView
-                        x:Name="ProfileList"
-                        x:Uid="ProfilesPage_ProfileList"
+                    <TextBlock x:Uid="WorkspacePage_WorkspaceHeading" FontSize="20" FontWeight="SemiBold" />
+
+                    <ComboBox
+                        x:Name="WorkspaceList"
+                        x:Uid="WorkspacePage_WorkspaceList"
                         ItemsSource="{Binding Profiles}"
-                        SelectionMode="Single"
-                        SelectionChanged="ProfileList_SelectionChanged"
-                        MaxHeight="220">
-                        <ListView.ItemTemplate>
+                        SelectionChanged="WorkspaceList_SelectionChanged"
+                        HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Padding="4" Spacing="3">
-                                    <TextBlock Text="{Binding Name}" FontSize="17" FontWeight="SemiBold" />
-                                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Opacity="0.72" />
-                                    <TextBlock Text="{Binding Id}" Opacity="0.55" />
+                                <StackPanel Padding="4" Spacing="2">
+                                    <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding Description}" Opacity="0.72" TextWrapping="Wrap" />
                                 </StackPanel>
                             </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox
+                            x:Name="WorkspaceNameBox"
+                            x:Uid="WorkspacePage_Name"
+                            Text="{Binding WorkspaceName, Mode=TwoWay}"
+                            Grid.Column="0" />
+                        <TextBox
+                            x:Name="WorkspaceDescriptionBox"
+                            x:Uid="WorkspacePage_Description"
+                            Text="{Binding WorkspaceDescription, Mode=TwoWay}"
+                            Grid.Column="1"
+                            TextWrapping="Wrap" />
+                    </Grid>
 
                     <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Button x:Uid="WorkspacePage_New" Click="NewWorkspaceButton_Click" />
                         <Button
-                            x:Name="ObserveDiffButton"
-                            x:Uid="ProfilesPage_ObserveDiff"
-                            Click="ObserveDiffButton_Click"
-                            HorizontalAlignment="Left"
-                            IsEnabled="False" />
-                        <Button
-                            x:Name="CreatePlanButton"
-                            x:Uid="ProfilesPage_GeneratePlan"
-                            Click="CreatePlanButton_Click"
-                            HorizontalAlignment="Left"
-                            IsEnabled="False" />
+                            x:Uid="WorkspacePage_Save"
+                            Click="SaveWorkspaceButton_Click"
+                            IsEnabled="{Binding HasSelectedWorkspace}" />
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -59,15 +69,46 @@
                 CornerRadius="12"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="12">
-                    <TextBlock x:Uid="ProfilesPage_DiffHeading" FontSize="20" FontWeight="SemiBold" />
+                    <TextBlock x:Uid="WorkspacePage_ApplicationsHeading" FontSize="20" FontWeight="SemiBold" />
+                    <TextBox
+                        x:Name="ApplicationSearchBox"
+                        x:Uid="WorkspacePage_ApplicationSearch"
+                        TextChanged="ApplicationSearchBox_TextChanged" />
+
+                    <ListView
+                        x:Name="ApplicationList"
+                        x:Uid="WorkspacePage_ApplicationList"
+                        ItemsSource="{Binding VisibleApplicationOptions}"
+                        SelectionMode="None"
+                        MaxHeight="420">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox
+                                    x:Uid="WorkspacePage_ApplicationCheckBox"
+                                    Content="{Binding Name}"
+                                    IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                    HorizontalAlignment="Stretch">
+                                </CheckBox>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </Border>
+
+            <Border
+                Padding="18"
+                CornerRadius="12"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <StackPanel Spacing="12">
+                    <TextBlock x:Uid="WorkspacePage_DiffHeading" FontSize="20" FontWeight="SemiBold" />
                     <TextBlock
-                        x:Uid="ProfilesPage_DiffDescription"
+                        x:Uid="WorkspacePage_DiffDescription"
                         TextWrapping="Wrap"
                         Opacity="0.72" />
 
                     <ListView
                         x:Name="DesiredStateDiffList"
-                        x:Uid="ProfilesPage_DiffList"
+                        x:Uid="WorkspacePage_DiffList"
                         ItemsSource="{Binding DesiredStateDiffItems}"
                         SelectionMode="None"
                         MaxHeight="360">
@@ -89,26 +130,26 @@
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel Spacing="1">
-                                                    <TextBlock x:Uid="ProfilesPage_DiffObserved" FontSize="12" Opacity="0.6" />
+                                                    <TextBlock x:Uid="WorkspacePage_DiffObserved" FontSize="12" Opacity="0.6" />
                                                     <TextBlock Text="{Binding ObservedValue}" />
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="1" Spacing="1">
-                                                    <TextBlock x:Uid="ProfilesPage_DiffAvailable" FontSize="12" Opacity="0.6" />
+                                                    <TextBlock x:Uid="WorkspacePage_DiffAvailable" FontSize="12" Opacity="0.6" />
                                                     <TextBlock Text="{Binding AvailableValue}" />
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="2" Spacing="1">
-                                                    <TextBlock x:Uid="ProfilesPage_DiffDesired" FontSize="12" Opacity="0.6" />
+                                                    <TextBlock x:Uid="WorkspacePage_DiffDesired" FontSize="12" Opacity="0.6" />
                                                     <TextBlock Text="{Binding DesiredValue}" />
                                                 </StackPanel>
                                             </Grid>
                                         </StackPanel>
                                         <StackPanel Grid.Column="1" Spacing="2" HorizontalAlignment="Right">
                                             <TextBlock
-                                                x:Uid="ProfilesPage_DiffAction"
+                                                x:Uid="WorkspacePage_DiffAction"
                                                 Text="{Binding ActionCode}"
                                                 FontWeight="SemiBold" />
                                             <TextBlock
-                                                x:Uid="ProfilesPage_DiffState"
+                                                x:Uid="WorkspacePage_DiffState"
                                                 Text="{Binding StateCode}"
                                                 Opacity="0.65" />
                                         </StackPanel>
@@ -117,6 +158,19 @@
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
+
+                    <Button
+                        x:Name="ObserveDiffButton"
+                        x:Uid="WorkspacePage_ObserveDiff"
+                        Click="ObserveDiffButton_Click"
+                        HorizontalAlignment="Left"
+                        IsEnabled="False" />
+                    <Button
+                        x:Name="CreatePlanButton"
+                        x:Uid="WorkspacePage_GeneratePlan"
+                        Click="CreatePlanButton_Click"
+                        HorizontalAlignment="Left"
+                        IsEnabled="False" />
                 </StackPanel>
             </Border>
 
@@ -125,27 +179,27 @@
                 CornerRadius="12"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="12">
-                    <TextBlock x:Uid="ProfilesPage_ReviewHeading" FontSize="20" FontWeight="SemiBold" />
+                    <TextBlock x:Uid="WorkspacePage_ReviewHeading" FontSize="20" FontWeight="SemiBold" />
 
                     <TextBlock
-                        x:Uid="ProfilesPage_Status"
+                        x:Uid="WorkspacePage_Status"
                         Text="{Binding ProvisioningStatusDisplay}"
                         FontSize="17"
                         FontWeight="SemiBold" />
 
                     <TextBlock
-                        x:Uid="ProfilesPage_Progress"
+                        x:Uid="WorkspacePage_Progress"
                         Text="{Binding ProvisioningProgressDisplay}"
                         Opacity="0.72" />
 
                     <TextBlock
-                        x:Uid="ProfilesPage_CurrentComponent"
+                        x:Uid="WorkspacePage_CurrentComponent"
                         Text="{Binding CurrentComponentDisplay}"
                         TextWrapping="Wrap"
                         Opacity="0.72" />
 
                     <ListView
-                        x:Uid="ProfilesPage_PlanList"
+                        x:Uid="WorkspacePage_PlanList"
                         ItemsSource="{Binding ProvisioningPlan.Items}"
                         SelectionMode="None"
                         MaxHeight="360">
@@ -167,26 +221,26 @@
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel Spacing="1">
-                                                    <TextBlock x:Uid="ProfilesPage_InstalledVersion" FontSize="12" Opacity="0.6" />
+                                                    <TextBlock x:Uid="WorkspacePage_InstalledVersion" FontSize="12" Opacity="0.6" />
                                                     <TextBlock Text="{Binding InstalledVersion}" />
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="1" Spacing="1">
-                                                    <TextBlock x:Uid="ProfilesPage_AvailableVersion" FontSize="12" Opacity="0.6" />
+                                                    <TextBlock x:Uid="WorkspacePage_AvailableVersion" FontSize="12" Opacity="0.6" />
                                                     <TextBlock Text="{Binding AvailableVersion}" />
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="2" Spacing="1">
-                                                    <TextBlock x:Uid="ProfilesPage_DesiredVersion" FontSize="12" Opacity="0.6" />
+                                                    <TextBlock x:Uid="WorkspacePage_DesiredVersion" FontSize="12" Opacity="0.6" />
                                                     <TextBlock Text="{Binding DesiredVersion}" />
                                                 </StackPanel>
                                             </Grid>
                                         </StackPanel>
                                         <StackPanel Grid.Column="1" Spacing="2" HorizontalAlignment="Right">
                                             <TextBlock
-                                                x:Uid="ProfilesPage_ActionCode"
+                                                x:Uid="WorkspacePage_ActionCode"
                                                 Text="{Binding ActionCode}"
                                                 FontWeight="SemiBold" />
                                             <TextBlock
-                                                x:Uid="ProfilesPage_StateCode"
+                                                x:Uid="WorkspacePage_StateCode"
                                                 Text="{Binding StateCode}"
                                                 Opacity="0.65" />
                                         </StackPanel>
@@ -197,7 +251,7 @@
                     </ListView>
 
                     <InfoBar
-                        x:Uid="ProfilesPage_ErrorInfoBar"
+                        x:Uid="WorkspacePage_ErrorInfoBar"
                         IsOpen="{Binding HasProvisioningError}"
                         Message="{Binding ProvisioningError}"
                         Severity="Error"
@@ -206,23 +260,23 @@
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <Button
                             x:Name="ConfirmButton"
-                            x:Uid="ProfilesPage_Confirm"
+                            x:Uid="WorkspacePage_Confirm"
                             Click="ConfirmButton_Click"
                             IsEnabled="{Binding IsAwaitingConfirmation}" />
                         <Button
                             x:Name="ResumeButton"
-                            x:Uid="ProfilesPage_Resume"
+                            x:Uid="WorkspacePage_Resume"
                             Click="ResumeButton_Click"
                             IsEnabled="{Binding CanResumeProvisioning}" />
                     </StackPanel>
 
                     <ProgressRing
-                        x:Uid="ProfilesPage_ProgressRing"
+                        x:Uid="WorkspacePage_ProgressRing"
                         IsActive="{Binding IsProvisioningActive}"
                         Width="28"
                         Height="28" />
 
-                    <TextBlock x:Uid="ProfilesPage_StaleNote" Opacity="0.65" TextWrapping="Wrap" />
+                    <TextBlock x:Uid="WorkspacePage_StaleNote" Opacity="0.65" TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
         </StackPanel>
