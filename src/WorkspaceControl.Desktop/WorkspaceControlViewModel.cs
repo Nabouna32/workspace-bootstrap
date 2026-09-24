@@ -471,6 +471,13 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
                 state,
                 action,
                 installed is not null));
+            
+            var workspaceOption = ApplicationOptions.FirstOrDefault(option =>
+                string.Equals(option.ComponentId, component.Id, StringComparison.OrdinalIgnoreCase));
+            workspaceOption?.UpdateObservedState(
+                state,
+                installed?.Version,
+                installed?.AvailableVersion);
         }
 
         RefreshVisibleApplicationCatalog();
@@ -726,6 +733,9 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 public sealed class WorkspaceApplicationOption : INotifyPropertyChanged
 {
     private bool _isSelected;
+    private string _stateCode = ProvisioningStateCodes.Unknown;
+    private string? _installedVersion;
+    private string? _availableVersion;
 
     public WorkspaceApplicationOption(string componentId, string name, string? source)
     {
@@ -737,6 +747,28 @@ public sealed class WorkspaceApplicationOption : INotifyPropertyChanged
     public string ComponentId { get; }
     public string Name { get; }
     public string? Source { get; }
+
+    public string StateCode
+    {
+        get => _stateCode;
+        private set => SetField(ref _stateCode, value);
+    }
+
+    public string? InstalledVersion
+    {
+        get => _installedVersion;
+        private set => SetField(ref _installedVersion, value);
+    }
+
+    public string? AvailableVersion
+    {
+        get => _availableVersion;
+        private set => SetField(ref _availableVersion, value);
+    }
+
+    public bool IsInstalled =>
+        string.Equals(StateCode, ProvisioningStateCodes.Installed, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(StateCode, ProvisioningStateCodes.Outdated, StringComparison.OrdinalIgnoreCase);
 
     public bool IsSelected
     {
@@ -751,7 +783,30 @@ public sealed class WorkspaceApplicationOption : INotifyPropertyChanged
         }
     }
 
+    public void UpdateObservedState(
+        string stateCode,
+        string? installedVersion,
+        string? availableVersion)
+    {
+        StateCode = stateCode;
+        InstalledVersion = installedVersion;
+        AvailableVersion = availableVersion;
+        OnPropertyChanged(nameof(IsInstalled));
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value))
+            return;
+
+        field = value;
+        OnPropertyChanged(propertyName);
+    }
+
+    private void OnPropertyChanged(string propertyName) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
 
 public static class ApplicationCatalogFilters
