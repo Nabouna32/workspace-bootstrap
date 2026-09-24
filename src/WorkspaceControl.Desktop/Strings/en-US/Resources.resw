@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <data name="ProfilesPage_Title.Text" xml:space="preserve"><value>Profiles &amp; provisioning</value><comment>Page title.</comment></data>
-  <data name="ProfilesPage_Subtitle.Text" xml:space="preserve"><value>Review a persisted plan before Workspace Control changes this PC.</value><comment>Explain that changes are reviewed before application.</comment></data>
-  <data name="ProfilesPage_ChooseHeading.Text" xml:space="preserve"><value>1. Choose a desired state</value></data>
-  <data name="ProfilesPage_ProfileList.AutomationProperties.Name" xml:space="preserve"><value>Available profiles</value></data>
-  <data name="ProfilesPage_GeneratePlan.Content" xml:space="preserve"><value>Generate plan</value></data>
-  <data name="ProfilesPage_GeneratePlan.AutomationProperties.Name" xml:space="preserve"><value>Generate a provisioning plan from the reviewed desired-state diff</value></data>
-  <data name="ProfilesPage_ReviewHeading.Text" xml:space="preserve"><value>3. Review the plan</value></data>
-  <data name="ProfilesPage_PlanList.AutomationProperties.Name" xml:space="preserve"><value>Provisioning plan items</value></data>
-  <data name="ProfilesPage_Confirm.Content" xml:space="preserve"><value>Confirm and apply</value></data>
-  <data name="ProfilesPage_Confirm.AutomationProperties.Name" xml:space="preserve"><value>Confirm and apply the provisioning plan</value></data>
-  <data name="ProfilesPage_Resume.Content" xml:space="preserve"><value>Resume safely</value></data>
-  <data name="ProfilesPage_Resume.AutomationProperties.Name" xml:space="preserve"><value>Resume the failed provisioning operation safely</value></data>
-  <data name="ProfilesPage_ProgressRing.AutomationProperties.Name" xml:space="preserve"><value>Provisioning operation in progress</value></data>
-  <data name="ProfilesPage_StaleNote.Text" xml:space="preserve"><value>If the observed state changes before an uncompleted step, the persisted plan becomes stale and cannot be resumed. Generate a new plan instead.</value></data>
-  <data name="ProfilesPage_ErrorInfoBar.Title" xml:space="preserve"><value>Provisioning error</value></data>
-  <data name="ProfilesPage_Status.AutomationProperties.Name" xml:space="preserve"><value>Provisioning status</value></data>
-  <data name="ProfilesPage_Progress.AutomationProperties.Name" xml:space="preserve"><value>Provisioning progress</value></data>
-  <data name="ProfilesPage_CurrentComponent.AutomationProperties.Name" xml:space="preserve"><value>Current provisioning component</value></data>
-  <data name="ProfilesPage_ActionCode.AutomationProperties.Name" xml:space="preserve"><value>Planned action</value></data>
-  <data name="ProfilesPage_InstalledVersion.Text" xml:space="preserve"><value>Installed</value></data>
-  <data name="ProfilesPage_AvailableVersion.Text" xml:space="preserve"><value>Available</value></data>
-  <data name="ProfilesPage_DesiredVersion.Text" xml:space="preserve"><value>Desired</value></data>
-  <data name="ProfilesPage_StateCode.AutomationProperties.Name" xml:space="preserve"><value>Observed state</value></data>
+  <data name="WorkspacePage_Title.Text" xml:space="preserve"><value>My Workspace</value><comment>Page title.</comment></data>
+  <data name="WorkspacePage_Subtitle.Text" xml:space="preserve"><value>Build your desired state, compare it with this PC, then review and confirm changes.</value><comment>Explain that changes are reviewed before application.</comment></data>
+  <data name="WorkspacePage_ChooseHeading.Text" xml:space="preserve"><value>Workspace</value></data>
+  <data name="WorkspacePage_ProfileList.AutomationProperties.Name" xml:space="preserve"><value>Workspaces and templates</value></data>
+  <data name="WorkspacePage_GeneratePlan.Content" xml:space="preserve"><value>Generate plan</value></data>
+  <data name="WorkspacePage_GeneratePlan.AutomationProperties.Name" xml:space="preserve"><value>Generate a provisioning plan from the reviewed desired-state diff</value></data>
+  <data name="WorkspacePage_ReviewHeading.Text" xml:space="preserve"><value>3. Review and apply</value></data>
+  <data name="WorkspacePage_PlanList.AutomationProperties.Name" xml:space="preserve"><value>Provisioning plan items</value></data>
+  <data name="WorkspacePage_Confirm.Content" xml:space="preserve"><value>Confirm and apply</value></data>
+  <data name="WorkspacePage_Confirm.AutomationProperties.Name" xml:space="preserve"><value>Confirm and apply the provisioning plan</value></data>
+  <data name="WorkspacePage_Resume.Content" xml:space="preserve"><value>Resume safely</value></data>
+  <data name="WorkspacePage_Resume.AutomationProperties.Name" xml:space="preserve"><value>Resume the failed provisioning operation safely</value></data>
+  <data name="WorkspacePage_ProgressRing.AutomationProperties.Name" xml:space="preserve"><value>Provisioning operation in progress</value></data>
+  <data name="WorkspacePage_StaleNote.Text" xml:space="preserve"><value>If the observed state changes before an uncompleted step, the persisted plan becomes stale and cannot be resumed. Generate a new plan instead.</value></data>
+  <data name="WorkspacePage_ErrorInfoBar.Title" xml:space="preserve"><value>Provisioning error</value></data>
+  <data name="WorkspacePage_Status.AutomationProperties.Name" xml:space="preserve"><value>Provisioning status</value></data>
+  <data name="WorkspacePage_Progress.AutomationProperties.Name" xml:space="preserve"><value>Provisioning progress</value></data>
+  <data name="WorkspacePage_CurrentComponent.AutomationProperties.Name" xml:space="preserve"><value>Current provisioning component</value></data>
+  <data name="WorkspacePage_ActionCode.AutomationProperties.Name" xml:space="preserve"><value>Planned action</value></data>
+  <data name="WorkspacePage_InstalledVersion.Text" xml:space="preserve"><value>Installed</value></data>
+  <data name="WorkspacePage_AvailableVersion.Text" xml:space="preserve"><value>Available</value></data>
+  <data name="WorkspacePage_DesiredVersion.Text" xml:space="preserve"><value>Desired</value></data>
+  <data name="WorkspacePage_StateCode.AutomationProperties.Name" xml:space="preserve"><value>Observed state</value></data>
   <data name="NoProvisioningOperation" xml:space="preserve"><value>No provisioning operation</value></data>
   <data name="AwaitingConfirmation" xml:space="preserve"><value>Awaiting your confirmation</value></data>
   <data name="Queued" xml:space="preserve"><value>Queued</value></data>
@@ -48,7 +48,7 @@
   <data name="ResumingProvisioning" xml:space="preserve"><value>Resuming provisioning…</value></data>
   <data name="ProvisioningResumed" xml:space="preserve"><value>Provisioning resumed</value></data>
   <data name="ProvisioningCouldNotResume" xml:space="preserve"><value>Provisioning could not resume</value></data>
-  <data name="MainWindow_Profiles.Content" xml:space="preserve"><value>Profiles</value></data>
+  <data name="MainWindow_Workspace.Content" xml:space="preserve"><value>Profiles</value></data>
   <data name="MainWindow.Title" xml:space="preserve"><value>Workspace Control</value></data>
   <data name="MainWindow_Navigation.AutomationProperties.Name" xml:space="preserve"><value>Primary navigation</value></data>
   <data name="MainWindow_Overview.Content" xml:space="preserve"><value>Overview</value></data>
@@ -59,8 +59,8 @@
   <data name="MainWindow_Windows.AutomationProperties.Name" xml:space="preserve"><value>Windows</value></data>
   <data name="MainWindow_Diagnostics.Content" xml:space="preserve"><value>Diagnostics</value></data>
   <data name="MainWindow_Diagnostics.AutomationProperties.Name" xml:space="preserve"><value>Diagnostics</value></data>
-  <data name="MainWindow_Profiles.Content" xml:space="preserve"><value>Profiles</value></data>
-  <data name="MainWindow_Profiles.AutomationProperties.Name" xml:space="preserve"><value>Profiles</value></data>
+  <data name="MainWindow_Workspace.Content" xml:space="preserve"><value>Profiles</value></data>
+  <data name="MainWindow_Workspace.AutomationProperties.Name" xml:space="preserve"><value>Profiles</value></data>
   <data name="MainWindow_StatusInfoBar.Title" xml:space="preserve"><value>Workspace Control</value></data>
   <data name="MainWindow_StatusInfoBar.AutomationProperties.Name" xml:space="preserve"><value>Application error</value></data>
   <data name="OverviewPage_Title.Text" xml:space="preserve"><value>Overview</value></data>
@@ -87,18 +87,37 @@
   <data name="DiagnosticsPage_Title.Text" xml:space="preserve"><value>Diagnostics</value></data>
   <data name="DiagnosticsPage_Subtitle.Text" xml:space="preserve"><value>Provider and discovery signals collected during the latest scan.</value></data>
   <data name="DiagnosticsPage_List.AutomationProperties.Name" xml:space="preserve"><value>Diagnostics results</value></data>
-  <data name="ProfilesPage_ObserveDiff.Content" xml:space="preserve"><value>Observe and compare</value></data>
-  <data name="ProfilesPage_ObserveDiff.AutomationProperties.Name" xml:space="preserve"><value>Observe the selected profile and compare it with this PC</value></data>
-  <data name="ProfilesPage_DiffHeading.Text" xml:space="preserve"><value>2. Observe and compare</value></data>
-  <data name="ProfilesPage_DiffDescription.Text" xml:space="preserve"><value>This read-only comparison shows what the selected profile requires before a mutation plan is created.</value></data>
-  <data name="ProfilesPage_DiffList.AutomationProperties.Name" xml:space="preserve"><value>Desired-state comparison</value></data>
-  <data name="ProfilesPage_DiffObserved.Text" xml:space="preserve"><value>Observed</value></data>
-  <data name="ProfilesPage_DiffAvailable.Text" xml:space="preserve"><value>Available</value></data>
-  <data name="ProfilesPage_DiffDesired.Text" xml:space="preserve"><value>Desired</value></data>
-  <data name="ProfilesPage_DiffAction.AutomationProperties.Name" xml:space="preserve"><value>Desired-state action</value></data>
-  <data name="ProfilesPage_DiffState.AutomationProperties.Name" xml:space="preserve"><value>Desired-state state</value></data>
+  <data name="WorkspacePage_ObserveDiff.Content" xml:space="preserve"><value>Observe and compare</value></data>
+  <data name="WorkspacePage_ObserveDiff.AutomationProperties.Name" xml:space="preserve"><value>Observe the selected profile and compare it with this PC</value></data>
+  <data name="WorkspacePage_DiffHeading.Text" xml:space="preserve"><value>2. Compare with this PC</value></data>
+  <data name="WorkspacePage_DiffDescription.Text" xml:space="preserve"><value>This read-only comparison shows what your Workspace requires before a mutation plan is created.</value></data>
+  <data name="WorkspacePage_DiffList.AutomationProperties.Name" xml:space="preserve"><value>Desired-state comparison</value></data>
+  <data name="WorkspacePage_DiffObserved.Text" xml:space="preserve"><value>Observed</value></data>
+  <data name="WorkspacePage_DiffAvailable.Text" xml:space="preserve"><value>Available</value></data>
+  <data name="WorkspacePage_DiffDesired.Text" xml:space="preserve"><value>Desired</value></data>
+  <data name="WorkspacePage_DiffAction.AutomationProperties.Name" xml:space="preserve"><value>Desired-state action</value></data>
+  <data name="WorkspacePage_DiffState.AutomationProperties.Name" xml:space="preserve"><value>Desired-state state</value></data>
   <data name="ObservingDesiredState" xml:space="preserve"><value>Observing and comparing this PC…</value></data>
   <data name="DesiredStateDiffReady" xml:space="preserve"><value>Desired-state comparison ready</value></data>
   <data name="DesiredStateObservationCancelled" xml:space="preserve"><value>Desired-state observation cancelled</value></data>
   <data name="DesiredStateObservationFailed" xml:space="preserve"><value>Desired-state observation failed</value></data>
+  <data name="WorkspacePage_WorkspaceHeading.Text" xml:space="preserve"><value>My Workspace</value></data>
+  <data name="WorkspacePage_WorkspaceList.AutomationProperties.Name" xml:space="preserve"><value>Workspaces and optional templates</value></data>
+  <data name="WorkspacePage_Name.Header" xml:space="preserve"><value>Name</value></data>
+  <data name="WorkspacePage_Name.PlaceholderText" xml:space="preserve"><value>Workspace name</value></data>
+  <data name="WorkspacePage_Description.Header" xml:space="preserve"><value>Description</value></data>
+  <data name="WorkspacePage_Description.PlaceholderText" xml:space="preserve"><value>What should this Workspace manage?</value></data>
+  <data name="WorkspacePage_New.Content" xml:space="preserve"><value>New workspace</value></data>
+  <data name="WorkspacePage_New.AutomationProperties.Name" xml:space="preserve"><value>Create a new user-owned Workspace</value></data>
+  <data name="WorkspacePage_Save.Content" xml:space="preserve"><value>Save Workspace</value></data>
+  <data name="WorkspacePage_Save.AutomationProperties.Name" xml:space="preserve"><value>Save the current Workspace</value></data>
+  <data name="WorkspacePage_ApplicationsHeading.Text" xml:space="preserve"><value>Applications</value></data>
+  <data name="WorkspacePage_ApplicationSearch.PlaceholderText" xml:space="preserve"><value>Search applications</value></data>
+  <data name="WorkspacePage_ApplicationSearch.AutomationProperties.Name" xml:space="preserve"><value>Search the application catalogue</value></data>
+  <data name="WorkspacePage_ApplicationList.AutomationProperties.Name" xml:space="preserve"><value>Applications available for this Workspace</value></data>
+  <data name="WorkspacePage_ApplicationCheckBox.AutomationProperties.Name" xml:space="preserve"><value>Workspace application selection</value></data>
+  <data name="WorkspacePage_ObserveDiff.Content" xml:space="preserve"><value>Observe and compare</value></data>
+  <data name="WorkspacePage_ObserveDiff.AutomationProperties.Name" xml:space="preserve"><value>Observe the selected Workspace and compare it with this PC</value></data>
+  <data name="WorkspacePage_GeneratePlan.Content" xml:space="preserve"><value>Generate reviewable plan</value></data>
+  <data name="WorkspacePage_GeneratePlan.AutomationProperties.Name" xml:space="preserve"><value>Generate a reviewable provisioning plan from this Workspace</value></data>
 </root>
