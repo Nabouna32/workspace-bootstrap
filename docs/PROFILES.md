@@ -1,6 +1,8 @@
 # Workspace Control — Profiles and Desired State
 
-A profile is a versioned declarative description of the desired Windows workstation state. It is not merely a list of installers.
+A **Workspace** is the user's desired Windows workstation state. A **ProfileManifest** is the versioned declarative technical representation of that state. The domain term `Profile` remains valid for schemas, APIs and imported/exported documents, while the primary user-facing term is **Workspace**.
+
+A Workspace is not merely a list of installers.
 
 ## Schema versions
 
@@ -25,12 +27,14 @@ Applications reference the existing component catalog. Each application may decl
 
 The desired-state diff is now available through the shared application contract and CLI. Application items are observed from the same inventory used by provisioning planning. Registry settings are observed with explicit hive/key/value/type evidence and can now be planned as reversible mutations. Registry Apply captures the existing value before writing, persists the snapshot in the operation journal, verifies the post-condition and rolls back registry mutations if the operation fails or is cancelled. Other non-application sections remain explicit contracts and appear as blocked diff items when populated.
 
-## Local workflow
+## User-facing workflow
 
 ```text
-Import/create profile
+Open My Workspace
         ↓
-Detect machine
+Create or edit desired state
+        ↓
+Detect current machine
         ↓
 Evaluate conditions
         ↓
@@ -38,14 +42,16 @@ Observe desired-state domains
         ↓
 Compare desired vs observed state
         ↓
-Show diff
+Review changes, risk and impact
         ↓
-User confirmation
+Explicit confirmation
         ↓
-Apply operations
+Apply the persisted plan
         ↓
 Verify
 ```
+
+A predefined profile is never required. Product templates, when supplied, are optional starting points that become user-owned Workspaces after editing.
 
 ## Heterogeneous machines
 
@@ -59,4 +65,4 @@ Profiles are versioned and portable. Export serializes a validated profile to a 
 
 ## Automation
 
-Interactive profiles require confirmation. Automated application is opt-in, explicit and auditable.
+Interactive Workspaces require confirmation. Automated application is opt-in, explicit and auditable.
