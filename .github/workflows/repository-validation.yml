@@ -84,9 +84,9 @@ jobs:
           }
 
           $profilesPage = Get-Content src/WorkspaceControl.Desktop/ProfilesPage.xaml -Raw
-          if ($profilesPage -notmatch 'x:Uid="ProfilesPage_ProfileList"' -or
-              $profilesPage -notmatch 'x:Uid="ProfilesPage_PlanList"' -or
-              $profilesPage -notmatch 'x:Uid="ProfilesPage_ProgressRing"') {
+          if ($profilesPage -notmatch 'x:Uid="WorkspacePage_WorkspaceList"' -or
+              $profilesPage -notmatch 'x:Uid="WorkspacePage_PlanList"' -or
+              $profilesPage -notmatch 'x:Uid="WorkspacePage_ProgressRing"') {
             throw "ProfilesPage.xaml is missing required accessibility resource bindings."
           }
 
