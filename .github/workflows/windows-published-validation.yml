@@ -87,18 +87,87 @@ jobs:
           $pri = Join-Path $package "WorkspaceControl/WorkspaceControl.pri"
           if (-not (Test-Path $pri -PathType Leaf)) { throw "Published application PRI is missing: $pri" }
 
-          $makePri = Get-ChildItem "$env:USERPROFILE\.nuget\packages\microsoft.windows.sdk.buildtools" -Filter makepri.exe -Recurse -ErrorAction SilentlyContinue |
-            Where-Object { $_.FullName -match '\\x86\\makepri\.exe$' } |
-            Select-Object -First 1
+          $makePriCandidates = @(
+            Get-ChildItem "$env:USERPROFILE\.nuget\packages\microsoft.windows.sdk.buildtools" -Filter makepri.exe -Recurse -File -ErrorAction SilentlyContinue
+            Get-ChildItem "$env:ProgramFiles(x86)\Windows Kits\10\bin" -Filter makepri.exe -Recurse -File -ErrorAction SilentlyContinue
+          ) |
+            Where-Object { $_.FullName } |
+            Sort-Object @{
+              Expression = {
+                if ($_.FullName -match '\\x64\\makepri\.exe
+          if ($LASTEXITCODE -ne 0) { throw "MakePri dump failed with exit code $LASTEXITCODE." }
+
+      - name: Validate published package and launch smoke test
+        shell: pwsh
+        run: |
+          $diagnostics = Join-Path $env:RUNNER_TEMP "workspace-control-published-diagnostics"
+          & .\scripts\validate-published-package.ps1 -PackageRoot "$env:RUNNER_TEMP\workspace-control-published" -DiagnosticsDirectory $diagnostics
+
+      - name: Upload published package
+        uses: actions/upload-artifact@v6
+        with:
+          name: workspace-control-published-win-x64-${{ github.run_id }}
+          path: ${{ runner.temp }}/workspace-control-published
+          if-no-files-found: error
+
+      - name: Upload native crash diagnostics
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: windows-published-crash-diagnostics-${{ github.run_id }}
+          path: ${{ runner.temp }}/workspace-control-published-diagnostics
+          if-no-files-found: warn
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: windows-published-test-results-${{ github.run_id }}
+          path: '**/TestResults/*.trx'
+          if-no-files-found: warn
+) { 0 }
+                elseif ($_.FullName -match '\\x86\\makepri\.exe
+          if ($LASTEXITCODE -ne 0) { throw "MakePri dump failed with exit code $LASTEXITCODE." }
+
+      - name: Validate published package and launch smoke test
+        shell: pwsh
+        run: |
+          $diagnostics = Join-Path $env:RUNNER_TEMP "workspace-control-published-diagnostics"
+          & .\scripts\validate-published-package.ps1 -PackageRoot "$env:RUNNER_TEMP\workspace-control-published" -DiagnosticsDirectory $diagnostics
+
+      - name: Upload published package
+        uses: actions/upload-artifact@v6
+        with:
+          name: workspace-control-published-win-x64-${{ github.run_id }}
+          path: ${{ runner.temp }}/workspace-control-published
+          if-no-files-found: error
+
+      - name: Upload native crash diagnostics
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: windows-published-crash-diagnostics-${{ github.run_id }}
+          path: ${{ runner.temp }}/workspace-control-published-diagnostics
+          if-no-files-found: warn
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: windows-published-test-results-${{ github.run_id }}
+          path: '**/TestResults/*.trx'
+          if-no-files-found: warn
+) { 1 }
+                else { 2 }
+              }
+            }, FullName
+
+          $makePri = $makePriCandidates | Select-Object -First 1
           if (-not $makePri) {
-            $makePri = Get-ChildItem "$env:ProgramFiles(x86)\Windows Kits\10\bin" -Filter makepri.exe -Recurse -ErrorAction SilentlyContinue |
-              Where-Object { $_.FullName -match '\\x64\\makepri\.exe$' } |
-              Select-Object -First 1
-          }
-          if (-not $makePri) {
-            throw "MakePri.exe was not found in the restored Windows SDK BuildTools package or Windows SDK."
+            throw "MakePri.exe was not found in the restored Windows SDK BuildTools package or installed Windows SDK."
           }
 
+          Write-Host "Using MakePri.exe: $($makePri.FullName)"
           & $makePri.FullName dump /if $pri /of (Join-Path $diagnostics "WorkspaceControl.pri.xml") /o
           if ($LASTEXITCODE -ne 0) { throw "MakePri dump failed with exit code $LASTEXITCODE." }
 
