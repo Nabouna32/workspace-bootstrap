@@ -32,7 +32,19 @@ public sealed class ProvisioningEngine
     }
 
     public IReadOnlyList<ProfileManifest> Profiles() =>
-        _config.LoadProfiles().Values.OrderBy(x => x.Id).ToArray();
+        _config.LoadProfiles().Values.OrderBy(x => x.Name).ToArray();
+
+    public IReadOnlyList<ComponentManifest> ApplicationCatalog() =>
+        _config.LoadComponents().Values.OrderBy(x => x.Name).ToArray();
+
+    public ProfileManifest CreateWorkspace(
+        string name,
+        string description,
+        IReadOnlyCollection<string> componentIds) =>
+        _config.CreateWorkspace(name, description, componentIds);
+
+    public void SaveWorkspace(ProfileManifest workspace) =>
+        _config.SaveWorkspace(workspace);
 
     public async Task<DesiredStateDiff> DiffAsync(
         string profileId,
