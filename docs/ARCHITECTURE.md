@@ -35,6 +35,10 @@ Stable capabilities include `DetectApplication`, `InstallApplication`, `UpdateAp
 
 Each capability declares inputs, preconditions, risk, elevation requirement, preview, execution, postconditions and rollback metadata where available.
 
+## Product boundary
+
+The presentation layer implements the user-facing Workspace model defined by `docs/PRODUCT-EXPERIENCE.md`. Application and Infrastructure layers must not redefine that model. A `ProfileManifest` is the technical desired-state contract behind a Workspace.
+
 ## Desired state
 ```text
 Desired state + observed evidence
@@ -76,6 +80,10 @@ Plugins are planned as a controlled extension boundary for providers, diagnostic
 
 ## Future cloud
 Cloud desired state resolves into the same local engine model. There is no second implementation of Windows mutation logic.
+
+## Documentation invariant
+
+Architecture changes may change how capabilities are implemented, composed, persisted or tested. They must not silently change the user-facing Workspace, application catalogue, navigation, safety or UX model. Product-direction changes update the product/UX contract first and then the implementation.
 
 ## Technology
 C#/.NET 10, WinUI 3/Windows App SDK, Windows 11 x64 and a .NET CLI. WPF is retired; WinUI 3 is the only desktop presentation technology.
