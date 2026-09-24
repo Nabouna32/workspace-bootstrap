@@ -832,3 +832,102 @@ public sealed class InstallerEngineTests
         CollectionAssert.Contains(arguments.ToArray(), "Test.Package");
     }
 }
+
+
+[TestClass]
+public sealed class WorkspaceStoreTests
+{
+    [TestMethod]
+    public void New_workspace_is_persisted_outside_packaged_profile_directory()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var workspaceRoot = Path.Combine(
+            Path.GetTempPath(),
+            "workspace-control-workspaces",
+            Guid.NewGuid().ToString("N"));
+        var configuration = new ConfigurationStore(repositoryRoot, workspaceRoot);
+
+        var workspace = configuration.CreateWorkspace(
+            "My development workspace",
+            "User-owned desired state.",
+            ["github-cli"]);
+
+        var loaded = configuration.LoadProfiles();
+
+        Assert.IsTrue(File.Exists(Path.Combine(workspaceRoot, $"{workspace.Id}.json")));
+        Assert.IsTrue(loaded.ContainsKey(workspace.Id));
+        Assert.IsTrue(
+            workspace.DesiredState!.Applications.Any(
+                application => application.ComponentId == "github-cli"));
+        Assert.IsFalse(File.Exists(
+            Path.Combine(repositoryRoot, "bootstrap", "windows", "profiles", $"{workspace.Id}.json")));
+    }
+
+    [TestMethod]
+    public void Workspace_update_replaces_only_the_user_owned_desired_state()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var workspaceRoot = Path.Combine(
+            Path.GetTempPath(),
+            "workspace-control-workspaces",
+            Guid.NewGuid().ToString("N"));
+        var configuration = new ConfigurationStore(repositoryRoot, workspaceRoot);
+
+        var workspace = configuration.CreateWorkspace(
+            "Workspace",
+            "Initial",
+            ["github-cli"]);
+
+        var updated = workspace with
+        {
+            Name = "Updated Workspace",
+            DesiredState = workspace.DesiredState! with
+            {
+                Applications = [new ProfileApplication("vscode")]
+            }
+        };
+
+        configuration.SaveWorkspace(updated);
+
+        var loaded = configuration.LoadProfiles()[workspace.Id];
+
+        Assert.AreEqual("Updated Workspace", loaded.Name);
+        CollectionAssert.AreEqual(
+            new[] { "vscode" },
+            loaded.DesiredState!.Applications.Select(application => application.ComponentId).ToArray());
+        Assert.AreEqual(0, loaded.DesiredState.WindowsSettings.Count);
+        Assert.AreEqual(0, loaded.DesiredState.RegistrySettings.Count);
+    }
+
+    [TestMethod]
+    public void Workspace_rejects_unknown_application()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var workspaceRoot = Path.Combine(
+            Path.GetTempPath(),
+            "workspace-control-workspaces",
+            Guid.NewGuid().ToString("N"));
+        var configuration = new ConfigurationStore(repositoryRoot, workspaceRoot);
+
+        Assert.ThrowsException<InvalidOperationException>(() =>
+            configuration.CreateWorkspace(
+                "Workspace",
+                "Invalid",
+                ["does-not-exist"]));
+    }
+
+    private static string FindRepositoryRoot()
+    {
+        var current = new DirectoryInfo(AppContext.BaseDirectory);
+        while (current is not null)
+        {
+            if (File.Exists(Path.Combine(current.FullName, "bootstrap", "windows", "components", "catalog.json")))
+                return current.FullName;
+
+            current = current.Parent;
+        }
+
+        Assert.Fail("Repository content root could not be located for the workspace contract tests.");
+        return string.Empty;
+    }
+}
