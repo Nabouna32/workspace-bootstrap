@@ -40,6 +40,23 @@ jobs:
             throw "CI policy violation: unsupported runner label detected."
           }
 
+      - name: Enforce portable application storage contract
+        shell: pwsh
+        run: |
+          $forbidden = @(
+            'Environment\.GetFolderPath\(\s*Environment\.SpecialFolder\.(LocalApplicationData|ApplicationData|RoamingApplicationData|CommonApplicationData)',
+            'ApplicationData\.Current',
+            'Windows\.Storage\.ApplicationData'
+          )
+
+          $matches = Get-ChildItem src -Recurse -File -Filter '*.cs' |
+            Select-String -Pattern $forbidden
+
+          if ($matches) {
+            $matches | ForEach-Object { $_.ToString() } | Write-Error
+            throw "CI policy violation: application-owned code introduced hidden per-user persistence."
+          }
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
