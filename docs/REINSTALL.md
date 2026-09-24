@@ -2,10 +2,10 @@
 
 Workspace Control is designed to remain useful after Windows maintenance or a fresh installation.
 
-Important user-controlled data includes profiles, exported configuration, retained cache artifacts and selected operation history.
+Important user-controlled data includes Workspaces, profiles, exported configuration, retained cache artifacts and selected operation history. These application-owned data live under the portable application root rather than a hidden AppData location.
 
 ## Before reinstalling Windows
-Export or copy the profiles and cache artifacts you want to preserve.
+Back up or copy the portable Workspace Control directory if you want to preserve its local Workspaces, configuration, cache and state. Export profiles when you want a portable document independent of the application directory.
 
 ## After reinstalling
 1. Install/restore Workspace Control.
