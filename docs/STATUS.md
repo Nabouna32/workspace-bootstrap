@@ -50,12 +50,11 @@ The backend desired-state/provisioning foundations exist, but the current WinUI 
 2. Build the first-class Applications catalogue and management experience.
 3. Replace implementation-centric profile selection UX with user-owned Workspace creation/editing while preserving the existing safe provisioning lifecycle.
 4. Execute and document real Windows 11 UI validation: navigation, localization, keyboard/focus, accessibility, DPI/scaling, long-running states, stale recovery, error presentation and visual clarity.
-5. Strengthen software inventory/provider contracts and update/removal semantics.
-3. Replace remaining infrastructure composition with a testable dependency-injection/composition strategy where it materially improves lifetime management.
-4. Complete Windows administration, policy, diagnostics, driver and WSL capability boundaries.
-5. Build richer desired-state diff presentation and risk/reversibility metadata.
-6. Harden verified installer reuse, artifact retention and integrity verification.
-7. Remove remaining historical names/dead documentation as each boundary becomes authoritative.
+6. Replace remaining infrastructure composition with a testable dependency-injection/composition strategy where it materially improves lifetime management.
+7. Complete Windows administration, policy, diagnostics, driver and WSL capability boundaries.
+8. Build richer desired-state diff presentation and risk/reversibility metadata.
+9. Harden verified installer reuse, artifact retention and integrity verification.
+10. Remove remaining historical names/dead documentation as each boundary becomes authoritative.
 
 ## Reusable foundations
 - inventory providers and evidence/ownership;
