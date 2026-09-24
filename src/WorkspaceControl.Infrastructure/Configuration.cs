@@ -240,7 +240,7 @@ public sealed class ConfigurationStore
         }
     }
 
-    private static void ValidateWorkspace(ProfileManifest workspace)
+    private void ValidateWorkspace(ProfileManifest workspace)
     {
         ValidateProfile(workspace, $"{workspace.Id}.json");
 
