@@ -49,7 +49,7 @@
                         <TextBox
                             x:Name="WorkspaceDescriptionBox"
                             x:Uid="WorkspacePage_Description"
-                            Text="{Binding WorkspaceDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Text="{Binding WorkspaceDescription, Mode=TwoWay}"
                             Grid.Column="1"
                             TextWrapping="Wrap" />
                     </Grid>
