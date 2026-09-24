@@ -4,8 +4,6 @@
   <data name="WorkspacePage_Subtitle.Text" xml:space="preserve"><value>Build your desired state, compare it with this PC, then review and confirm changes.</value><comment>Explain that changes are reviewed before application.</comment></data>
   <data name="WorkspacePage_ChooseHeading.Text" xml:space="preserve"><value>Workspace</value></data>
   <data name="WorkspacePage_ProfileList.AutomationProperties.Name" xml:space="preserve"><value>Workspaces and templates</value></data>
-  <data name="WorkspacePage_GeneratePlan.Content" xml:space="preserve"><value>Generate plan</value></data>
-  <data name="WorkspacePage_GeneratePlan.AutomationProperties.Name" xml:space="preserve"><value>Generate a provisioning plan from the reviewed desired-state diff</value></data>
   <data name="WorkspacePage_ReviewHeading.Text" xml:space="preserve"><value>3. Review and apply</value></data>
   <data name="WorkspacePage_PlanList.AutomationProperties.Name" xml:space="preserve"><value>Provisioning plan items</value></data>
   <data name="WorkspacePage_Confirm.Content" xml:space="preserve"><value>Confirm and apply</value></data>
@@ -48,7 +46,7 @@
   <data name="ResumingProvisioning" xml:space="preserve"><value>Resuming provisioning…</value></data>
   <data name="ProvisioningResumed" xml:space="preserve"><value>Provisioning resumed</value></data>
   <data name="ProvisioningCouldNotResume" xml:space="preserve"><value>Provisioning could not resume</value></data>
-  <data name="MainWindow_Workspace.Content" xml:space="preserve"><value>Profiles</value></data>
+  <data name="MainWindow_Workspace.Content" xml:space="preserve"><value>My Workspace</value></data>
   <data name="MainWindow.Title" xml:space="preserve"><value>Workspace Control</value></data>
   <data name="MainWindow_Navigation.AutomationProperties.Name" xml:space="preserve"><value>Primary navigation</value></data>
   <data name="MainWindow_Overview.Content" xml:space="preserve"><value>Overview</value></data>
@@ -59,7 +57,7 @@
   <data name="MainWindow_Windows.AutomationProperties.Name" xml:space="preserve"><value>Windows</value></data>
   <data name="MainWindow_Diagnostics.Content" xml:space="preserve"><value>Diagnostics</value></data>
   <data name="MainWindow_Diagnostics.AutomationProperties.Name" xml:space="preserve"><value>Diagnostics</value></data>
-  <data name="MainWindow_Workspace.Content" xml:space="preserve"><value>Profiles</value></data>
+
   <data name="MainWindow_Workspace.AutomationProperties.Name" xml:space="preserve"><value>Profiles</value></data>
   <data name="MainWindow_StatusInfoBar.Title" xml:space="preserve"><value>Workspace Control</value></data>
   <data name="MainWindow_StatusInfoBar.AutomationProperties.Name" xml:space="preserve"><value>Application error</value></data>
@@ -87,8 +85,6 @@
   <data name="DiagnosticsPage_Title.Text" xml:space="preserve"><value>Diagnostics</value></data>
   <data name="DiagnosticsPage_Subtitle.Text" xml:space="preserve"><value>Provider and discovery signals collected during the latest scan.</value></data>
   <data name="DiagnosticsPage_List.AutomationProperties.Name" xml:space="preserve"><value>Diagnostics results</value></data>
-  <data name="WorkspacePage_ObserveDiff.Content" xml:space="preserve"><value>Observe and compare</value></data>
-  <data name="WorkspacePage_ObserveDiff.AutomationProperties.Name" xml:space="preserve"><value>Observe the selected profile and compare it with this PC</value></data>
   <data name="WorkspacePage_DiffHeading.Text" xml:space="preserve"><value>2. Compare with this PC</value></data>
   <data name="WorkspacePage_DiffDescription.Text" xml:space="preserve"><value>This read-only comparison shows what your Workspace requires before a mutation plan is created.</value></data>
   <data name="WorkspacePage_DiffList.AutomationProperties.Name" xml:space="preserve"><value>Desired-state comparison</value></data>
