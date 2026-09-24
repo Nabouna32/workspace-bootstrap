@@ -287,7 +287,7 @@ public sealed class ConfigurationTests
         try
         {
             var registry = new RegistryDesiredStateObserver(
-                new FakeRegistryReader(new RegistryObservation(false, null, null, null)));
+                new FakeRegistryReader(new RegistryObservation(true, "0", "dword", null)));
             var engine = new ProvisioningEngine(
                 configuration,
                 new InstallerEngine(paths),
@@ -298,7 +298,7 @@ public sealed class ConfigurationTests
 
             var diff = await engine.DiffAsync("registry-only");
             var diffItem = diff.Items.Single(item => item.Domain == DesiredStateDomainCodes.RegistrySetting);
-            Assert.AreEqual(ProvisioningStateCodes.Missing, diffItem.StateCode);
+            Assert.AreEqual(ProvisioningStateCodes.Drifted, diffItem.StateCode);
             Assert.AreEqual(ProvisioningActionCodes.Set, diffItem.ActionCode);
             StringAssert.Contains(diffItem.Message, "will be updated after explicit confirmation");
 
