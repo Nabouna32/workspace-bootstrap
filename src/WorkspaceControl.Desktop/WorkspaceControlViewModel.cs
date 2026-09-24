@@ -125,6 +125,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public ObservableCollection<string> Diagnostics { get; } = [];
     public ObservableCollection<ProfileManifest> Profiles { get; } = [];
     public ObservableCollection<WorkspaceApplicationOption> ApplicationOptions { get; } = [];
+    public ObservableCollection<WorkspaceApplicationOption> VisibleApplicationOptions { get; } = [];
     public ObservableCollection<DesiredStateDiffItem> DesiredStateDiffItems { get; } = [];
 
     public string? SelectedWorkspaceId
@@ -212,6 +213,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
                     component.Name,
                     component.Source));
             }
+
+            SetApplicationSearchText(string.Empty);
 
             var selected = Profiles.FirstOrDefault(profile =>
                 string.Equals(profile.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase))
@@ -353,11 +356,18 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public void SetApplicationSearchText(string value)
     {
         ApplicationSearchText = value ?? string.Empty;
+        VisibleApplicationOptions.Clear();
+
         foreach (var option in ApplicationOptions)
-            option.IsVisible = string.IsNullOrWhiteSpace(ApplicationSearchText)
+        {
+            if (string.IsNullOrWhiteSpace(ApplicationSearchText)
                 || option.Name.Contains(ApplicationSearchText, StringComparison.OrdinalIgnoreCase)
                 || option.ComponentId.Contains(ApplicationSearchText, StringComparison.OrdinalIgnoreCase)
-                || option.Source?.Contains(ApplicationSearchText, StringComparison.OrdinalIgnoreCase) == true;
+                || option.Source?.Contains(ApplicationSearchText, StringComparison.OrdinalIgnoreCase) == true)
+            {
+                VisibleApplicationOptions.Add(option);
+            }
+        }
     }
 
     public void CreateBlankWorkspace()
