@@ -58,7 +58,6 @@
   <data name="MainWindow_Diagnostics.Content" xml:space="preserve"><value>Diagnostics</value></data>
   <data name="MainWindow_Diagnostics.AutomationProperties.Name" xml:space="preserve"><value>Diagnostics</value></data>
 
-  <data name="MainWindow_Workspace.AutomationProperties.Name" xml:space="preserve"><value>Profils</value></data>
   <data name="MainWindow_StatusInfoBar.Title" xml:space="preserve"><value>Workspace Control</value></data>
   <data name="MainWindow_StatusInfoBar.AutomationProperties.Name" xml:space="preserve"><value>Erreur de l’application</value></data>
   <data name="OverviewPage_Title.Text" xml:space="preserve"><value>Vue d’ensemble</value></data>
@@ -71,8 +70,6 @@
   <data name="OverviewPage_ProgressRing.AutomationProperties.Name" xml:space="preserve"><value>Actualisation des informations système</value></data>
   <data name="OverviewPage_Refresh.Content" xml:space="preserve"><value>Actualiser</value></data>
   <data name="OverviewPage_Refresh.AutomationProperties.Name" xml:space="preserve"><value>Actualiser les informations système</value></data>
-  <data name="SoftwarePage_Title.Text" xml:space="preserve"><value>Logiciels</value></data>
-  <data name="SoftwarePage_Subtitle.Text" xml:space="preserve"><value>Inventaire d’abord. Les actions viennent après les preuves.</value></data>
   <data name="SoftwarePage_Refresh.Content" xml:space="preserve"><value>Actualiser l’inventaire</value></data>
   <data name="SoftwarePage_Refresh.AutomationProperties.Name" xml:space="preserve"><value>Actualiser l’inventaire logiciel</value></data>
   <data name="SoftwarePage_ProgressRing.AutomationProperties.Name" xml:space="preserve"><value>Actualisation de l’inventaire logiciel</value></data>
@@ -124,4 +121,22 @@
   <data name="WorkspaceCreationFailed" xml:space="preserve"><value>Échec de la création du Workspace</value></data>
   <data name="WorkspaceSaveFailed" xml:space="preserve"><value>Impossible d’enregistrer le Workspace</value></data>
   <data name="WorkspaceNameRequired" xml:space="preserve"><value>Saisissez un nom de Workspace avant l’enregistrement.</value></data>
+  <data name="SoftwarePage_Title.Text" xml:space="preserve"><value>Applications</value></data>
+  <data name="SoftwarePage_Subtitle.Text" xml:space="preserve"><value>Recherchez dans le catalogue, comprenez les preuves disponibles et ajoutez les applications prises en charge à Mon Workspace.</value></data>
+  <data name="SoftwarePage_Search.PlaceholderText" xml:space="preserve"><value>Rechercher des applications</value></data>
+  <data name="SoftwarePage_Search.AutomationProperties.Name" xml:space="preserve"><value>Rechercher dans le catalogue d’applications</value></data>
+  <data name="SoftwarePage_Filter.Header" xml:space="preserve"><value>Afficher</value></data>
+  <data name="SoftwarePage_FilterAll.Content" xml:space="preserve"><value>Toutes</value></data>
+  <data name="SoftwarePage_FilterInstalled.Content" xml:space="preserve"><value>Installées</value></data>
+  <data name="SoftwarePage_FilterUpdates.Content" xml:space="preserve"><value>Mises à jour</value></data>
+  <data name="SoftwarePage_FilterAvailable.Content" xml:space="preserve"><value>Disponibles</value></data>
+  <data name="SoftwarePage_Results.AutomationProperties.Name" xml:space="preserve"><value>Résultats du catalogue d’applications</value></data>
+  <data name="SoftwarePage_InstalledVersion.Text" xml:space="preserve"><value>Installée</value></data>
+  <data name="SoftwarePage_AvailableVersion.Text" xml:space="preserve"><value>Disponible</value></data>
+  <data name="SoftwarePage_State.AutomationProperties.Name" xml:space="preserve"><value>État de l’application</value></data>
+  <data name="SoftwarePage_Action.AutomationProperties.Name" xml:space="preserve"><value>Action disponible</value></data>
+  <data name="SoftwarePage_AddToWorkspace.Content" xml:space="preserve"><value>Ajouter à Mon Workspace</value></data>
+  <data name="SoftwarePage_AddToWorkspace.AutomationProperties.Name" xml:space="preserve"><value>Ajouter cette application à Mon Workspace</value></data>
+  <data name="ApplicationAddedToWorkspace" xml:space="preserve"><value>Application ajoutée à Mon Workspace</value></data>
+  <data name="MainWindow_Workspace.AutomationProperties.Name" xml:space="preserve"><value>Mon Workspace</value></data>
 </root>
