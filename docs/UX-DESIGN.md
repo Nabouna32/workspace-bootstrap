@@ -13,9 +13,10 @@ Make difficult Windows administration feel simple, calm, modern and trustworthy 
 - WSL
 - Diagnostics
 - Cleanup
-- Profiles
-- Cache / Offline
+- My Workspace
 - Settings
+
+The navigation is organized around user goals, not internal engine components. Advanced surfaces may expose inventory, providers, policies, registry evidence, services, operations, logs and plugin diagnostics.
 
 Advanced surfaces can expose inventory, providers, policies, registry evidence, services, operations, logs and plugin diagnostics.
 
@@ -49,8 +50,13 @@ Never use color alone to communicate state.
 ## Progressive disclosure
 Every mutation starts with: what, why, scope, risk, reversibility and restart impact. Technical implementation, registry/policy paths, provider details and logs are one step deeper.
 
+## My Workspace
+The user-facing desired-state editor is **My Workspace**. Users build their own desired state by selecting and checking/unchecking applications, Windows settings, optimizations and other supported capabilities. A predefined profile is never required. Product-supplied profiles are optional editable templates.
+
+The technical model remains a versioned `ProfileManifest`; the word Profile is primarily used in domain, file-format and API contexts.
+
 ## Desired-state review
-Profiles use progressive disclosure in an explicit sequence: choose profile → observe and compare → review the generated plan → confirm → apply → verify. The observation/diff step is read-only and must show observed, available and desired values where applicable. Unsupported desired-state domains are visible as blocked comparison items rather than silently omitted.
+The primary sequence is: My Workspace → observe current PC → compare → review changes → confirm → apply → verify. Observation and comparison are read-only. The review shows satisfied, changed, blocked and unknown items and exposes observed, available and desired values where applicable. Unsupported desired-state domains are visible as blocked comparison items rather than silently omitted.
 
 ## Operations
 Long operations show current step, progress where measurable, affected item, elapsed time, cancellation, details and recovery status. The UI must never leave the user unsure whether work is still running.
