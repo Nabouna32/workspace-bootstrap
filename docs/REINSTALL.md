@@ -16,4 +16,4 @@ Back up or copy the portable Workspace Control directory if you want to preserve
 6. Confirm the desired operations.
 7. Apply and verify.
 
-The final packaging design must not assume that mutable application state can safely live inside a protected Program Files directory.
+The supported release artifact is a portable, unpackaged package. It must be extracted or copied to a location where the user can write. Workspace Control must not silently redirect writes to AppData when the selected portable root is protected or read-only.
