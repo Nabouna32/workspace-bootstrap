@@ -712,7 +712,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(HomeProvisioningDisplay));
     }
 
-    private void OnPropertyChanged(string propertyName) =>
+    private void OnPropertyChanged(string? propertyName) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
     private bool SetField<T>(
