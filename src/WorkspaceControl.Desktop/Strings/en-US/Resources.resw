@@ -60,7 +60,7 @@
 
   <data name="MainWindow_StatusInfoBar.Title" xml:space="preserve"><value>Workspace Control</value></data>
   <data name="MainWindow_StatusInfoBar.AutomationProperties.Name" xml:space="preserve"><value>Application error</value></data>
-  <data name="OverviewPage_Title.Text" xml:space="preserve"><value>Overview</value></data>
+  <data name="OverviewPage_Title.Text" xml:space="preserve"><value>Home</value></data>
   <data name="OverviewPage_Subtitle.Text" xml:space="preserve"><value>Your PC at a glance: health, updates, applications, workspace activity and what needs attention.</value></data>
   <data name="OverviewPage_WindowsCard.Text" xml:space="preserve"><value>Windows</value></data>
   <data name="OverviewPage_HardwareCard.Text" xml:space="preserve"><value>Hardware</value></data>
