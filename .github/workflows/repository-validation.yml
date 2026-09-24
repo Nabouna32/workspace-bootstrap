@@ -79,7 +79,7 @@ jobs:
             )
             'docs/DECISIONS.md' = @(
               'repository history',
-              'do not invent',
+              'do not invent them',
               'Anti-drift rule'
             )
             'docs/ARCHITECTURE.md' = @(
