@@ -49,8 +49,8 @@
   <data name="MainWindow_Workspace.Content" xml:space="preserve"><value>My Workspace</value></data>
   <data name="MainWindow.Title" xml:space="preserve"><value>Workspace Control</value></data>
   <data name="MainWindow_Navigation.AutomationProperties.Name" xml:space="preserve"><value>Primary navigation</value></data>
-  <data name="MainWindow_Overview.Content" xml:space="preserve"><value>Overview</value></data>
-  <data name="MainWindow_Overview.AutomationProperties.Name" xml:space="preserve"><value>Overview</value></data>
+  <data name="MainWindow_Overview.Content" xml:space="preserve"><value>Home</value></data>
+  <data name="MainWindow_Overview.AutomationProperties.Name" xml:space="preserve"><value>Home control center</value></data>
   <data name="MainWindow_Software.Content" xml:space="preserve"><value>Software</value></data>
   <data name="MainWindow_Software.AutomationProperties.Name" xml:space="preserve"><value>Software</value></data>
   <data name="MainWindow_Windows.Content" xml:space="preserve"><value>Windows</value></data>
@@ -61,12 +61,35 @@
   <data name="MainWindow_StatusInfoBar.Title" xml:space="preserve"><value>Workspace Control</value></data>
   <data name="MainWindow_StatusInfoBar.AutomationProperties.Name" xml:space="preserve"><value>Application error</value></data>
   <data name="OverviewPage_Title.Text" xml:space="preserve"><value>Overview</value></data>
-  <data name="OverviewPage_Subtitle.Text" xml:space="preserve"><value>A clear view of this Windows 11 PC.</value></data>
+  <data name="OverviewPage_Subtitle.Text" xml:space="preserve"><value>Your PC at a glance: health, updates, applications, workspace activity and what needs attention.</value></data>
   <data name="OverviewPage_WindowsCard.Text" xml:space="preserve"><value>Windows</value></data>
   <data name="OverviewPage_HardwareCard.Text" xml:space="preserve"><value>Hardware</value></data>
   <data name="OverviewPage_SoftwareCard.Text" xml:space="preserve"><value>Software</value></data>
   <data name="OverviewPage_DetectedEntries.Text" xml:space="preserve"><value>Detected entries</value></data>
-  <data name="OverviewPage_StatusHeading.Text" xml:space="preserve"><value>System status</value></data>
+    <data name="OverviewPage_HealthHeading.Text" xml:space="preserve"><value>System health</value></data>
+  <data name="OverviewPage_HealthDescription.Text" xml:space="preserve"><value>Green means the latest observations are healthy. Warnings and errors explain where attention is needed.</value></data>
+  <data name="OverviewPage_UpdatesCard.Text" xml:space="preserve"><value>Updates</value></data>
+  <data name="OverviewPage_UpdatesHint.Text" xml:space="preserve"><value>applications with updates</value></data>
+  <data name="OverviewPage_ApplicationsCard.Text" xml:space="preserve"><value>Applications</value></data>
+  <data name="OverviewPage_ApplicationsHint.Text" xml:space="preserve"><value>installed catalogue entries</value></data>
+  <data name="OverviewPage_AvailableCard.Text" xml:space="preserve"><value>Available</value></data>
+  <data name="OverviewPage_AvailableHint.Text" xml:space="preserve"><value>catalogue entries not installed</value></data>
+  <data name="OverviewPage_DiagnosticsCard.Text" xml:space="preserve"><value>Diagnostics</value></data>
+  <data name="OverviewPage_DiagnosticsHint.Text" xml:space="preserve"><value>signals requiring review</value></data>
+  <data name="OverviewPage_WorkspaceHeading.Text" xml:space="preserve"><value>My Workspace</value></data>
+  <data name="OverviewPage_WorkspaceHint.Text" xml:space="preserve"><value>Your desired state stays separate from machine changes until you explicitly review and confirm a plan.</value></data>
+  <data name="OverviewPage_WorkspaceAction.Content" xml:space="preserve"><value>Open My Workspace</value></data>
+  <data name="OverviewPage_ActivityHeading.Text" xml:space="preserve"><value>Recent operation</value></data>
+  <data name="OverviewPage_ActivityAction.Content" xml:space="preserve"><value>Review operation</value></data>
+  <data name="OverviewPage_QuickActionsHeading.Text" xml:space="preserve"><value>Quick actions</value></data>
+  <data name="OverviewPage_ApplicationsAction.Content" xml:space="preserve"><value>Applications</value></data>
+  <data name="OverviewPage_WorkspaceQuickAction.Content" xml:space="preserve"><value>My Workspace</value></data>
+  <data name="OverviewPage_DiagnosticsAction.Content" xml:space="preserve"><value>Diagnostics</value></data>
+  <data name="HomeHealthHealthy" xml:space="preserve"><value>Healthy</value></data>
+  <data name="HomeHealthAttention" xml:space="preserve"><value>Needs attention</value></data>
+  <data name="HomeHealthError" xml:space="preserve"><value>Error</value></data>
+  <data name="HomeNoWorkspace" xml:space="preserve"><value>No Workspace selected</value></data>
+<data name="OverviewPage_StatusHeading.Text" xml:space="preserve"><value>System status</value></data>
   <data name="OverviewPage_ProgressRing.AutomationProperties.Name" xml:space="preserve"><value>Refreshing system information</value></data>
   <data name="OverviewPage_Refresh.Content" xml:space="preserve"><value>Refresh</value></data>
   <data name="OverviewPage_Refresh.AutomationProperties.Name" xml:space="preserve"><value>Refresh system information</value></data>

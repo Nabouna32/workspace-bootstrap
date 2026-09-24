@@ -121,6 +121,35 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public string CpuCoresDisplay => Baseline is null ? "—" : $"{Baseline.CpuCores} logical cores";
     public string UptimeDisplay => Baseline is null ? "—" : $"{Baseline.UptimeHours:F1} hours uptime";
     public string SoftwareCountDisplay => $"{SoftwareItems.Count} detected entries";
+    public int ApplicationInstalledCount => ApplicationCatalogItems.Count(item => item.IsInstalled);
+    public int ApplicationUpdatesCount => ApplicationCatalogItems.Count(item => item.IsUpdateAvailable);
+    public int ApplicationAvailableCount => ApplicationCatalogItems.Count(item => !item.IsInstalled);
+    public int DiagnosticCount => Diagnostics.Count;
+    public string HomeHealthCode
+    {
+        get
+        {
+            if (HasError || IsProvisioningFailed || IsProvisioningStale)
+                return "ERROR";
+
+            if (DiagnosticCount > 0 || ApplicationUpdatesCount > 0)
+                return "WARNING";
+
+            return "HEALTHY";
+        }
+    }
+    public string HomeHealthDisplay => HomeHealthCode switch
+    {
+        "ERROR" => _localizer.Get("HomeHealthError"),
+        "WARNING" => _localizer.Get("HomeHealthAttention"),
+        _ => _localizer.Get("HomeHealthHealthy")
+    };
+    public string HomeWorkspaceDisplay => HasSelectedWorkspace
+        ? WorkspaceName
+        : _localizer.Get("HomeNoWorkspace");
+    public string HomeProvisioningDisplay => ProvisioningOperation is null
+        ? _localizer.Get("NoProvisioningOperation")
+        : ProvisioningStatusDisplay;
     public bool HasError => !string.IsNullOrWhiteSpace(Error);
 
     public ObservableCollection<SoftwareItem> SoftwareItems { get; } = [];
@@ -193,6 +222,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
                 return;
 
             OnPropertyChanged(nameof(HasError));
+            NotifyHomeDashboardChanged();
         }
     }
 
@@ -259,6 +289,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             foreach (var diagnostic in software.Diagnostics)
                 Diagnostics.Add(diagnostic);
 
+            NotifyHomeDashboardChanged();
             Status = _localizer.Format("ReadySoftwareEntriesFormat", SoftwareItems.Count);
         }
         catch (OperationCanceledException)
@@ -656,8 +687,23 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         return operation is not null;
     }
 
-    private void SetProvisioningOperation(ProvisioningOperation? operation) =>
+    private void SetProvisioningOperation(ProvisioningOperation? operation)
+    {
         ProvisioningOperation = operation;
+        NotifyHomeDashboardChanged();
+    }
+
+    private void NotifyHomeDashboardChanged()
+    {
+        OnPropertyChanged(nameof(ApplicationInstalledCount));
+        OnPropertyChanged(nameof(ApplicationUpdatesCount));
+        OnPropertyChanged(nameof(ApplicationAvailableCount));
+        OnPropertyChanged(nameof(DiagnosticCount));
+        OnPropertyChanged(nameof(HomeHealthCode));
+        OnPropertyChanged(nameof(HomeHealthDisplay));
+        OnPropertyChanged(nameof(HomeWorkspaceDisplay));
+        OnPropertyChanged(nameof(HomeProvisioningDisplay));
+    }
 
     private void OnPropertyChanged(string propertyName) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
