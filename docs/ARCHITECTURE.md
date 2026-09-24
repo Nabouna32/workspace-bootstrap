@@ -72,6 +72,26 @@ ProvisioningOperation stores the exact ProvisioningPlan that the user confirmed.
 ## Privilege boundary
 The normal UI runs unelevated. A small privileged component accepts a narrow structured command contract and validates all arguments. An explicitly elevated application session may be offered as a convenience but is not the security foundation.
 
+## Application-owned storage
+
+Workspace Control is a portable, self-contained, unpackaged application. Application-owned mutable data stays under the explicit portable application root derived from `AppContext.BaseDirectory`.
+
+The application-owned layout is:
+```text
+<portable application root>/
+├── workspaces/
+├── cache/
+│   ├── installers/
+│   ├── metadata/
+│   └── staging/
+├── state/
+└── logs/
+```
+
+Packaged `bootstrap/windows` resources remain application content/read-only inputs. Tests and controlled composition may inject an isolated root.
+
+Infrastructure must not introduce hidden AppData or Registry persistence for Workspace Control's own state. Windows stores remain valid when they are the target system being observed or managed. See `docs/PORTABILITY.md` and `docs/DECISIONS.md`.
+
 ## Cache
 Installer artifacts are staged and verified before use. A verified artifact is reused when it already matches the requested current version; there is no cache-only/offline provisioning mode. Failed downloads never invalidate valid artifacts.
 
