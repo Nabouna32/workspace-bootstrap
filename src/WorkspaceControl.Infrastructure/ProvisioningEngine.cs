@@ -1006,7 +1006,7 @@ public sealed class ProvisioningEngine
                 desired.Value,
                 matches
                     ? "Registry value matches the desired state."
-                    : "Registry value differs from the desired state. Registry mutation is not enabled yet."));
+                    : "Registry value differs from the desired state and will be updated after explicit confirmation."));
         }
     }
 
