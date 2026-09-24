@@ -9,7 +9,7 @@ public sealed partial class ProfilesPage : Page
 {
     private readonly WorkspaceControlViewModel _viewModel;
     private readonly DispatcherQueueTimer _pollTimer;
-    private ProfileManifest? _selectedProfile;
+    private ProfileManifest? _selectedWorkspace;
 
     public ProfilesPage()
     {
@@ -18,7 +18,7 @@ public sealed partial class ProfilesPage : Page
         DataContext = _viewModel;
 
         _pollTimer = DispatcherQueue.GetForCurrentThread()?.CreateTimer()
-            ?? throw new InvalidOperationException("The provisioning page must be created on the UI thread.");
+            ?? throw new InvalidOperationException("The Workspace page must be created on the UI thread.");
         _pollTimer.Interval = TimeSpan.FromMilliseconds(750);
         _pollTimer.Tick += PollTimer_Tick;
 
@@ -28,42 +28,80 @@ public sealed partial class ProfilesPage : Page
 
     private void ProfilesPage_Loaded(object sender, RoutedEventArgs e)
     {
+        if (_viewModel.SelectedWorkspaceId is not null)
+        {
+            WorkspaceList.SelectedItem = _viewModel.Profiles.FirstOrDefault(profile =>
+                string.Equals(
+                    profile.Id,
+                    _viewModel.SelectedWorkspaceId,
+                    StringComparison.OrdinalIgnoreCase));
+        }
+
+        ApplicationSearchBox.Text = _viewModel.ApplicationSearchText;
+
         if (_viewModel.IsProvisioningActive)
             _pollTimer.Start();
 
-        UpdateCreatePlanButton();
+        UpdateButtons();
     }
 
     private void ProfilesPage_Unloaded(object sender, RoutedEventArgs e) =>
         _pollTimer.Stop();
 
-    private void ProfileList_SelectionChanged(
+    private void WorkspaceList_SelectionChanged(
         object sender,
         SelectionChangedEventArgs e)
     {
-        _selectedProfile = ProfileList.SelectedItem as ProfileManifest;
-        _viewModel.ClearDesiredStateDiff();
-        UpdateCreatePlanButton();
+        _selectedWorkspace = WorkspaceList.SelectedItem as ProfileManifest;
+        if (_selectedWorkspace is not null)
+            _viewModel.SelectWorkspace(_selectedWorkspace.Id);
+
+        UpdateButtons();
     }
+
+    private void NewWorkspaceButton_Click(object sender, RoutedEventArgs e)
+    {
+        _viewModel.CreateBlankWorkspace();
+        WorkspaceList.SelectedItem = _viewModel.Profiles.LastOrDefault();
+        UpdateButtons();
+    }
+
+    private void SaveWorkspaceButton_Click(object sender, RoutedEventArgs e)
+    {
+        _viewModel.SaveWorkspace();
+
+        WorkspaceList.SelectedItem = _viewModel.Profiles.FirstOrDefault(profile =>
+            string.Equals(
+                profile.Id,
+                _viewModel.SelectedWorkspaceId,
+                StringComparison.OrdinalIgnoreCase));
+
+        UpdateButtons();
+    }
+
+    private void ApplicationSearchBox_TextChanged(
+        object sender,
+        TextChangedEventArgs e) =>
+        _viewModel.SetApplicationSearchText(ApplicationSearchBox.Text);
 
     private async void ObserveDiffButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_selectedProfile is null)
+        if (_selectedWorkspace is null)
             return;
 
         ObserveDiffButton.IsEnabled = false;
-        await _viewModel.ObserveDesiredStateAsync(_selectedProfile.Id);
-        UpdateCreatePlanButton();
+        await _viewModel.ObserveDesiredStateAsync(_selectedWorkspace.Id);
+        UpdateButtons();
     }
 
     private async void CreatePlanButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_selectedProfile is null)
+        if (_selectedWorkspace is null)
             return;
 
         CreatePlanButton.IsEnabled = false;
-        await _viewModel.CreateProvisioningAsync(_selectedProfile.Id);
-        UpdateCreatePlanButton();
+        await _viewModel.CreateProvisioningAsync(_selectedWorkspace.Id);
+        UpdateButtons();
     }
 
     private void ConfirmButton_Click(object sender, RoutedEventArgs e)
@@ -93,20 +131,19 @@ public sealed partial class ProfilesPage : Page
         else
             _pollTimer.Stop();
 
-        UpdateCreatePlanButton();
+        UpdateButtons();
     }
 
-    private void UpdateCreatePlanButton()
+    private void UpdateButtons()
     {
         var canInteract =
-            _selectedProfile is not null &&
+            _selectedWorkspace is not null &&
             !_viewModel.IsBusy &&
             !_viewModel.IsProvisioningActive;
 
         ObserveDiffButton.IsEnabled = canInteract;
         CreatePlanButton.IsEnabled =
             canInteract &&
-            _selectedProfile is not null &&
-            _viewModel.HasDesiredStateDiffFor(_selectedProfile.Id);
+            _viewModel.HasDesiredStateDiffFor(_selectedWorkspace?.Id ?? string.Empty);
     }
 }
