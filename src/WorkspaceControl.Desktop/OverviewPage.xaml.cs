@@ -13,4 +13,13 @@ public sealed partial class OverviewPage : Page
 
     private async void Refresh_Click(object sender, RoutedEventArgs e) =>
         await ((WorkspaceControlViewModel)DataContext).RefreshAsync();
+
+    private void Applications_Click(object sender, RoutedEventArgs e) =>
+        Frame.Navigate(typeof(SoftwarePage));
+
+    private void Workspace_Click(object sender, RoutedEventArgs e) =>
+        Frame.Navigate(typeof(ProfilesPage));
+
+    private void Diagnostics_Click(object sender, RoutedEventArgs e) =>
+        Frame.Navigate(typeof(DiagnosticsPage));
 }

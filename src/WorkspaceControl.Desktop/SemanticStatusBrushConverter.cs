@@ -17,13 +17,16 @@ public sealed class SemanticStatusBrushConverter : IValueConverter
                 "INSTALL" or "UPDATE" or "SET" => "AccentFillColorDefaultBrush",
                 "BLOCKED" => "SystemFillColorCautionBrush",
                 "NONE" => "SystemFillColorSuccessBrush",
+                "HEALTHY" => "SystemFillColorSuccessBrush",
+                "WARNING" => "SystemFillColorCautionBrush",
+                "ERROR" => "SystemFillColorCriticalBrush",
                 _ => "TextFillColorSecondaryBrush"
             }
             : code switch
             {
-                "INSTALLED" => "SystemFillColorSuccessBrush",
+                "INSTALLED" or "HEALTHY" => "SystemFillColorSuccessBrush",
                 "ERROR" => "SystemFillColorCriticalBrush",
-                "UNKNOWN" or "BLOCKED" => "SystemFillColorCautionBrush",
+                "UNKNOWN" or "BLOCKED" or "WARNING" => "SystemFillColorCautionBrush",
                 "OUTDATED" or "MISSING" or "ABSENT" => "SystemFillColorAttentionBrush",
                 _ => "TextFillColorSecondaryBrush"
             };
