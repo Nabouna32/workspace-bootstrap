@@ -96,7 +96,7 @@ jobs:
             $content = Get-Content $file -Raw
             foreach ($assertion in $required[$file]) {
               if ($content -notmatch [regex]::Escape($assertion)) {
-                throw "Documentation contract assertion missing in $file: $assertion"
+                throw "Documentation contract assertion missing in ${file}: $assertion"
               }
             }
           }
