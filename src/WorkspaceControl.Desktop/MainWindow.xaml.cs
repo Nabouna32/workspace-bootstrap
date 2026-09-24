@@ -1,8 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
-using System.Diagnostics;
 
 namespace WorkspaceControl.Desktop;
 
@@ -13,19 +11,6 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
         RootGrid.DataContext = ((App)Microsoft.UI.Xaml.Application.Current).ViewModel;
         Activated += MainWindow_Activated;
-        TryApplyMicaBackdrop();
-    }
-
-    private void TryApplyMicaBackdrop()
-    {
-        try
-        {
-            SystemBackdrop = new MicaBackdrop();
-        }
-        catch (Exception exception)
-        {
-            Debug.WriteLine($"Mica backdrop is unavailable: {exception}");
-        }
     }
 
     private async void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
