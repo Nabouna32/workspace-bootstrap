@@ -11,14 +11,14 @@ running → failed → recovery/resume
 running → stale
 ```
 
-A plan is read-only and is persisted as part of the `ProvisioningOperation`. Computing a plan never implies a mutation.
+A plan is read-only and is persisted as part of the `ProvisioningOperation`. Computing a plan never implies a mutation. The user-facing review belongs to My Workspace; provisioning is the execution lifecycle behind that experience.
 
 ## Planning
 Planning compares requested capability, observed state, desired state, providers, prerequisites, inventory diagnostics, privilege and risk. The resulting `ProvisioningPlan` contains the exact actions and observed preconditions that will be reviewed by the user.
 
 Version policy is evaluated explicitly during planning. `latest-stable` and `stable-compatible` use the provider-reported available version as the desired version when an update is available. `minimum` compares the installed version with the component minimum version and does not request an update merely because a newer version exists. Unsupported or malformed version policy data blocks mutation rather than guessing.
 
-Each plan item keeps installed, available and desired versions as structured data. The desktop Profiles surface exposes these values before mutation. The user must explicitly confirm the persisted operation. Post-condition verification then validates the persisted version constraint against the newly observed installed version: `minimum` requires installed >= confirmed minimum, while `latest-stable` and `stable-compatible` require an exact match to the confirmed desired version. A successful installer process alone is never treated as proof of the requested version.
+Each plan item keeps installed, available and desired versions as structured data. The desktop Workspace surface exposes these values before mutation. The user must explicitly confirm the persisted operation. Post-condition verification then validates the persisted version constraint against the newly observed installed version: `minimum` requires installed >= confirmed minimum, while `latest-stable` and `stable-compatible` require an exact match to the confirmed desired version. A successful installer process alone is never treated as proof of the requested version.
 
 ## Execution
 After confirmation, Apply executes the persisted plan. It does not silently recompute or replace the plan.
