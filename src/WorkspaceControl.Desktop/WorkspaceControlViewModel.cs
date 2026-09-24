@@ -123,7 +123,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public string SoftwareCountDisplay => $"{SoftwareItems.Count} detected entries";
     public int ApplicationInstalledCount => ApplicationCatalogItems.Count(item => item.IsInstalled);
     public int ApplicationUpdatesCount => ApplicationCatalogItems.Count(item => item.IsUpdateAvailable);
-    public int ApplicationAvailableCount => ApplicationCatalogItems.Count(item => !item.IsInstalled);
+    public int ApplicationAvailableCount => ApplicationCatalogItems.Count(item => string.Equals(item.StateCode, ProvisioningStateCodes.Missing, StringComparison.OrdinalIgnoreCase));
     public int DiagnosticCount => Diagnostics.Count;
     public string HomeHealthCode
     {
@@ -498,7 +498,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             {
                 ApplicationCatalogFilters.Installed => item.IsInstalled,
                 ApplicationCatalogFilters.Updates => item.IsUpdateAvailable,
-                ApplicationCatalogFilters.Available => !item.IsInstalled,
+                ApplicationCatalogFilters.Available => string.Equals(item.StateCode, ProvisioningStateCodes.Missing, StringComparison.OrdinalIgnoreCase),
                 _ => true
             };
 
