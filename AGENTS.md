@@ -63,6 +63,20 @@ When documents disagree, resolve them in this order:
 - Roadmap/status documents must not be used as a reason to overwrite canonical product/UX documents.
 - Documentation changes must be checked for contradictions across all affected Markdown files before merge.
 
+## Context reconstruction and decision audit — non-negotiable
+
+Conversation context is not the source of truth for project decisions.
+
+When a task depends on an earlier product or architecture discussion:
+1. inspect the current `AGENTS.md` and applicable Markdown contracts;
+2. search merged PRs, commit history and repository documentation for the decision;
+3. distinguish verified repository evidence from assumptions or unavailable conversation history;
+4. if a decision cannot be verified, do not invent it; record the uncertainty in the decision audit and use the safest interpretation consistent with the existing product contract;
+5. when an implementation exposes a contradiction with an established decision, correct the implementation and update the relevant documentation in the same coherent unit of work.
+
+Important decisions must be durable in repository documentation. A future agent must not need to remember a private conversation to avoid regressing the product.
+
+Use `docs/DECISIONS.md` for reconstructed decision history and `docs/PORTABILITY.md` for the portable-storage invariant.
 ## Portability and application-owned storage — non-negotiable
 
 Workspace Control is a **portable, self-contained, unpackaged Windows application**.
