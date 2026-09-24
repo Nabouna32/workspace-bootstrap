@@ -43,7 +43,7 @@ The canonical product/UX contract is `docs/PRODUCT-EXPERIENCE.md`. Engine founda
 - Real interactive UI behavior still requires a human Windows 11 validation pass; automated launch validation is not a substitute for visual, keyboard, accessibility, localization and DPI checks.
 
 ## Current product-experience gap
-The first My Workspace editor is now functional end-to-end for application desired state, but the broader product experience remains incomplete. The portable-storage contract is now explicit and guarded by regression tests and CI policy. The richer Home dashboard, first-class Applications management actions, semantic state presentation across domains, and Windows/Optimizations/Drivers/WSL/Diagnostics/Cleanup surfaces remain implementation work.
+The first My Workspace editor is now functional end-to-end for application desired state, but the broader product experience remains incomplete. The portable-storage contract is explicit and guarded by regression tests and CI policy. The richer Home dashboard, first-class Applications management actions, semantic state presentation across domains, and Windows/Optimizations/Drivers/WSL/Diagnostics/Cleanup surfaces remain implementation work.
 
 ## Next engineering priorities
 1. Expand My Workspace beyond application desired state to Windows settings, policies, optimizations and other supported capabilities.
