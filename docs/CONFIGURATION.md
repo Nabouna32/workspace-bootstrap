@@ -5,8 +5,10 @@ Product settings and desired-state profiles are separate concepts.
 ## Product settings
 Theme, language, interface level, logging, local installer retention, notifications and provider preferences are local preferences. They never silently authorize dangerous system mutations.
 
-## Profiles
-Profiles are versioned declarative desired-state documents containing applications, Windows policies/settings, drivers, WSL, optimizations and conditions.
+## Workspaces and profiles
+A Workspace is the user-facing desired-state object. `ProfileManifest` is its technical versioned representation. Workspaces contain applications, Windows policies/settings, drivers, WSL, optimizations and conditions.
+
+Users build Workspaces by selecting and checking/unchecking what they want managed. Predefined profiles are optional templates, never a required first-run choice.
 
 ## Portable configuration
 Profiles can be imported/exported. Exports contain no secrets.

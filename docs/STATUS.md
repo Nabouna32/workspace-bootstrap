@@ -1,7 +1,9 @@
 # Status
 
 ## Product direction
-The product is **Workspace Control**, a permanent Windows 11 control center. The migration from the historical Workspace Bootstrap implementation is now structurally established and future work should extend the new architecture rather than revive retired layers.
+The product is **Workspace Control**, a permanent Windows 11 control center. The user-facing desired-state concept is **My Workspace**: users choose what they want managed on their PC rather than being forced to select a predefined profile. `ProfileManifest` remains the technical desired-state representation.
+
+The canonical product/UX contract is `docs/PRODUCT-EXPERIENCE.md`. Engine foundations must not be mistaken for completed product experience.
 
 ## Confirmed decisions
 - Windows 11 only.
@@ -12,7 +14,8 @@ The product is **Workspace Control**, a permanent Windows 11 control center. The
 - Simple / Advanced / Expert presentation levels.
 - Online-first installation; a verified local installer is reused when it already matches the requested current version. There is no cache-only/offline provisioning mode.
 - Software, Windows administration, diagnostics, cleanup, optimization, drivers and WSL are product domains.
-- Profiles represent desired state.
+- Workspaces represent user-owned desired state; `ProfileManifest` is the technical profile/schema representation.
+- Predefined profiles, if present, are optional editable templates, not the primary UX.
 - Local import/export first; future cloud/fleet is optional.
 - Providers/plugins are planned.
 - Normal interactive mode never mutates without explicit confirmation.
@@ -29,7 +32,7 @@ The product is **Workspace Control**, a permanent Windows 11 control center. The
 - Mutable cache/state/log data defaults to LocalAppData rather than the installation directory.
 - Packaged configuration is resolved from the application content root.
 - Legacy WPF desktop has been removed; WinUI 3 is the only desktop UI target.
-- The desktop Profiles surface now exposes profile selection, persisted plan review, explicit confirmation, live apply progress, verification results, stale-plan handling and safe resume for resumable failures.
+- The desktop currently exposes the desired-state/provisioning foundation, including persisted plan review, explicit confirmation, live apply progress, verification results, stale-plan handling and safe resume for resumable failures. The target user experience is the richer My Workspace builder defined in `docs/PRODUCT-EXPERIENCE.md`.
 - The provisioning surface uses WinUI .resw localization for English and French, localized view-model status/progress messages, and explicit accessibility names for provisioning controls and status regions.
 - A dedicated Windows published-validation workflow now builds a self-contained x64 package, validates its required payload, runs the published CLI smoke test, launches the published WinUI executable for a timed smoke test, and uploads the validated package as an artifact.
 
@@ -39,14 +42,19 @@ The product is **Workspace Control**, a permanent Windows 11 control center. The
 - The new Windows published-validation workflow adds a focused end-to-end package validation path for the desktop executable itself.
 - Real interactive UI behavior still requires a human Windows 11 validation pass; automated launch validation is not a substitute for visual, keyboard, accessibility, localization and DPI checks.
 
+## Current product-experience gap
+The backend desired-state/provisioning foundations exist, but the current WinUI experience is not yet the full product described by the product contract. In particular, the application catalogue, user-built My Workspace editor, richer Home dashboard, semantic state presentation and broader domain surfaces remain implementation work.
+
 ## Next engineering priorities
-1. Execute and document the real Windows 11 UI validation pass for the provisioning surface: navigation, localization, keyboard/focus, accessibility, DPI/scaling, long-running states, stale recovery and error presentation.
-2. Strengthen software inventory/provider contracts and update/removal semantics.
-3. Replace remaining infrastructure composition with a testable dependency-injection/composition strategy where it materially improves lifetime management.
-4. Complete Windows administration, policy, diagnostics, driver and WSL capability boundaries.
-5. Build richer desired-state diff presentation and risk/reversibility metadata.
-6. Harden verified installer reuse, artifact retention and integrity verification.
-7. Remove remaining historical names/dead documentation as each boundary becomes authoritative.
+1. Build the My Workspace user experience on top of the existing desired-state/provisioning foundation.
+2. Build the first-class Applications catalogue and management experience.
+3. Replace implementation-centric profile selection UX with user-owned Workspace creation/editing while preserving the existing safe provisioning lifecycle.
+4. Execute and document real Windows 11 UI validation: navigation, localization, keyboard/focus, accessibility, DPI/scaling, long-running states, stale recovery, error presentation and visual clarity.
+6. Replace remaining infrastructure composition with a testable dependency-injection/composition strategy where it materially improves lifetime management.
+7. Complete Windows administration, policy, diagnostics, driver and WSL capability boundaries.
+8. Build richer desired-state diff presentation and risk/reversibility metadata.
+9. Harden verified installer reuse, artifact retention and integrity verification.
+10. Remove remaining historical names/dead documentation as each boundary becomes authoritative.
 
 ## Reusable foundations
 - inventory providers and evidence/ownership;

@@ -33,15 +33,26 @@
 - WSL installation/configuration.
 - WSL-aware profiles.
 
-## Phase 4 — Profiles and extensibility
+## Phase 4 — Desired state and extensibility — foundation complete
 - Versioned desired-state profile contract.
 - Desired-state observation and diff engine.
-- Desired-state profile editor.
 - Conditions and heterogeneous-machine support.
 - Import/export.
 - Plugin SDK boundary and trust model.
 
-## Phase 5 — Optional cloud/fleet
+The technical desired-state foundation is established. The user-facing Workspace editor remains a product-experience task and is not considered complete merely because the profile engine exists.
+
+## Phase 5 — Product experience completion
+- First-class Applications catalogue with search, categories, filters, rich state and actions.
+- My Workspace builder with check/uncheck desired-state controls.
+- Optional editable templates rather than mandatory predefined profiles.
+- Home control-center dashboard.
+- Updates, Windows, Optimizations, Diagnostics and Cleanup surfaces with consistent semantic states.
+- Clear Unknown / Unavailable / Blocked / Error presentation.
+- Consistent risk, reversibility and restart-impact presentation.
+- Full light/dark/system visual polish, accessibility and English/French coverage across new surfaces.
+
+## Phase 6 — Optional cloud/fleet
 - Accounts and synchronized profiles.
 - Machine groups and per-machine overrides.
 - Fleet inventory.

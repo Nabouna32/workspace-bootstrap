@@ -5,8 +5,20 @@
 - Repository: `workspace-control`.
 - Target: **Windows 11 x64**.
 - This is a permanent Windows control center, not a one-time bootstrapper.
-- Core domains: software, Windows configuration, diagnostics, cleanup, optimization, drivers, WSL, profiles, cache/offline workflows and future fleet configuration.
+- Core domains: software, Windows configuration, diagnostics, cleanup, optimization, drivers, WSL, profiles/workspaces, cache/offline workflows and future fleet configuration.
 - Local operation must remain useful without an account or cloud service.
+- The canonical user-facing product/UX contract is `docs/PRODUCT-EXPERIENCE.md`.
+
+## Product model — do not regress
+- **Workspace** is the primary user-facing desired-state concept.
+- **ProfileManifest** is the technical serialized/domain representation of a Workspace.
+- The user creates a Workspace by choosing and checking/unchecking the capabilities they want managed. A predefined profile must never be required.
+- Product-supplied profiles, when present, are optional templates that can be previewed and edited; they are not the primary UX.
+- First-run experience observes the real machine before asking the user to decide what to manage.
+- Applications are a first-class catalogue and management surface. A small curated catalogue is not a product limit.
+- Unknown, unavailable, blocked and error states must remain distinct and explained.
+- The user-facing flow is: observe machine → choose desired state → compare → review → explicitly confirm → apply the persisted plan → verify.
+- Engine or infrastructure work must not silently replace this product model with an implementation-centric workflow.
 
 ## Non-negotiable product principles
 1. User control first: normal interactive mode never mutates silently.
@@ -19,9 +31,36 @@
 8. Risk-aware mutation: reversible, risky and irreversible actions are explicitly classified.
 9. Least privilege by default; a user may explicitly launch an elevated session as a convenience.
 10. Automation is explicit and auditable.
-12. Provisioning plans are immutable after confirmation; Apply executes the persisted plan and never silently replans.
-11. Windows 11 is the only supported target unless product direction explicitly changes.
-12. Open-source local client first; future paid services remain optional.
+11. Provisioning plans are immutable after confirmation; Apply executes the persisted plan and never silently replans.
+12. Windows 11 is the only supported target unless product direction explicitly changes.
+13. Open-source local client first; future paid services remain optional.
+
+## Documentation is a product contract
+
+Markdown documentation is not disposable implementation commentary. Product and UX documents preserve decisions made through product analysis, brainstorming and design work.
+
+### Authority hierarchy
+When documents disagree, resolve them in this order:
+
+1. `docs/PRODUCT-EXPERIENCE.md` — canonical user-facing product and UX contract.
+2. `docs/PRODUCT-VISION.md` — mission, scope, audience and product boundaries.
+3. `docs/UX-DESIGN.md` — detailed design system and interaction rules.
+4. `docs/PROFILES.md`, `docs/SOFTWARE.md`, `docs/INVENTORY.md`, `docs/PROVISIONING.md`, `docs/CONFIGURATION.md` — domain contracts.
+5. `docs/ARCHITECTURE.md` — technical architecture implementing the product contracts.
+6. `docs/ROADMAP.md` and `docs/STATUS.md` — implementation state and sequencing.
+
+### Anti-drift rules
+- Never wholesale-replace product/UX Markdown with a summary derived from the latest engine work.
+- A backend, infrastructure, provider, CI or build change may update technical details, but it must preserve existing product decisions unless the PR explicitly changes product direction.
+- Before editing an existing Markdown file, read the current file and preserve unrelated decisions.
+- Prefer surgical edits and additions over regeneration.
+- If implementation reality conflicts with the product contract, document the implementation gap; do not silently redefine the product to match the gap.
+- If a product decision genuinely changes, update the canonical product contract and every affected dependent document in the same coherent documentation change.
+- Any PR that materially changes user experience, product scope, terminology, desired-state semantics or safety rules must include a documentation impact audit.
+- Do not delete or weaken product decisions merely because the current UI does not implement them yet.
+- Do not mark a capability complete merely because its engine foundation exists; distinguish foundation, user experience and end-to-end completion.
+- Roadmap/status documents must not be used as a reason to overwrite canonical product/UX documents.
+- Documentation changes must be checked for contradictions across all affected Markdown files before merge.
 
 ## Target technology
 - C# / .NET 10.
@@ -37,7 +76,6 @@ Workspace Control
 ├── CLI
 ├── Core / Domain
 ├── Application / Use cases
-├── Application / use cases
 ├── Infrastructure / Windows integration
 ├── Software providers
 ├── Drivers
@@ -60,14 +98,16 @@ Presentation depends on Application contracts. Application owns use-case orchest
 - Never use color alone to communicate state.
 - Simple, Advanced and Expert are presentation levels over the same engine.
 - Technical details are available through progressive disclosure.
+- The primary desired-state UX is user-built **My Workspace**, not mandatory predefined profiles.
 - Destructive or irreversible actions require contextual confirmation.
 - Interactive installers are first-class: launch vendor UI, wait, rescan and verify postconditions.
+- See `docs/PRODUCT-EXPERIENCE.md` for the complete UX contract.
 
 ## Mutation contract
 Every mutation should have a stable operation id, capability, target, evidence, desired state, plan, risk, reversibility, confirmation requirement, elevation requirement, progress, logs and result/recovery state.
 
 ## Profiles and future fleet
-Profiles are declarative desired-state documents. They may contain applications, Windows policies/settings, registry-backed settings, drivers, WSL, optimizations and machine conditions. The model must support future machine groups, per-machine overrides and cloud synchronization without a second execution engine. A provisioning operation persists its exact plan, requires explicit confirmation, verifies preconditions before uncompleted mutations, and enters a terminal stale state when observed state diverges.
+Profiles are declarative desired-state documents. In the user-facing product they are presented as Workspaces; `ProfileManifest` remains the technical contract. They may contain applications, Windows policies/settings, registry-backed settings, drivers, WSL, optimizations and machine conditions. The model must support future machine groups, per-machine overrides and cloud synchronization without a second execution engine. A provisioning operation persists its exact plan, requires explicit confirmation, verifies preconditions before uncompleted mutations, and enters a terminal stale state when observed state diverges.
 
 ## Security
 - Verify downloaded artifacts with SHA-256 and Authenticode where applicable.

@@ -2,6 +2,8 @@
 
 ## Product
 
+- [Product experience](PRODUCT-EXPERIENCE.md) — canonical user-facing product model, Workspace UX, application catalogue and interaction contract.
+
 - [Product vision](PRODUCT-VISION.md) — mission, audience, boundaries and long-term direction.
 - [Roadmap](ROADMAP.md) — implementation phases and quality bar.
 - [Status](STATUS.md) — current migration state and confirmed decisions.

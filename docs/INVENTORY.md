@@ -39,7 +39,7 @@ Residuals and orphan candidates are recommendations, not automatic deletion targ
 
 ## Desired state
 
-Inventory is compared with profiles to produce a read-only diff and plan:
+Inventory is compared with the user's Workspace (technical `ProfileManifest`) to produce a read-only diff and plan:
 
 `Observed → Desired → Diff → Plan → Confirmation → Operation → Verify`
 
