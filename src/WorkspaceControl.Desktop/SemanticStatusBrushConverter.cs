@@ -14,7 +14,7 @@ public sealed class SemanticStatusBrushConverter : IValueConverter
             ? code switch
             {
                 "REMOVE" => "SystemFillColorCriticalBrush",
-                "INSTALL" or "UPDATE" or "SET" => "SystemFillColorAttentionBrush",
+                "INSTALL" or "UPDATE" or "SET" => "AccentFillColorDefaultBrush",
                 "BLOCKED" => "SystemFillColorCautionBrush",
                 "NONE" => "SystemFillColorSuccessBrush",
                 _ => "TextFillColorSecondaryBrush"
@@ -22,7 +22,8 @@ public sealed class SemanticStatusBrushConverter : IValueConverter
             : code switch
             {
                 "INSTALLED" => "SystemFillColorSuccessBrush",
-                "UNKNOWN" => "SystemFillColorCautionBrush",
+                "ERROR" => "SystemFillColorCriticalBrush",
+                "UNKNOWN" or "BLOCKED" => "SystemFillColorCautionBrush",
                 "OUTDATED" or "MISSING" or "ABSENT" => "SystemFillColorAttentionBrush",
                 _ => "TextFillColorSecondaryBrush"
             };
