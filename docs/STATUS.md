@@ -32,7 +32,7 @@ The canonical product/UX contract is `docs/PRODUCT-EXPERIENCE.md`. Engine founda
 - Mutable cache/state/log data defaults to LocalAppData rather than the installation directory.
 - Packaged configuration is resolved from the application content root.
 - Legacy WPF desktop has been removed; WinUI 3 is the only desktop UI target.
-- The desktop currently exposes the desired-state/provisioning foundation, including persisted plan review, explicit confirmation, live apply progress, verification results, stale-plan handling and safe resume for resumable failures. The target user experience is the richer My Workspace builder defined in `docs/PRODUCT-EXPERIENCE.md`.
+- The desktop now exposes a first My Workspace builder: user-owned schema-2 Workspaces are persisted under LocalAppData, applications can be searched and checked/unchecked from the catalog, optional built-in templates can be copied into a user-owned Workspace, and the existing persisted provisioning lifecycle remains the safety boundary.
 - The provisioning surface uses WinUI .resw localization for English and French, localized view-model status/progress messages, and explicit accessibility names for provisioning controls and status regions.
 - A dedicated Windows published-validation workflow now builds a self-contained x64 package, validates its required payload, runs the published CLI smoke test, launches the published WinUI executable for a timed smoke test, and uploads the validated package as an artifact.
 
@@ -43,7 +43,7 @@ The canonical product/UX contract is `docs/PRODUCT-EXPERIENCE.md`. Engine founda
 - Real interactive UI behavior still requires a human Windows 11 validation pass; automated launch validation is not a substitute for visual, keyboard, accessibility, localization and DPI checks.
 
 ## Current product-experience gap
-The backend desired-state/provisioning foundations exist, but the current WinUI experience is not yet the full product described by the product contract. In particular, the application catalogue, user-built My Workspace editor, richer Home dashboard, semantic state presentation and broader domain surfaces remain implementation work.
+The first My Workspace editor is now functional end-to-end for application desired state, but the broader product experience remains incomplete. The richer Home dashboard, first-class Applications management actions, semantic state presentation across domains, and Windows/Optimizations/Drivers/WSL/Diagnostics/Cleanup surfaces remain implementation work.
 
 ## Next engineering priorities
 1. Build the My Workspace user experience on top of the existing desired-state/provisioning foundation.
