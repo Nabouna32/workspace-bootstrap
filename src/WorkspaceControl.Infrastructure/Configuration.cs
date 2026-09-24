@@ -152,7 +152,7 @@ public sealed class ConfigurationStore
 
         ValidateProfile(profile, Path.GetFileName(fullPath));
 
-        var destination = Path.Combine(WorkspaceRoot, $"{profile.Id}.json");
+        var destination = Path.Combine(ProfilesRoot, $"{profile.Id}.json");
         if (File.Exists(destination) && !overwrite)
             throw new IOException($"Profile '{profile.Id}' already exists.");
 
