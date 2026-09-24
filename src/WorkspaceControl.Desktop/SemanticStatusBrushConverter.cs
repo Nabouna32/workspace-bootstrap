@@ -27,7 +27,7 @@ public sealed class SemanticStatusBrushConverter : IValueConverter
                 _ => "TextFillColorSecondaryBrush"
             };
 
-        return Microsoft.UI.Xaml.Application.Current.Resources[key] as Brush
+        return global::Microsoft.UI.Xaml.Application.Current.Resources[key] as Brush
             ?? Microsoft.UI.Xaml.Application.Current.Resources["TextFillColorSecondaryBrush"] as Brush
             ?? new SolidColorBrush(Windows.UI.Color.FromArgb(255, 100, 100, 100));
     }
