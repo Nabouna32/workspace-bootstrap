@@ -1,7 +1,12 @@
 <Page
     x:Class="WorkspaceControl.Desktop.ProfilesPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WorkspaceControl.Desktop">
+
+    <Page.Resources>
+        <local:SemanticStatusBrushConverter x:Key="SemanticStatusBrushConverter" />
+    </Page.Resources>
 
     <ScrollViewer>
         <StackPanel Padding="28" Spacing="20">
@@ -147,11 +152,13 @@
                                             <TextBlock
                                                 x:Uid="WorkspacePage_DiffAction"
                                                 Text="{Binding ActionCode}"
+                                                Foreground="{Binding ActionCode, Converter={StaticResource SemanticStatusBrushConverter}, ConverterParameter=action}"
                                                 FontWeight="SemiBold" />
                                             <TextBlock
                                                 x:Uid="WorkspacePage_DiffState"
                                                 Text="{Binding StateCode}"
-                                                Opacity="0.65" />
+                                                Foreground="{Binding StateCode, Converter={StaticResource SemanticStatusBrushConverter}, ConverterParameter=state}"
+                                                Opacity="0.85" />
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -238,11 +245,13 @@
                                             <TextBlock
                                                 x:Uid="WorkspacePage_ActionCode"
                                                 Text="{Binding ActionCode}"
+                                                Foreground="{Binding ActionCode, Converter={StaticResource SemanticStatusBrushConverter}, ConverterParameter=action}"
                                                 FontWeight="SemiBold" />
                                             <TextBlock
                                                 x:Uid="WorkspacePage_StateCode"
                                                 Text="{Binding StateCode}"
-                                                Opacity="0.65" />
+                                                Foreground="{Binding StateCode, Converter={StaticResource SemanticStatusBrushConverter}, ConverterParameter=state}"
+                                                Opacity="0.85" />
                                         </StackPanel>
                                     </Grid>
                                 </Border>
