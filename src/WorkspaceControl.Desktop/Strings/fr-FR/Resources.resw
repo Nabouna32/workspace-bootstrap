@@ -131,6 +131,8 @@
   <data name="WorkspacePage_ApplicationSearch.PlaceholderText" xml:space="preserve"><value>Rechercher des applications</value></data>
   <data name="WorkspacePage_ApplicationSearch.AutomationProperties.Name" xml:space="preserve"><value>Rechercher dans le catalogue d’applications</value></data>
   <data name="WorkspacePage_ApplicationList.AutomationProperties.Name" xml:space="preserve"><value>Applications disponibles pour ce Workspace</value></data>
+  <data name="WorkspacePage_ApplicationInstalled.Text" xml:space="preserve"><value>Installée</value><comment>Libellé de la version installée dans l’éditeur de Workspace.</comment></data>
+  <data name="WorkspacePage_ApplicationAvailable.Text" xml:space="preserve"><value>Disponible</value><comment>Libellé de la version disponible dans l’éditeur de Workspace.</comment></data>
   <data name="WorkspacePage_ApplicationCheckBox.AutomationProperties.Name" xml:space="preserve"><value>Sélection d’une application du Workspace</value></data>
   <data name="WorkspacePage_ObserveDiff.Content" xml:space="preserve"><value>Observer et comparer</value></data>
   <data name="WorkspacePage_ObserveDiff.AutomationProperties.Name" xml:space="preserve"><value>Observer le Workspace sélectionné et le comparer à ce PC</value></data>
