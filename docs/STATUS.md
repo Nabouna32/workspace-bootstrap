@@ -46,15 +46,15 @@ The canonical product/UX contract is `docs/PRODUCT-EXPERIENCE.md`. Engine founda
 The first My Workspace editor is now functional end-to-end for application desired state, but the broader product experience remains incomplete. The richer Home dashboard, first-class Applications management actions, semantic state presentation across domains, and Windows/Optimizations/Drivers/WSL/Diagnostics/Cleanup surfaces remain implementation work.
 
 ## Next engineering priorities
-1. Build the My Workspace user experience on top of the existing desired-state/provisioning foundation.
-2. Build the first-class Applications catalogue and management experience.
-3. Replace implementation-centric profile selection UX with user-owned Workspace creation/editing while preserving the existing safe provisioning lifecycle.
+1. Expand My Workspace beyond application desired state to Windows settings, policies, optimizations and other supported capabilities.
+2. Build the first-class Applications catalogue and management actions on top of the shared inventory/provider contracts.
+3. Build the richer Home control-center dashboard and semantic state presentation.
 4. Execute and document real Windows 11 UI validation: navigation, localization, keyboard/focus, accessibility, DPI/scaling, long-running states, stale recovery, error presentation and visual clarity.
-6. Replace remaining infrastructure composition with a testable dependency-injection/composition strategy where it materially improves lifetime management.
-7. Complete Windows administration, policy, diagnostics, driver and WSL capability boundaries.
-8. Build richer desired-state diff presentation and risk/reversibility metadata.
-9. Harden verified installer reuse, artifact retention and integrity verification.
-10. Remove remaining historical names/dead documentation as each boundary becomes authoritative.
+5. Replace remaining infrastructure composition with a testable dependency-injection/composition strategy where it materially improves lifetime management.
+6. Complete Windows administration, policy, diagnostics, driver and WSL capability boundaries.
+7. Build richer desired-state diff presentation and risk/reversibility metadata.
+8. Harden verified installer reuse, artifact retention and integrity verification.
+9. Remove remaining historical names/dead documentation as each boundary becomes authoritative.
 
 ## Reusable foundations
 - inventory providers and evidence/ownership;
