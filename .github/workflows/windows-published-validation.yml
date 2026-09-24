@@ -87,15 +87,19 @@ jobs:
           $pri = Join-Path $package "WorkspaceControl/WorkspaceControl.pri"
           if (-not (Test-Path $pri -PathType Leaf)) { throw "Published application PRI is missing: $pri" }
 
-          $makePri = Get-ChildItem "$env:ProgramFiles(x86)\Windows Kits\10\bin" -Filter makepri.exe -Recurse -ErrorAction SilentlyContinue |
-            Where-Object { $_.FullName -match '\\x64\\makepri\.exe$' } |
+          $makePri = Get-ChildItem "$env:USERPROFILE\.nuget\packages\microsoft.windows.sdk.buildtools" -Filter makepri.exe -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match '\\x86\\makepri\.exe$' } |
             Select-Object -First 1
           if (-not $makePri) {
-            Write-Warning "MakePri.exe was not found; the published PRI will still be validated by the launch smoke test."
-            return
+            $makePri = Get-ChildItem "$env:ProgramFiles(x86)\Windows Kits\10\bin" -Filter makepri.exe -Recurse -ErrorAction SilentlyContinue |
+              Where-Object { $_.FullName -match '\\x64\\makepri\.exe$' } |
+              Select-Object -First 1
+          }
+          if (-not $makePri) {
+            throw "MakePri.exe was not found in the restored Windows SDK BuildTools package or Windows SDK."
           }
 
-          & $makePri.FullName dump /if $pri /of (Join-Path $diagnostics "WorkspaceControl.pri") /o
+          & $makePri.FullName dump /if $pri /of (Join-Path $diagnostics "WorkspaceControl.pri.xml") /o
           if ($LASTEXITCODE -ne 0) { throw "MakePri dump failed with exit code $LASTEXITCODE." }
 
       - name: Validate published package and launch smoke test
