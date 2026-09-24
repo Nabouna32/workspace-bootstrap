@@ -29,10 +29,10 @@ The canonical product/UX contract is `docs/PRODUCT-EXPERIENCE.md`. Engine founda
 - Desktop and CLI consume the Application contract through an explicit Infrastructure composition root; the old `EngineFacade` service-locator layer is removed.
 - Infrastructure namespaces are aligned with `WorkspaceControl.Infrastructure`.
 - Software inventory aggregation has provider isolation, deterministic merge behavior, provenance/evidence preservation and partial-failure diagnostics.
-- Mutable cache/state/log data defaults to LocalAppData rather than the installation directory.
+- Workspace Control is distributed as a portable, self-contained, unpackaged application; application-owned mutable data stays under the explicit portable application root and never silently falls back to AppData.
 - Packaged configuration is resolved from the application content root.
 - Legacy WPF desktop has been removed; WinUI 3 is the only desktop UI target.
-- The desktop now exposes a first My Workspace builder: user-owned schema-2 Workspaces are persisted under LocalAppData, applications can be searched and checked/unchecked from the catalog, optional built-in templates can be copied into a user-owned Workspace, and the existing persisted provisioning lifecycle remains the safety boundary.
+- The desktop now exposes a first My Workspace builder: user-owned schema-2 Workspaces are persisted under the portable application root, applications can be searched and checked/unchecked from the catalog, optional built-in templates can be copied into a user-owned Workspace, and the existing persisted provisioning lifecycle remains the safety boundary.
 - The provisioning surface uses WinUI .resw localization for English and French, localized view-model status/progress messages, and explicit accessibility names for provisioning controls and status regions.
 - A dedicated Windows published-validation workflow now builds a self-contained x64 package, validates its required payload, runs the published CLI smoke test, launches the published WinUI executable for a timed smoke test, and uploads the validated package as an artifact.
 
@@ -43,7 +43,7 @@ The canonical product/UX contract is `docs/PRODUCT-EXPERIENCE.md`. Engine founda
 - Real interactive UI behavior still requires a human Windows 11 validation pass; automated launch validation is not a substitute for visual, keyboard, accessibility, localization and DPI checks.
 
 ## Current product-experience gap
-The first My Workspace editor is now functional end-to-end for application desired state, but the broader product experience remains incomplete. The richer Home dashboard, first-class Applications management actions, semantic state presentation across domains, and Windows/Optimizations/Drivers/WSL/Diagnostics/Cleanup surfaces remain implementation work.
+The first My Workspace editor is now functional end-to-end for application desired state, but the broader product experience remains incomplete. The portable-storage contract is now explicit and guarded by regression tests and CI policy. The richer Home dashboard, first-class Applications management actions, semantic state presentation across domains, and Windows/Optimizations/Drivers/WSL/Diagnostics/Cleanup surfaces remain implementation work.
 
 ## Next engineering priorities
 1. Expand My Workspace beyond application desired state to Windows settings, policies, optimizations and other supported capabilities.
