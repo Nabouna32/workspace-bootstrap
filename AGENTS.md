@@ -48,7 +48,7 @@ When documents disagree, resolve them in this order:
 4. `docs/PROFILES.md`, `docs/SOFTWARE.md`, `docs/INVENTORY.md`, `docs/PROVISIONING.md`, `docs/CONFIGURATION.md`, `docs/PORTABILITY.md` — domain and cross-cutting contracts.
 5. `docs/ARCHITECTURE.md` — technical architecture implementing the product contracts.
 6. `docs/DECISIONS.md` — reconstructed decision record and anti-drift ledger.
-7. `docs/ROADMAP.md` and `docs/STATUS.md` — implementation state and sequencing.
+7. `docs/ROADMAP.md` and `docs/STATUS.md` — implementation state and sequencing; these are descriptive and never override product/domain/architecture contracts.
 
 ### Anti-drift rules
 - Never wholesale-replace product/UX Markdown with a summary derived from the latest engine work.
@@ -62,6 +62,8 @@ When documents disagree, resolve them in this order:
 - Do not mark a capability complete merely because its engine foundation exists; distinguish foundation, user experience and end-to-end completion.
 - Roadmap/status documents must not be used as a reason to overwrite canonical product/UX documents.
 - Documentation changes must be checked for contradictions across all affected Markdown files before merge.
+- A status/roadmap document may record an implementation gap, but may never convert an implementation workaround into a product requirement.
+- README and generated/release notes are explanatory surfaces; they do not override the canonical contracts.
 
 ## Context reconstruction and decision audit — non-negotiable
 
