@@ -17,7 +17,7 @@
                 <NavigationViewItem x:Uid="MainWindow_Software" Tag="software" />
                 <NavigationViewItem x:Uid="MainWindow_Windows" Tag="windows" />
                 <NavigationViewItem x:Uid="MainWindow_Diagnostics" Tag="diagnostics" />
-                <NavigationViewItem x:Uid="MainWindow_Profiles" Tag="profiles" />
+                <NavigationViewItem x:Uid="MainWindow_Workspace" Tag="profiles" />
             </NavigationView.MenuItems>
 
             <Grid>
