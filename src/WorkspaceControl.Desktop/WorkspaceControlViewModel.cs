@@ -564,7 +564,6 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 public sealed class WorkspaceApplicationOption : INotifyPropertyChanged
 {
     private bool _isSelected;
-    private bool _isVisible = true;
 
     public WorkspaceApplicationOption(string componentId, string name, string? source)
     {
@@ -587,19 +586,6 @@ public sealed class WorkspaceApplicationOption : INotifyPropertyChanged
 
             _isSelected = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
-        }
-    }
-
-    public bool IsVisible
-    {
-        get => _isVisible;
-        set
-        {
-            if (_isVisible == value)
-                return;
-
-            _isVisible = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsVisible)));
         }
     }
 
