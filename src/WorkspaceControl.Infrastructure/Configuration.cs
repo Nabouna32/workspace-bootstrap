@@ -187,7 +187,7 @@ public sealed class ConfigurationStore
         return profiles;
     }
 
-    private static IReadOnlyDictionary<string, ProfileManifest> LoadProfileDirectory(string root)
+    private static Dictionary<string, ProfileManifest> LoadProfileDirectory(string root)
     {
         if (!Directory.Exists(root))
             return new Dictionary<string, ProfileManifest>(StringComparer.OrdinalIgnoreCase);
