@@ -835,6 +835,56 @@ public sealed class InstallerEngineTests
 
 
 [TestClass]
+public sealed class WorkspaceStorageContractTests
+{
+    [TestMethod]
+    public void Application_owned_state_defaults_to_portable_application_root()
+    {
+        var paths = new WorkspacePaths();
+
+        Assert.AreEqual(
+            Path.GetFullPath(AppContext.BaseDirectory),
+            paths.Root);
+
+        Assert.AreEqual(
+            Path.Combine(paths.Root, "cache"),
+            paths.CacheRoot);
+        Assert.AreEqual(
+            Path.Combine(paths.Root, "state"),
+            paths.StateRoot);
+        Assert.AreEqual(
+            Path.Combine(paths.Root, "logs"),
+            paths.LogsRoot);
+    }
+
+    [TestMethod]
+    public void User_workspaces_default_to_explicit_portable_root()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var configuration = new ConfigurationStore(repositoryRoot);
+
+        Assert.AreEqual(
+            Path.Combine(Path.GetFullPath(repositoryRoot), "workspaces"),
+            configuration.WorkspaceRoot);
+    }
+
+    private static string FindRepositoryRoot()
+    {
+        var current = new DirectoryInfo(AppContext.BaseDirectory);
+        while (current is not null)
+        {
+            if (File.Exists(Path.Combine(current.FullName, "bootstrap", "windows", "components", "catalog.json")))
+                return current.FullName;
+
+            current = current.Parent;
+        }
+
+        Assert.Fail("Repository content root could not be located for the workspace storage contract tests.");
+        return string.Empty;
+    }
+}
+
+
 public sealed class WorkspaceStoreTests
 {
     [TestMethod]
