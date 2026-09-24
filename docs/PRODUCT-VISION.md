@@ -3,6 +3,12 @@
 ## Mission
 Workspace Control is a permanent Windows 11 control center. It turns fragmented Windows administration into a clear, understandable and safe experience.
 
+## User experience contract
+
+The user-facing product is built around **My Workspace**: the user observes the real PC, chooses what should be managed, checks/unchecks desired capabilities, saves the result, compares it with current state, reviews impact, confirms and applies the exact persisted plan.
+
+Workspace Control must not require users to choose a predefined profile. Product-supplied profiles, if present, are optional editable templates. The technical desired-state representation remains `ProfileManifest`.
+
 ## Core jobs
 - Install, update and uninstall software.
 - Discover software even when no curated definition exists.
