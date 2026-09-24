@@ -22,12 +22,7 @@ public sealed class ConfigurationStore
         ProfilesRoot = Path.Combine(Root, "bootstrap", "windows", "profiles");
         WorkspaceRoot = Path.GetFullPath(
             workspaceRoot
-            ?? (string.IsNullOrWhiteSpace(contentRoot)
-                ? Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "WorkspaceControl",
-                    "workspaces")
-                : Path.Combine(Root, ".workspaces")));
+            ?? Path.Combine(Root, "workspaces"));
 
         Directory.CreateDirectory(WorkspaceRoot);
         ValidateLayout();
