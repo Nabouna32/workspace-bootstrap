@@ -19,6 +19,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     private string _workspaceName = string.Empty;
     private string _workspaceDescription = string.Empty;
     private string _applicationSearchText = string.Empty;
+    private string _applicationCatalogSearchText = string.Empty;
+    private string _applicationCatalogFilter = ApplicationCatalogFilters.All;
     private bool _isBusy;
     private string _status;
     private string? _error;
@@ -122,6 +124,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public bool HasError => !string.IsNullOrWhiteSpace(Error);
 
     public ObservableCollection<SoftwareItem> SoftwareItems { get; } = [];
+    public ObservableCollection<ApplicationCatalogItem> ApplicationCatalogItems { get; } = [];
+    public ObservableCollection<ApplicationCatalogItem> VisibleApplicationCatalogItems { get; } = [];
     public ObservableCollection<string> Diagnostics { get; } = [];
     public ObservableCollection<ProfileManifest> Profiles { get; } = [];
     public ObservableCollection<WorkspaceApplicationOption> ApplicationOptions { get; } = [];
@@ -150,6 +154,18 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     {
         get => _applicationSearchText;
         private set => SetField(ref _applicationSearchText, value);
+    }
+
+    public string ApplicationCatalogSearchText
+    {
+        get => _applicationCatalogSearchText;
+        private set => SetField(ref _applicationCatalogSearchText, value);
+    }
+
+    public string ApplicationCatalogFilter
+    {
+        get => _applicationCatalogFilter;
+        private set => SetField(ref _applicationCatalogFilter, value);
     }
 
     public bool HasSelectedWorkspace => !string.IsNullOrWhiteSpace(SelectedWorkspaceId);
@@ -236,6 +252,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             foreach (var item in software.Items)
                 SoftwareItems.Add(item);
             OnPropertyChanged(nameof(SoftwareCountDisplay));
+
+            RebuildApplicationCatalog(catalog, software);
 
             Diagnostics.Clear();
             foreach (var diagnostic in software.Diagnostics)
@@ -351,6 +369,104 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         ClearDesiredStateDiff();
         OnPropertyChanged(nameof(HasSelectedWorkspace));
         OnPropertyChanged(nameof(IsSelectedWorkspaceUserOwned));
+    }
+
+    public void SetApplicationCatalogSearchText(string value)
+    {
+        ApplicationCatalogSearchText = value ?? string.Empty;
+        RefreshVisibleApplicationCatalog();
+    }
+
+    public void SetApplicationCatalogFilter(string filter)
+    {
+        ApplicationCatalogFilter = string.IsNullOrWhiteSpace(filter)
+            ? ApplicationCatalogFilters.All
+            : filter;
+        RefreshVisibleApplicationCatalog();
+    }
+
+    public void AddApplicationToWorkspace(string componentId)
+    {
+        if (!IsSelectedWorkspaceUserOwned)
+            CreateBlankWorkspace();
+
+        var option = ApplicationOptions.FirstOrDefault(item =>
+            string.Equals(item.ComponentId, componentId, StringComparison.OrdinalIgnoreCase));
+
+        if (option is null)
+            return;
+
+        option.IsSelected = true;
+        SaveWorkspace();
+        Status = _localizer.Get("ApplicationAddedToWorkspace");
+        Error = null;
+    }
+
+    private void RebuildApplicationCatalog(
+        IReadOnlyList<ComponentManifest> catalog,
+        SoftwareInventorySnapshot software)
+    {
+        ApplicationCatalogItems.Clear();
+
+        foreach (var component in catalog.OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            var installed = software.Items.FirstOrDefault(item =>
+                (!string.IsNullOrWhiteSpace(component.PackageId)
+                    && string.Equals(item.Id, component.PackageId, StringComparison.OrdinalIgnoreCase))
+                || string.Equals(item.Name, component.Name, StringComparison.OrdinalIgnoreCase));
+
+            var state = software.Diagnostics.Count > 0 && installed is null
+                ? ProvisioningStateCodes.Unknown
+                : installed is null
+                    ? ProvisioningStateCodes.Missing
+                    : !string.IsNullOrWhiteSpace(installed.AvailableVersion)
+                        ? ProvisioningStateCodes.Outdated
+                        : ProvisioningStateCodes.Installed;
+
+            var action = state switch
+            {
+                ProvisioningStateCodes.Missing => ProvisioningActionCodes.Install,
+                ProvisioningStateCodes.Outdated => ProvisioningActionCodes.Update,
+                ProvisioningStateCodes.Unknown => ProvisioningActionCodes.Blocked,
+                _ => ProvisioningActionCodes.None
+            };
+
+            ApplicationCatalogItems.Add(new ApplicationCatalogItem(
+                component.Id,
+                component.Name,
+                component.Source,
+                installed?.Version,
+                installed?.AvailableVersion,
+                state,
+                action,
+                installed is not null));
+        }
+
+        RefreshVisibleApplicationCatalog();
+    }
+
+    private void RefreshVisibleApplicationCatalog()
+    {
+        VisibleApplicationCatalogItems.Clear();
+
+        foreach (var item in ApplicationCatalogItems)
+        {
+            var matchesSearch = string.IsNullOrWhiteSpace(ApplicationCatalogSearchText)
+                || item.Name.Contains(ApplicationCatalogSearchText, StringComparison.OrdinalIgnoreCase)
+                || item.ComponentId.Contains(ApplicationCatalogSearchText, StringComparison.OrdinalIgnoreCase)
+                || item.Source?.Contains(ApplicationCatalogSearchText, StringComparison.OrdinalIgnoreCase) == true;
+
+            var matchesFilter = ApplicationCatalogFilter switch
+            {
+                ApplicationCatalogFilters.Installed => item.IsInstalled,
+                ApplicationCatalogFilters.Updates => item.IsUpdateAvailable,
+                ApplicationCatalogFilters.Available => !item.IsInstalled,
+                _ => true
+            };
+
+            if (matchesSearch && matchesFilter)
+                VisibleApplicationCatalogItems.Add(item);
+        }
     }
 
     public void SetApplicationSearchText(string value)
@@ -590,4 +706,26 @@ public sealed class WorkspaceApplicationOption : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+}
+
+public static class ApplicationCatalogFilters
+{
+    public const string All = "all";
+    public const string Installed = "installed";
+    public const string Updates = "updates";
+    public const string Available = "available";
+}
+
+public sealed record ApplicationCatalogItem(
+    string ComponentId,
+    string Name,
+    string? Source,
+    string? InstalledVersion,
+    string? AvailableVersion,
+    string StateCode,
+    string ActionCode,
+    bool IsInstalled)
+{
+    public bool IsUpdateAvailable =>
+        string.Equals(StateCode, ProvisioningStateCodes.Outdated, StringComparison.OrdinalIgnoreCase);
 }

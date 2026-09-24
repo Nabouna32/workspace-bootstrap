@@ -58,7 +58,6 @@
   <data name="MainWindow_Diagnostics.Content" xml:space="preserve"><value>Diagnostics</value></data>
   <data name="MainWindow_Diagnostics.AutomationProperties.Name" xml:space="preserve"><value>Diagnostics</value></data>
 
-  <data name="MainWindow_Workspace.AutomationProperties.Name" xml:space="preserve"><value>Profiles</value></data>
   <data name="MainWindow_StatusInfoBar.Title" xml:space="preserve"><value>Workspace Control</value></data>
   <data name="MainWindow_StatusInfoBar.AutomationProperties.Name" xml:space="preserve"><value>Application error</value></data>
   <data name="OverviewPage_Title.Text" xml:space="preserve"><value>Overview</value></data>
@@ -71,8 +70,6 @@
   <data name="OverviewPage_ProgressRing.AutomationProperties.Name" xml:space="preserve"><value>Refreshing system information</value></data>
   <data name="OverviewPage_Refresh.Content" xml:space="preserve"><value>Refresh</value></data>
   <data name="OverviewPage_Refresh.AutomationProperties.Name" xml:space="preserve"><value>Refresh system information</value></data>
-  <data name="SoftwarePage_Title.Text" xml:space="preserve"><value>Software</value></data>
-  <data name="SoftwarePage_Subtitle.Text" xml:space="preserve"><value>Inventory first. Actions come after evidence.</value></data>
   <data name="SoftwarePage_Refresh.Content" xml:space="preserve"><value>Refresh inventory</value></data>
   <data name="SoftwarePage_Refresh.AutomationProperties.Name" xml:space="preserve"><value>Refresh software inventory</value></data>
   <data name="SoftwarePage_ProgressRing.AutomationProperties.Name" xml:space="preserve"><value>Refreshing software inventory</value></data>
@@ -124,4 +121,22 @@
   <data name="WorkspaceCreationFailed" xml:space="preserve"><value>Workspace creation failed</value></data>
   <data name="WorkspaceSaveFailed" xml:space="preserve"><value>Workspace could not be saved</value></data>
   <data name="WorkspaceNameRequired" xml:space="preserve"><value>Enter a Workspace name before saving.</value></data>
+  <data name="SoftwarePage_Title.Text" xml:space="preserve"><value>Applications</value></data>
+  <data name="SoftwarePage_Subtitle.Text" xml:space="preserve"><value>Search the application catalogue, understand evidence and add supported applications to My Workspace.</value></data>
+  <data name="SoftwarePage_Search.PlaceholderText" xml:space="preserve"><value>Search applications</value></data>
+  <data name="SoftwarePage_Search.AutomationProperties.Name" xml:space="preserve"><value>Search the application catalogue</value></data>
+  <data name="SoftwarePage_Filter.Header" xml:space="preserve"><value>Show</value></data>
+  <data name="SoftwarePage_FilterAll.Content" xml:space="preserve"><value>All</value></data>
+  <data name="SoftwarePage_FilterInstalled.Content" xml:space="preserve"><value>Installed</value></data>
+  <data name="SoftwarePage_FilterUpdates.Content" xml:space="preserve"><value>Updates</value></data>
+  <data name="SoftwarePage_FilterAvailable.Content" xml:space="preserve"><value>Available</value></data>
+  <data name="SoftwarePage_Results.AutomationProperties.Name" xml:space="preserve"><value>Application catalogue results</value></data>
+  <data name="SoftwarePage_InstalledVersion.Text" xml:space="preserve"><value>Installed</value></data>
+  <data name="SoftwarePage_AvailableVersion.Text" xml:space="preserve"><value>Available</value></data>
+  <data name="SoftwarePage_State.AutomationProperties.Name" xml:space="preserve"><value>Application state</value></data>
+  <data name="SoftwarePage_Action.AutomationProperties.Name" xml:space="preserve"><value>Available action</value></data>
+  <data name="SoftwarePage_AddToWorkspace.Content" xml:space="preserve"><value>Add to My Workspace</value></data>
+  <data name="SoftwarePage_AddToWorkspace.AutomationProperties.Name" xml:space="preserve"><value>Add this application to My Workspace</value></data>
+  <data name="ApplicationAddedToWorkspace" xml:space="preserve"><value>Application added to My Workspace</value></data>
+  <data name="MainWindow_Workspace.AutomationProperties.Name" xml:space="preserve"><value>My Workspace</value></data>
 </root>
