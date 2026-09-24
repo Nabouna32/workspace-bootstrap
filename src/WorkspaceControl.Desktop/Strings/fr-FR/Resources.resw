@@ -4,8 +4,6 @@
   <data name="WorkspacePage_Subtitle.Text" xml:space="preserve"><value>Vérifiez un plan enregistré avant que Workspace Control ne modifie ce PC.</value></data>
   <data name="WorkspacePage_ChooseHeading.Text" xml:space="preserve"><value>1. Choisir un état souhaité</value></data>
   <data name="WorkspacePage_ProfileList.AutomationProperties.Name" xml:space="preserve"><value>Profils disponibles</value></data>
-  <data name="WorkspacePage_GeneratePlan.Content" xml:space="preserve"><value>Générer le plan</value></data>
-  <data name="WorkspacePage_GeneratePlan.AutomationProperties.Name" xml:space="preserve"><value>Générer un plan de provisionnement à partir de la comparaison validée</value></data>
   <data name="WorkspacePage_ReviewHeading.Text" xml:space="preserve"><value>3. Vérifier le plan</value></data>
   <data name="WorkspacePage_PlanList.AutomationProperties.Name" xml:space="preserve"><value>Éléments du plan de provisionnement</value></data>
   <data name="WorkspacePage_Confirm.Content" xml:space="preserve"><value>Confirmer et appliquer</value></data>
@@ -48,7 +46,7 @@
   <data name="ResumingProvisioning" xml:space="preserve"><value>Reprise du provisionnement…</value></data>
   <data name="ProvisioningResumed" xml:space="preserve"><value>Provisionnement repris</value></data>
   <data name="ProvisioningCouldNotResume" xml:space="preserve"><value>Impossible de reprendre le provisionnement</value></data>
-  <data name="MainWindow_Workspace.Content" xml:space="preserve"><value>Profils</value></data>
+  <data name="MainWindow_Workspace.Content" xml:space="preserve"><value>Mon Workspace</value></data>
   <data name="MainWindow.Title" xml:space="preserve"><value>Workspace Control</value></data>
   <data name="MainWindow_Navigation.AutomationProperties.Name" xml:space="preserve"><value>Navigation principale</value></data>
   <data name="MainWindow_Overview.Content" xml:space="preserve"><value>Vue d’ensemble</value></data>
@@ -59,7 +57,7 @@
   <data name="MainWindow_Windows.AutomationProperties.Name" xml:space="preserve"><value>Windows</value></data>
   <data name="MainWindow_Diagnostics.Content" xml:space="preserve"><value>Diagnostics</value></data>
   <data name="MainWindow_Diagnostics.AutomationProperties.Name" xml:space="preserve"><value>Diagnostics</value></data>
-  <data name="MainWindow_Workspace.Content" xml:space="preserve"><value>Profils</value></data>
+
   <data name="MainWindow_Workspace.AutomationProperties.Name" xml:space="preserve"><value>Profils</value></data>
   <data name="MainWindow_StatusInfoBar.Title" xml:space="preserve"><value>Workspace Control</value></data>
   <data name="MainWindow_StatusInfoBar.AutomationProperties.Name" xml:space="preserve"><value>Erreur de l’application</value></data>
@@ -87,8 +85,6 @@
   <data name="DiagnosticsPage_Title.Text" xml:space="preserve"><value>Diagnostics</value></data>
   <data name="DiagnosticsPage_Subtitle.Text" xml:space="preserve"><value>Signaux des fournisseurs et de la découverte recueillis lors de la dernière analyse.</value></data>
   <data name="DiagnosticsPage_List.AutomationProperties.Name" xml:space="preserve"><value>Résultats des diagnostics</value></data>
-  <data name="WorkspacePage_ObserveDiff.Content" xml:space="preserve"><value>Observer et comparer</value></data>
-  <data name="WorkspacePage_ObserveDiff.AutomationProperties.Name" xml:space="preserve"><value>Observer le profil sélectionné et le comparer à ce PC</value></data>
   <data name="WorkspacePage_DiffHeading.Text" xml:space="preserve"><value>2. Observer et comparer</value></data>
   <data name="WorkspacePage_DiffDescription.Text" xml:space="preserve"><value>Cette comparaison en lecture seule montre les besoins du profil sélectionné avant de créer un plan de modification.</value></data>
   <data name="WorkspacePage_DiffList.AutomationProperties.Name" xml:space="preserve"><value>Comparaison de l’état souhaité</value></data>
