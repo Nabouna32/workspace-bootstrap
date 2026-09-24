@@ -88,14 +88,6 @@
                                     Content="{Binding Name}"
                                     IsChecked="{Binding IsSelected, Mode=TwoWay}"
                                     HorizontalAlignment="Stretch">
-                                    <CheckBox.ToolTip>
-                                        <ToolTip>
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding ComponentId}" />
-                                                <TextBlock Text="{Binding Source}" Opacity="0.72" />
-                                            </StackPanel>
-                                        </ToolTip>
-                                    </CheckBox.ToolTip>
                                 </CheckBox>
                             </DataTemplate>
                         </ListView.ItemTemplate>
