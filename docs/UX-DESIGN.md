@@ -18,8 +18,6 @@ Make difficult Windows administration feel simple, calm, modern and trustworthy 
 
 The navigation is organized around user goals, not internal engine components. Advanced surfaces may expose inventory, providers, policies, registry evidence, services, operations, logs and plugin diagnostics.
 
-Advanced surfaces can expose inventory, providers, policies, registry evidence, services, operations, logs and plugin diagnostics.
-
 ## Presentation levels
 ### Simple
 Health, updates, recommendations and safe actions.
