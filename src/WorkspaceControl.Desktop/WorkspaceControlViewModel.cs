@@ -199,7 +199,9 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
     public bool HasSelectedWorkspace => !string.IsNullOrWhiteSpace(SelectedWorkspaceId);
     public bool IsSelectedWorkspaceUserOwned =>
-        SelectedWorkspaceId?.StartsWith("workspace-", StringComparison.OrdinalIgnoreCase) == true;
+        SelectedWorkspaceId is not null
+        && Workspaces.Any(workspace =>
+            string.Equals(workspace.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase));
 
     public bool IsBusy
     {
@@ -264,8 +266,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
             var selected = Workspaces.FirstOrDefault(workspace =>
                 string.Equals(workspace.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase))
-                ?? Workspaces.FirstOrDefault(workspace =>
-                    workspace.Id.StartsWith("workspace-", StringComparison.OrdinalIgnoreCase));
+                ?? Workspaces.FirstOrDefault();
 
             if (selected is not null)
                 SelectWorkspace(selected.Id);
@@ -419,7 +420,11 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public void AddApplicationToWorkspace(string componentId)
     {
         if (!IsSelectedWorkspaceUserOwned)
-            CreateBlankWorkspace();
+        {
+            Error = _localizer.Get("WorkspaceSelectionRequired");
+            Status = _localizer.Get("WorkspaceSelectionRequired");
+            return;
+        }
 
         var option = ApplicationOptions.FirstOrDefault(item =>
             string.Equals(item.ComponentId, componentId, StringComparison.OrdinalIgnoreCase));
