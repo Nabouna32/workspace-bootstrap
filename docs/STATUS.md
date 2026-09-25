@@ -60,8 +60,9 @@ These remaining gaps are alignment work, not reasons to weaken the intended prod
 - The Workspace page has been rebuilt around Workspace identity, managed scope, current-vs-desired comparison and explicit review before apply.
 - Adding an application no longer creates a Workspace implicitly; the user must explicitly select or create one.
 - The Home page is being reshaped into a Workspace-oriented control center rather than a collection of maintenance counters.
-- The first executable Windows desired-state slice is now available: Windows light/dark appearance is optional, user-scoped, reversible and represented through the existing plan/confirm/verify registry path. Undefined leaves the setting unmanaged.
-- The Windows appearance mapping is covered by domain-level tests.
+- The first executable Windows desired-state slice is now available: Windows appearance is user-scoped, reversible and represented through the existing plan/confirm/verify registry path. The user-facing choices are System, Light and Dark; System clears any explicit light/dark Workspace intent and does not force a mode.
+- The Windows appearance mapping, including the System intent, is covered by domain-level tests.
+- The UX now defines a shared semantic color grammar: green for success/healthy, blue for information/neutral action, amber/orange for warning/attention/risk, red for error/failure/blocked, and neutral for undefined/secondary information.
 
 ## Verification
 
