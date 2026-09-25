@@ -4,7 +4,7 @@ namespace WorkspaceControl.Application;
 
 public interface IWorkspaceControlApplication
 {
-    IReadOnlyList<WorkspaceManifest> GetProfiles();
+    IReadOnlyList<WorkspaceManifest> GetWorkspaces();
     IReadOnlyList<ComponentManifest> GetApplicationCatalog();
     WorkspaceManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds);
     void SaveWorkspace(WorkspaceManifest workspace);
