@@ -10,11 +10,11 @@ internal sealed class ProvisioningServiceAdapter : IProvisioningService
     public ProvisioningServiceAdapter(ProvisioningEngine engine) =>
         _engine = engine ?? throw new ArgumentNullException(nameof(engine));
 
-    public IReadOnlyList<ProfileManifest> GetProfiles() => _engine.Profiles();
+    public IReadOnlyList<WorkspaceManifest> GetProfiles() => _engine.Profiles();
     public IReadOnlyList<ComponentManifest> GetApplicationCatalog() => _engine.ApplicationCatalog();
-    public ProfileManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
+    public WorkspaceManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
         _engine.CreateWorkspace(name, description, componentIds);
-    public void SaveWorkspace(ProfileManifest workspace) => _engine.SaveWorkspace(workspace);
+    public void SaveWorkspace(WorkspaceManifest workspace) => _engine.SaveWorkspace(workspace);
     public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string profileId, CancellationToken cancellationToken = default) =>
         _engine.DiffAsync(profileId, cancellationToken);
     public Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
