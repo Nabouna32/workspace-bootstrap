@@ -60,7 +60,7 @@ public sealed class ConfigurationTests
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var components = configuration.LoadComponents();
-        var profiles = configuration.LoadProfiles();
+        var profiles = configuration.LoadWorkspaces();
 
         Assert.IsNotEmpty(profiles);
         Assert.AreEqual(
@@ -88,8 +88,8 @@ public sealed class ConfigurationTests
 
         foreach (var component in components.Values)
         {
-            foreach (var profileId in component.Profiles ?? Array.Empty<string>())
-                Assert.IsTrue(profiles.ContainsKey(profileId), $"{component.Id} references unknown profile {profileId}.");
+            foreach (var workspaceId in component.Profiles ?? Array.Empty<string>())
+                Assert.IsTrue(profiles.ContainsKey(workspaceId), $"{component.Id} references unknown profile {workspaceId}.");
         }
     }
 
@@ -189,7 +189,7 @@ public sealed class ConfigurationTests
             "Remove app",
             "Application removal test",
             DesiredState: new DesiredStateManifest(
-                [new ProfileApplication("test-app", null, null, "absent")],
+                [new WorkspaceApplication("test-app", null, null, "absent")],
                 [],
                 [],
                 [],
@@ -443,7 +443,7 @@ public sealed class ConfigurationTests
             "Test",
             "Test profile",
             DesiredState: new DesiredStateManifest(
-                [new ProfileApplication("vscode", "minimum", "1.2.3")],
+                [new WorkspaceApplication("vscode", "minimum", "1.2.3")],
                 [],
                 [],
                 [],
@@ -512,7 +512,7 @@ public sealed class ConfigurationTests
             paths,
             inventory);
 
-        var plan = await engine.PlanAsync(configuration.LoadProfiles().Values.First().Id);
+        var plan = await engine.PlanAsync(configuration.LoadWorkspaces().Values.First().Id);
 
         Assert.IsNotEmpty(plan.Items);
         Assert.IsTrue(plan.Items.All(item =>
@@ -690,8 +690,8 @@ public sealed class ProvisioningPlanContractTests
             paths,
             new InventoryScanner([]));
 
-        var plan = await engine.PlanAsync(configuration.LoadProfiles().Values.First().Id);
-        Assert.AreEqual(configuration.LoadProfiles().Values.First().Id, plan.ProfileId);
+        var plan = await engine.PlanAsync(configuration.LoadWorkspaces().Values.First().Id);
+        Assert.AreEqual(configuration.LoadWorkspaces().Values.First().Id, plan.WorkspaceId);
         Assert.IsFalse(string.IsNullOrWhiteSpace(plan.InventoryScanId));
         Assert.IsNotEmpty(plan.Items);
 
@@ -903,7 +903,7 @@ public sealed class WorkspaceStoreTests
             "User-owned desired state.",
             ["github-cli"]);
 
-        var loaded = configuration.LoadProfiles();
+        var loaded = configuration.LoadWorkspaces();
 
         Assert.IsTrue(File.Exists(Path.Combine(workspaceRoot, $"{workspace.Id}.json")));
         Assert.IsTrue(loaded.ContainsKey(workspace.Id));
@@ -934,13 +934,13 @@ public sealed class WorkspaceStoreTests
             Name = "Updated Workspace",
             DesiredState = workspace.DesiredState! with
             {
-                Applications = [new ProfileApplication("vscode")]
+                Applications = [new WorkspaceApplication("vscode")]
             }
         };
 
         configuration.SaveWorkspace(updated);
 
-        var loaded = configuration.LoadProfiles()[workspace.Id];
+        var loaded = configuration.LoadWorkspaces()[workspace.Id];
 
         Assert.AreEqual("Updated Workspace", loaded.Name);
         CollectionAssert.AreEqual(
