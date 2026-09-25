@@ -36,9 +36,9 @@ A full or partial reconstruction is acceptable if incremental repair would prese
 
 ## Known implementation debt
 
-The current code still contains historical bootstrap/provisioning naming and abstractions, and the desktop navigation/UX does not yet fully express the broader permanent control-center model described by the product documents.
+The implementation baseline has now been cleaned of the legacy bootstrap/provisioning runtime paths and public operation naming audited in this phase. Compatibility terminology remains in historical documentation and the component manifest schema, while the desktop navigation/UX still does not fully express the broader permanent control-center model described by the product documents.
 
-These are alignment problems to resolve, not reasons to weaken the intended product direction.
+These remaining gaps are alignment work, not reasons to weaken the intended product direction.
 
 ## Verification
 
