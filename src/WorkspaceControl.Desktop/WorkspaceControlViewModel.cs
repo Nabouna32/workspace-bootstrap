@@ -196,7 +196,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     {
         WindowsAppearanceValues.Light => _localizer.Get("WindowsAppearanceLight"),
         WindowsAppearanceValues.Dark => _localizer.Get("WindowsAppearanceDark"),
-        _ => _localizer.Get("Undefined")
+        _ => _localizer.Get("WindowsAppearanceSystem")
     };
 
     public string ApplicationSearchText
