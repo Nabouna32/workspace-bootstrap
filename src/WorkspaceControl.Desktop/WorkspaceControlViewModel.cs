@@ -183,8 +183,21 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public string WindowsAppearance
     {
         get => _windowsAppearance;
-        set => SetField(ref _windowsAppearance, value);
+        set
+        {
+            if (!SetField(ref _windowsAppearance, value))
+                return;
+
+            OnPropertyChanged(nameof(WindowsAppearanceDisplay));
+        }
     }
+
+    public string WindowsAppearanceDisplay => WindowsAppearance switch
+    {
+        WindowsAppearanceValues.Light => _localizer.Get("WindowsAppearanceLight"),
+        WindowsAppearanceValues.Dark => _localizer.Get("WindowsAppearanceDark"),
+        _ => _localizer.Get("Undefined")
+    };
 
     public string ApplicationSearchText
     {
