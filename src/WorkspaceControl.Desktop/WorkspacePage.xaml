@@ -246,7 +246,7 @@
 
                     <ListView
                         x:Uid="WorkspacePage_PlanList"
-                        ItemsSource="{Binding ProvisioningPlan.Items}"
+                        ItemsSource="{Binding WorkspacePlan.Items}"
                         SelectionMode="None"
                         MaxHeight="360">
                         <ListView.ItemTemplate>
