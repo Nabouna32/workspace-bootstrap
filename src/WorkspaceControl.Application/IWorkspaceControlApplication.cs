@@ -8,9 +8,9 @@ public interface IWorkspaceControlApplication
     IReadOnlyList<ComponentManifest> GetApplicationCatalog();
     WorkspaceManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds);
     void SaveWorkspace(WorkspaceManifest workspace);
-    Task<DesiredStateDiff> GetDesiredStateDiffAsync(string profileId, CancellationToken cancellationToken = default);
-    Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default);
-    Task<ProvisioningOperation> CreateProvisioningAsync(string profileId, CancellationToken cancellationToken = default);
+    Task<DesiredStateDiff> GetDesiredStateDiffAsync(string workspaceId, CancellationToken cancellationToken = default);
+    Task<ProvisioningPlan> GetPlanAsync(string workspaceId, CancellationToken cancellationToken = default);
+    Task<ProvisioningOperation> CreateProvisioningAsync(string workspaceId, CancellationToken cancellationToken = default);
     string ConfirmProvisioning(string operationId);
     Task RunProvisioningAsync(string operationId, CancellationToken cancellationToken = default);
     ProvisioningOperation? GetProvisioningStatus(string operationId);
