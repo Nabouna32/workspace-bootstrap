@@ -3,7 +3,7 @@
   <data name="WorkspacePage_Title.Text" xml:space="preserve"><value>My Workspace</value><comment>Page title.</comment></data>
   <data name="WorkspacePage_Subtitle.Text" xml:space="preserve"><value>Build your desired state, compare it with this PC, then review and confirm changes.</value><comment>Explain that changes are reviewed before application.</comment></data>
   <data name="WorkspacePage_ChooseHeading.Text" xml:space="preserve"><value>Workspace</value></data>
-  <data name="WorkspacePage_ProfileList.AutomationProperties.Name" xml:space="preserve"><value>My Workspaces</value></data>
+  <data name="WorkspacePage_WorkspaceeList.AutomationProperties.Name" xml:space="preserve"><value>My Workspaces</value></data>
   <data name="WorkspacePage_ReviewHeading.Text" xml:space="preserve"><value>3. Review and apply</value></data>
   <data name="WorkspacePage_PlanList.AutomationProperties.Name" xml:space="preserve"><value>Operation plan items</value></data>
   <data name="WorkspacePage_Confirm.Content" xml:space="preserve"><value>Confirm and apply</value></data>
@@ -21,7 +21,7 @@
   <data name="WorkspacePage_AvailableVersion.Text" xml:space="preserve"><value>Available</value></data>
   <data name="WorkspacePage_DesiredVersion.Text" xml:space="preserve"><value>Desired</value></data>
   <data name="WorkspacePage_StateCode.AutomationProperties.Name" xml:space="preserve"><value>Observed state</value></data>
-  <data name="NoProvisioningOperation" xml:space="preserve"><value>No provisioning operation</value></data>
+  <data name="NoWorkspace operationOperation" xml:space="preserve"><value>No workspace operation operation</value></data>
   <data name="AwaitingConfirmation" xml:space="preserve"><value>Awaiting your confirmation</value></data>
   <data name="Queued" xml:space="preserve"><value>Queued</value></data>
   <data name="ApplyingConfirmedPlan" xml:space="preserve"><value>Applying confirmed plan</value></data>
@@ -36,16 +36,16 @@
   <data name="ReadySoftwareEntriesFormat" xml:space="preserve"><value>Ready · {0} software entries</value></data>
   <data name="RefreshCancelled" xml:space="preserve"><value>Refresh cancelled</value></data>
   <data name="RefreshFailed" xml:space="preserve"><value>Refresh failed</value></data>
-  <data name="GeneratingProvisioningPlan" xml:space="preserve"><value>Generating provisioning plan…</value></data>
+  <data name="GeneratingWorkspace operationPlan" xml:space="preserve"><value>Generating workspace operation plan…</value></data>
   <data name="PlanReadyForReview" xml:space="preserve"><value>Plan ready for review</value></data>
   <data name="PlanGenerationCancelled" xml:space="preserve"><value>Plan generation cancelled</value></data>
   <data name="PlanGenerationFailed" xml:space="preserve"><value>Plan generation failed</value></data>
-  <data name="StartingProvisioning" xml:space="preserve"><value>Starting provisioning…</value></data>
-  <data name="ProvisioningStarted" xml:space="preserve"><value>Provisioning started</value></data>
-  <data name="ProvisioningCouldNotStart" xml:space="preserve"><value>Provisioning could not start</value></data>
-  <data name="ResumingProvisioning" xml:space="preserve"><value>Resuming provisioning…</value></data>
-  <data name="ProvisioningResumed" xml:space="preserve"><value>Provisioning resumed</value></data>
-  <data name="ProvisioningCouldNotResume" xml:space="preserve"><value>Provisioning could not resume</value></data>
+  <data name="StartingWorkspace operation" xml:space="preserve"><value>Starting workspace operation…</value></data>
+  <data name="Workspace operationStarted" xml:space="preserve"><value>Workspace operation started</value></data>
+  <data name="Workspace operationCouldNotStart" xml:space="preserve"><value>Workspace operation could not start</value></data>
+  <data name="ResumingWorkspace operation" xml:space="preserve"><value>Resuming workspace operation…</value></data>
+  <data name="Workspace operationResumed" xml:space="preserve"><value>Workspace operation resumed</value></data>
+  <data name="Workspace operationCouldNotResume" xml:space="preserve"><value>Workspace operation could not resume</value></data>
   <data name="MainWindow_Workspace.Content" xml:space="preserve"><value>My Workspace</value></data>
   <data name="MainWindow.Title" xml:space="preserve"><value>Workspace Control</value></data>
   <data name="MainWindow_Navigation.AutomationProperties.Name" xml:space="preserve"><value>Primary navigation</value></data>
