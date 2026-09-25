@@ -34,8 +34,8 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
     public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string workspaceId, CancellationToken cancellationToken = default) =>
         _provisioning.GetDesiredStateDiffAsync(workspaceId, cancellationToken);
 
-    public Task<WorkspacePlan> CreateWorkspacePlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
-        _provisioning.CreateWorkspacePlanAsync(workspaceId, cancellationToken);
+    public Task<WorkspacePlan> GetPlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+        _provisioning.GetPlanAsync(workspaceId, cancellationToken);
 
     public Task<WorkspaceOperation> CreateWorkspaceOperationAsync(string workspaceId, CancellationToken cancellationToken = default) =>
         _provisioning.CreateAsync(workspaceId, cancellationToken);
