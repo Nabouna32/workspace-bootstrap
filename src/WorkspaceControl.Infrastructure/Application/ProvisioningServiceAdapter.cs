@@ -10,7 +10,7 @@ internal sealed class ProvisioningServiceAdapter : IProvisioningService
     public ProvisioningServiceAdapter(ProvisioningEngine engine) =>
         _engine = engine ?? throw new ArgumentNullException(nameof(engine));
 
-    public IReadOnlyList<WorkspaceManifest> GetProfiles() => _engine.Profiles();
+    public IReadOnlyList<WorkspaceManifest> GetWorkspaces() => _engine.Profiles();
     public IReadOnlyList<ComponentManifest> GetApplicationCatalog() => _engine.ApplicationCatalog();
     public WorkspaceManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
         _engine.CreateWorkspace(name, description, componentIds);
