@@ -14,10 +14,10 @@ public static class WorkspaceControlApplicationFactory
             new WindowsRegistryUninstallInventoryProvider(),
             new WinGetInventoryProvider()
         ]);
-        var provisioning = new WorkspaceOperationEngine(configuration, installer, paths, inventory);
+        var workspaceOperations = new WorkspaceOperationEngine(configuration, installer, paths, inventory);
 
         return new WorkspaceControlApplication(
-            new Application.WorkspaceOperationServiceAdapter(provisioning),
+            new Application.WorkspaceOperationServiceAdapter(workspaceOperations),
             new Application.InventoryServiceAdapter(inventory),
             new SoftwareInventoryService([
                 new Software.RegistrySoftwareInventorySource(),
