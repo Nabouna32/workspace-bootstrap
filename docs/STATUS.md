@@ -55,6 +55,14 @@ The current Workspace UX is still too application-centric and too close to the e
 
 These remaining gaps are alignment work, not reasons to weaken the intended product direction.
 
+## Recent implementation progress
+
+- The Workspace page has been rebuilt around Workspace identity, managed scope, current-vs-desired comparison and explicit review before apply.
+- Adding an application no longer creates a Workspace implicitly; the user must explicitly select or create one.
+- The Home page is being reshaped into a Workspace-oriented control center rather than a collection of maintenance counters.
+- The first executable Windows desired-state slice is now available: Windows light/dark appearance is optional, user-scoped, reversible and represented through the existing plan/confirm/verify registry path. Undefined leaves the setting unmanaged.
+- The Windows appearance mapping is covered by domain-level tests.
+
 ## Verification
 
 Published Windows validation exists, but automated launch is not a substitute for real interactive Windows 11 UX, accessibility, DPI and localization validation.
