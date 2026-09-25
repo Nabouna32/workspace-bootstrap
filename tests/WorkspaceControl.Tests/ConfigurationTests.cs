@@ -180,7 +180,7 @@ public sealed class ConfigurationTests
 
         var componentDirectory = Path.Combine(
             root,
-            "bootstrap",
+            "catalog",
             "windows",
             "components",
             "test-app");
