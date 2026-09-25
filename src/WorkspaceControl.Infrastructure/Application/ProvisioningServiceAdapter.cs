@@ -10,17 +10,17 @@ internal sealed class ProvisioningServiceAdapter : IProvisioningService
     public ProvisioningServiceAdapter(ProvisioningEngine engine) =>
         _engine = engine ?? throw new ArgumentNullException(nameof(engine));
 
-    public IReadOnlyList<WorkspaceManifest> GetWorkspaces() => _engine.Profiles();
+    public IReadOnlyList<WorkspaceManifest> GetWorkspaces() => _engine.Workspaces();
     public IReadOnlyList<ComponentManifest> GetApplicationCatalog() => _engine.ApplicationCatalog();
     public WorkspaceManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
         _engine.CreateWorkspace(name, description, componentIds);
     public void SaveWorkspace(WorkspaceManifest workspace) => _engine.SaveWorkspace(workspace);
-    public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string profileId, CancellationToken cancellationToken = default) =>
-        _engine.DiffAsync(profileId, cancellationToken);
-    public Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
-        _engine.PlanAsync(profileId, cancellationToken);
-    public Task<ProvisioningOperation> CreateAsync(string profileId, CancellationToken cancellationToken = default) =>
-        _engine.CreateAsync(profileId, cancellationToken);
+    public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+        _engine.DiffAsync(workspaceId, cancellationToken);
+    public Task<ProvisioningPlan> GetPlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+        _engine.PlanAsync(workspaceId, cancellationToken);
+    public Task<ProvisioningOperation> CreateAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+        _engine.CreateAsync(workspaceId, cancellationToken);
     public string Confirm(string operationId) => _engine.Confirm(operationId);
     public Task RunAsync(string operationId, CancellationToken cancellationToken = default) =>
         _engine.RunAsync(operationId, cancellationToken);
