@@ -163,4 +163,19 @@
   <data name="SoftwarePage_AddToWorkspace.AutomationProperties.Name" xml:space="preserve"><value>Add this application to My Workspace</value></data>
   <data name="ApplicationAddedToWorkspace" xml:space="preserve"><value>Application added to My Workspace</value></data>
   <data name="MainWindow_Workspace.AutomationProperties.Name" xml:space="preserve"><value>My Workspace</value></data>
+
+  <data name="WorkspacePage_CurrentHeading.Text" xml:space="preserve"><value>Workspace identity</value></data>
+  <data name="WorkspacePage_IntentHeading.Text" xml:space="preserve"><value>What this Workspace manages</value></data>
+  <data name="WorkspacePage_IntentDescription.Text" xml:space="preserve"><value>A Workspace is a partial desired state. Anything you leave undefined stays untouched.</value></data>
+  <data name="WorkspacePage_ApplicationsDomain.Text" xml:space="preserve"><value>Applications</value></data>
+  <data name="WorkspacePage_ApplicationsDomainHint.Text" xml:space="preserve"><value>Explicit application requirements</value></data>
+  <data name="WorkspacePage_WindowsDomain.Text" xml:space="preserve"><value>Windows</value></data>
+  <data name="WorkspacePage_WindowsDomainHint.Text" xml:space="preserve"><value>Windows settings are not defined here yet</value></data>
+  <data name="WorkspacePage_OtherDomain.Text" xml:space="preserve"><value>Other system areas</value></data>
+  <data name="WorkspacePage_OtherDomainHint.Text" xml:space="preserve"><value>Privacy, performance, drivers, WSL and more</value></data>
+  <data name="WorkspacePage_Undefined.Text" xml:space="preserve"><value>Undefined</value></data>
+  <data name="WorkspacePage_ScopeHeading.Text" xml:space="preserve"><value>Managed scope</value></data>
+  <data name="WorkspacePage_ScopeDescription.Text" xml:space="preserve"><value>Select only the things you want this Workspace to control. Detection alone never creates a requirement.</value></data>
+  <data name="WorkspacePage_UpdatesSummary.Text" xml:space="preserve"><value>Updates detected</value></data>
+  <data name="WorkspacePage_ReviewDescription.Text" xml:space="preserve"><value>No change is applied here. Review the proposed actions and their impact before confirming the operation.</value></data>
 </root>
