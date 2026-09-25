@@ -6,7 +6,7 @@
 - Target: **Windows 11 x64**.
 - Permanent Windows control center; not a one-time bootstrapper.
 - Primary user concept: **My Workspace**.
-- Technical desired-state representation: **ProfileManifest**.
+- Technical desired-state representation: **WorkspaceManifest**.
 - Local operation must remain useful without an account or cloud service.
 
 ## Source of truth
