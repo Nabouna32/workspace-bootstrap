@@ -1,41 +1,64 @@
 # Workspace Control — Product Vision
 
-## Mission
-Workspace Control is a permanent Windows 11 control center. It turns fragmented Windows administration into a clear, understandable and safe experience.
+## Purpose
 
-## User experience contract
+Workspace Control is a permanent Windows 11 control center. It evolved from the original bootstrapper idea into a local-first product for understanding, configuring and maintaining a Windows machine over time.
 
-The user-facing product is built around **My Workspace**: the user observes the real PC, chooses what should be managed, checks/unchecks desired capabilities, saves the result, compares it with current state, reviews impact, confirms and applies the exact persisted plan.
+The product should be **simple in surface and powerful underneath**: everyday users should not need to understand Windows internals, while advanced users must retain access to the evidence and technical detail behind an operation.
 
-Workspace Control must not require users to choose a predefined profile. Product-supplied profiles, if present, are optional editable templates. The technical desired-state representation remains `ProfileManifest`.
+## Product model
 
-## Core jobs
-- Install, update and uninstall software.
-- Discover software even when no curated definition exists.
-- Identify residuals conservatively.
-- Reuse a verified local installer when the requested current version is already present.
-- Inspect and configure supported Windows settings and policies.
-- Recommend and apply documented optimizations.
-- Diagnose Windows and application problems.
-- Inspect and manage drivers with appropriate caution.
-- Install and configure WSL.
-- Create, edit, import, export and apply user-owned Workspaces (technical `ProfileManifest` documents).
-- Expose the same capabilities through CLI and future API.
-- Provide an extension path through providers/plugins.
+The central user concept is **My Workspace**: a user-owned desired state describing what they want Workspace Control to manage.
 
-## Audience
-Everyday users, power users, developers, technicians, small businesses and future fleet administrators use the same engine. The UI changes complexity rather than creating separate products.
+A Workspace may eventually cover applications, Windows configuration, drivers, WSL, optimizations and conditions. Predefined profiles, if offered, are optional editable templates and never the mandatory primary experience.
 
-## Safety philosophy
-Normal interactive mode never mutates the machine without explicit user confirmation. Automation is possible only when explicitly enabled by the user or a future administrator policy.
+The core interaction is:
 
-Every meaningful mutation explains what changes, why, affected scope, risk, reversibility and restart requirements. Irreversible changes are clearly labelled and require stronger confirmation.
+**observe → choose desired state → compare → review → explicitly confirm → apply → verify**
 
-## Non-goals
-Workspace Control will never become an antivirus, VPN, password manager or generic endpoint-security suite. It may manage Windows security-related configuration where that is legitimately part of Windows administration.
+## Principles
 
-## Local operation and installation
-Core local operation does not require an account or cloud. Profiles can be exported/imported; installation remains online-first.
+- Local operation remains useful without an account or cloud service.
+- Interactive operations do not silently mutate the system.
+- Detection can be broad; mutation is conservative.
+- Unknown state remains visible rather than being guessed away.
+- Every important change should be explainable, risk-aware and verified.
+- Providers are implementation mechanisms, not product policy.
+- WinGet is a provider, not the product architecture.
+- Cloud and fleet management are future extensions, not prerequisites for the local product.
+- Accessibility, localization, security and maintainability are product quality requirements.
 
-## Future SaaS
-A future optional service may add accounts, synchronized profiles, machine groups, fleet inventory, compliance/diff views, remote orchestration, reports and alerts. The local engine remains responsible for executing Windows operations.
+## Scope
+
+Long-term product domains include:
+
+- applications and software;
+- Windows administration and policies;
+- diagnostics;
+- cleanup;
+- optimization;
+- drivers;
+- WSL;
+- Workspaces / desired state;
+- cache and artifact management;
+- providers and controlled extensions;
+- future cloud/fleet capabilities.
+
+This list describes product direction, not a promise that every domain belongs in the first public release.
+
+## Boundaries
+
+Workspace Control is not intended to become:
+
+- a silent system modification engine;
+- a generic registry cleaner;
+- a WinGet-only frontend;
+- a PowerShell wrapper presented as an architecture;
+- a cloud-dependent product;
+- an opaque automation tool.
+
+## Technology direction
+
+The supported desktop target is Windows 11 x64, using C#/.NET and WinUI 3 / Windows App SDK. The CLI shares the same application/domain contracts.
+
+The product is designed local-first so that future cloud synchronization can feed the same local desired-state engine rather than creating a second Windows execution architecture.

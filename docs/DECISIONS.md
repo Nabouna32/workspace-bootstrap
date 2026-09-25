@@ -1,50 +1,41 @@
-# Workspace Control — Decision Audit
+# Workspace Control — Decisions
 
-This document records architectural decisions reconstructed from the repository, merged pull requests and current implementation. It is an engineering guardrail, not a transcript of private chat history.
+This file records durable decisions and their context. It is not a development journal and it does not invent history that cannot be supported by repository evidence.
 
-## What was verified
+## Baseline decisions
 
-The repository history contains an explicit portable-storage direction:
+### Product identity
 
-- **PR #1 — native C# Windows cutover:** the merged change explicitly described moving application state and installer cache into the portable application package.
-- **PR #14 — provisioning hardening:** the merged change introduced isolated workspace roots for deterministic tests. That is a testability mechanism, not a product requirement for hidden per-user storage.
-- **PR #19 — Workspace Control architecture:** the merged change moved mutable cache/state/log data out of the installation directory and made packaged configuration resolve from the application content root. This established a distinction between packaged read-only resources and mutable application data, but did not establish AppData as a product requirement.
-- **PR #56 — profile import/export:** the merged change documented profiles as portable data and added safe import/export.
-- **PR #81 — product-contract restoration:** the merged documentation established `docs/PRODUCT-EXPERIENCE.md` as the canonical product/UX contract and added anti-drift rules to `AGENTS.md`.
-- **PR #82 — first My Workspace implementation:** the open change introduced LocalAppData persistence for user Workspaces. That choice is inconsistent with the earlier portable-storage direction and is therefore corrected by the current audit rather than treated as a new product decision.
+Workspace Control is a permanent Windows 11 control center. The original bootstrapper concept is historical context, not the current product model.
 
-## Current decision
+### User model
 
-The product contract is now explicit:
+**My Workspace** is the primary user-facing desired-state concept. Users choose what they want managed. Predefined profiles are optional editable templates.
 
-> **Workspace Control is portable. Application-owned mutable state must remain under the explicit portable application root. It must never silently move to AppData or another hidden per-user store.**
+### Safety
 
-This includes Workspaces, application configuration/preferences, cache, operation state, optimization state and application-owned logs.
+Normal interactive operation does not mutate silently. Important changes are planned, reviewed and explicitly confirmed before execution, followed by verification.
 
-The only supported default root is `AppContext.BaseDirectory`; constructors may receive an explicit root for tests or controlled composition.
+### Architecture
 
-## Important distinction
+Desktop and CLI share application/domain contracts. Infrastructure owns Windows/provider integration. WinGet is a provider, not the architecture.
 
-“Portable” does **not** mean that every Windows resource is stored as a file beside the application.
+### Portability
 
-Workspace Control may legitimately use Windows system stores when those stores are the **thing being managed**. For example, a registry-backed Workspace setting is a Windows configuration target. It must not be confused with using the Registry to store Workspace Control's own configuration.
+Application-owned mutable state is portable and explicit. Hidden AppData persistence is forbidden unless a future explicit decision changes the product contract.
 
-Likewise, an explicit user-selected export destination is not hidden application persistence.
+### Technology
 
-## What cannot be claimed from history
+The supported desktop stack is C#/.NET 10 with WinUI 3 / Windows App SDK on Windows 11 x64.
 
-The repository does not contain a complete transcript of the long private product discussions that preceded every PR. Where those discussions are not preserved in repository artifacts, this audit does not invent them.
+### Local-first
 
-The current portable/no-hidden-AppData rule is therefore recorded explicitly here and in `AGENTS.md` so future implementation work does not depend on recovering conversational context.
+The local product does not require an account or cloud service. Future cloud/fleet capabilities must reuse the local desired-state/execution model rather than introduce a second Windows engine.
 
-## Anti-drift rule
+## Decision discipline
 
-When implementation reality conflicts with this document, the implementation is the part that must be corrected unless the product direction is deliberately changed.
+When a new decision changes product direction, record it here and update affected canonical documents in the same coherent change.
 
-A deliberate change to the portability model requires:
+Implementation details do not become product decisions merely because they exist in code.
 
-1. an explicit product/architecture decision;
-2. updates to this document, `docs/PORTABILITY.md` and `AGENTS.md`;
-3. an impact audit of configuration, Workspaces, cache, state, logs, packaging, uninstall/reinstall and backup behavior;
-4. regression tests and CI guardrails;
-5. a coherent PR description explaining the migration and user impact.
+When historical context cannot be verified, record the uncertainty instead of reconstructing a false history.

@@ -1,109 +1,94 @@
 # Workspace Control — Architecture
 
-## Target shape
-```text
-WinUI 3 Desktop ─┐
-CLI ─────────────┼──> Application / Domain Engine
-Future API ──────┤              │
-Future Cloud ────┘              ├── Software providers
-                                ├── Windows administration
-                                ├── Drivers
-                                ├── WSL
-                                ├── Optimization / Policies
-                                ├── Diagnostics
-                                ├── Profiles / Desired state
-                                ├── Cache / Offline
-                                ├── Security
-                                └── Plugins
-```
+## Architectural goal
+
+The architecture supports a local Windows control center whose user-facing model is Workspace / desired state rather than a provisioning-only engine.
+
+The primary dependency direction is:
+
+**Desktop / CLI → Application → Domain**
+
+with **Infrastructure** implementing application-facing adapters and integrating Windows and providers.
 
 ## Layers
-### Presentation
-WinUI 3 handles navigation, input, accessibility, localization and presentation. It never owns Windows mutation logic.
-
-### Application
-Use cases coordinate inventory, planning, confirmation, operation lifecycle, profiles, cache and diagnostics.
 
 ### Domain
-Defines application, inventory, capability, desired state, plan, operation, risk, provenance, provider, profile, diagnostic and cache concepts. Domain rules remain testable without a live machine.
 
-### Infrastructure / Windows adapters
-Adapters communicate with Registry, Windows APIs, services, scheduled tasks, Windows Update, Event Log, WMI/CIM, WSL, package providers and installers. They return structured evidence/results.
+Contains stable concepts that can be tested without a live Windows machine:
 
-## Capabilities
-Stable capabilities include `DetectApplication`, `InstallApplication`, `UpdateApplication`, `RemoveApplication`, `InspectResiduals`, `ObserveRegistrySetting`, `ApplyRegistrySetting`, `InspectDriver`, `UpdateDriver`, `InspectWindowsPolicy`, `ApplyWindowsPolicy`, `ApplyOptimization`, `RevertOptimization`, `RunDiagnostic`, `InstallWsl`, `ConfigureWsl`, `ApplyProfile`, `ManageCache` and related operations.
+- applications and inventory;
+- capabilities;
+- desired state;
+- Workspaces / ProfileManifest;
+- plans;
+- operations;
+- risk and reversibility;
+- provenance and evidence;
+- diagnostics.
 
-Each capability declares inputs, preconditions, risk, elevation requirement, preview, execution, postconditions and rollback metadata where available.
+### Application
 
-## Product boundary
+Owns use-case orchestration and coordinates:
 
-The presentation layer implements the user-facing Workspace model defined by `docs/PRODUCT-EXPERIENCE.md`. Application and Infrastructure layers must not redefine that model. A `ProfileManifest` is the technical desired-state contract behind a Workspace.
+**observed state + desired state → diff → plan → confirmation → execution → verification**
 
-## Desired state
-```text
-Desired state + observed evidence
-          ↓
-        Desired-state Diff
-          ↓
-         Plan
-          ↓
-   User confirmation
-          ↓
-      Operation
-          ↓
-    Postcondition
-          ↓
-     Final verification
-        ↓
-     Final state
-```
+It must not contain WinUI concerns or concrete Windows integration details.
 
-## Providers
-Providers are replaceable adapters. Examples include official vendor installers, MSI/EXE, Store/package sources, WinGet, portable artifacts and future plugins. Providers expose evidence and provenance; they do not own product policy.
+### Infrastructure
 
-## Provisioning operation lifecycle
+Implements Windows and external mechanisms such as:
 
-A provisioning mutation is never implied by computing a plan. Registry mutations and application removals use the same persisted operation lifecycle: capture snapshot → mutate → post-condition verification → final verification, with reverse-order rollback on failure. Application removal snapshots the installed version and restores that version through the provisioning installer when rollback is required. The lifecycle is persisted as:
+- Registry;
+- Windows APIs;
+- services and scheduled tasks;
+- Event Log / WMI / CIM;
+- WSL;
+- package and installer providers;
+- cache and artifact handling.
 
-Observed State → Desired State → Plan → awaiting-confirmation → queued → running → post-condition verification → completed
+Providers are replaceable adapters. They provide evidence and execution mechanisms but do not own product policy.
 
-ProvisioningOperation stores the exact ProvisioningPlan that the user confirmed. Apply executes that persisted plan rather than recomputing a replacement plan. Before each uncompleted mutation, current inventory is compared with the corresponding planned precondition. A divergence makes the operation stale and non-resumable until a new plan is created and explicitly confirmed. Recovery/resume reuses the same persisted plan and repeats the precondition check before any mutation.
+### Desktop
 
-## Privilege boundary
-The normal UI runs unelevated. A small privileged component accepts a narrow structured command contract and validates all arguments. An explicitly elevated application session may be offered as a convenience but is not the security foundation.
+WinUI 3 / Windows App SDK provides presentation, navigation, localization, accessibility and user interaction. Windows mutation logic does not belong in the presentation layer.
 
-## Application-owned storage
+### CLI
 
-Workspace Control is a portable, self-contained, unpackaged application. Application-owned mutable data stays under the explicit portable application root derived from `AppContext.BaseDirectory`.
+The CLI consumes the same application/domain contracts and does not maintain a second implementation of product behavior.
 
-The application-owned layout is:
-```text
-<portable application root>/
-├── workspaces/
-├── cache/
-│   ├── installers/
-│   ├── metadata/
-│   └── staging/
-├── state/
-└── logs/
-```
+## Desired-state mutation
 
-Packaged `bootstrap/windows` resources remain application content/read-only inputs. Tests and controlled composition may inject an isolated root.
+Important mutations use a persisted operation lifecycle:
 
-Infrastructure must not introduce hidden AppData or Registry persistence for Workspace Control's own state. Windows stores remain valid when they are the target system being observed or managed. See `docs/PORTABILITY.md` and `docs/DECISIONS.md`.
+**Observed → Desired → Plan → awaiting confirmation → queued → running → post-condition verification → completed**
 
-## Cache
-Installer artifacts are staged and verified before use. A verified artifact is reused when it already matches the requested current version; there is no cache-only/offline provisioning mode. Failed downloads never invalidate valid artifacts.
+If observed state diverges from the persisted plan before an uncompleted mutation, the operation becomes stale rather than silently replanning.
 
-## Plugins
-Plugins are planned as a controlled extension boundary for providers, diagnostics, optimizations and Windows/WSL capabilities. Metadata, compatibility and permissions are required; unrestricted privileged access is never implicit.
+Plans are read-only after confirmation. Apply executes the persisted plan.
 
-## Future cloud
-Cloud desired state resolves into the same local engine model. There is no second implementation of Windows mutation logic.
+## Security boundary
 
-## Documentation invariant
+The normal application remains unelevated where possible. Privileged operations use a narrow, structured and auditable boundary with validated inputs.
 
-Architecture changes may change how capabilities are implemented, composed, persisted or tested. They must not silently change the user-facing Workspace, application catalogue, navigation, safety or UX model. Product-direction changes update the product/UX contract first and then the implementation.
+Downloaded artifacts are verified before use. User-controlled, network and provider data are treated as untrusted.
+
+## Storage
+
+Workspace Control is a self-contained, unpackaged portable application.
+
+Application-owned mutable data lives under an explicit portable application root. The application must not silently use AppData, ApplicationData.Current or Registry-backed application configuration/state.
+
+Windows system stores remain valid when they are the target being observed or managed.
+
+## Extensibility
+
+Plugins are a future controlled extension boundary. Compatibility, metadata, permissions and trust must be explicit; privileged access is never implicit.
 
 ## Technology
-C#/.NET 10, WinUI 3/Windows App SDK, Windows 11 x64 and a .NET CLI. WPF is retired; WinUI 3 is the only desktop presentation technology.
+
+- Windows 11 x64
+- C#
+- .NET 10
+- WinUI 3 / Windows App SDK
+
+The architecture should remain as simple as the product permits. Future cloud/fleet functionality should feed the same local engine rather than duplicate Windows mutation logic.

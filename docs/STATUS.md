@@ -1,69 +1,46 @@
-# Status
+# Workspace Control — Status
 
-## Product direction
-The product is **Workspace Control**, a permanent Windows 11 control center. The user-facing desired-state concept is **My Workspace**: users choose what they want managed on their PC rather than being forced to select a predefined profile. `ProfileManifest` remains the technical desired-state representation.
+> This document is a concise operational snapshot. Git history remains the source of historical detail.
 
-The canonical product/UX contract is `docs/PRODUCT-EXPERIENCE.md`. Engine foundations must not be mistaken for completed product experience.
+## Current state
 
-## Confirmed decisions
+The repository contains a functioning WinUI 3 desktop foundation, shared application/domain layers, Windows infrastructure and CLI.
+
+The first **My Workspace** editor is functional for application desired state: users can work with user-owned Workspaces, search/select applications and persist the desired state under the portable application root.
+
+The provisioning lifecycle includes persisted planning, confirmation boundaries, precondition checks and final verification.
+
+Software inventory aggregation preserves provider isolation, provenance/evidence and partial-failure diagnostics.
+
+The published Windows validation workflow builds and smoke-tests a self-contained x64 package. Real interactive Windows 11 visual, keyboard, accessibility, localization and DPI validation still requires a human on Windows.
+
+## Current product gap
+
+The product experience is not complete.
+
+Remaining major surfaces include:
+
+- richer Home / control-center dashboard;
+- first-class Applications catalogue and management actions;
+- broader Windows administration;
+- semantic state presentation across domains;
+- Optimizations;
+- Drivers;
+- WSL;
+- Diagnostics;
+- Cleanup;
+- richer desired-state diff/risk/reversibility UX.
+
+## Important constraints
+
 - Windows 11 only.
-- C#/.NET 10.
-- WinUI 3 / Windows App SDK for desktop.
-- Fluent-inspired modern UX with System/Light/Dark themes.
-- Semantic status colors.
-- Simple / Advanced / Expert presentation levels.
-- Online-first installation; a verified local installer is reused when it already matches the requested current version. There is no cache-only/offline provisioning mode.
-- Software, Windows administration, diagnostics, cleanup, optimization, drivers and WSL are product domains.
-- Workspaces represent user-owned desired state; `ProfileManifest` is the technical profile/schema representation.
-- Predefined profiles, if present, are optional editable templates, not the primary UX.
-- Local import/export first; future cloud/fleet is optional.
-- Providers/plugins are planned.
-- Normal interactive mode never mutates without explicit confirmation.
-- Elevated session is optional; least privilege remains the architecture.
-- GitHub-hosted CI only; self-hosted runners are abandoned and must not be reintroduced.
+- Portable, self-contained, unpackaged desktop.
+- No hidden AppData persistence for application-owned state.
+- Interactive mutations require explicit confirmation.
+- GitHub-hosted CI only.
+- English and French localization.
+- Product direction comes from canonical documentation; status never overrides it.
 
-## Current architecture state
-- Native WinUI 3 shell exists under `src/WorkspaceControl.Desktop`.
-- Domain models and Application contracts are separated from Windows implementation.
-- `WorkspaceControl.Infrastructure` is a real project with its own physical source tree; the retired `WorkspaceBootstrap.Engine` project has been removed.
-- Desktop and CLI consume the Application contract through an explicit Infrastructure composition root; the old `EngineFacade` service-locator layer is removed.
-- Infrastructure namespaces are aligned with `WorkspaceControl.Infrastructure`.
-- Software inventory aggregation has provider isolation, deterministic merge behavior, provenance/evidence preservation and partial-failure diagnostics.
-- Workspace Control is distributed as a portable, self-contained, unpackaged application; application-owned mutable data stays under the explicit portable application root and never silently falls back to AppData.
-- Packaged configuration is resolved from the application content root.
-- Legacy WPF desktop has been removed; WinUI 3 is the only desktop UI target.
-- The desktop now exposes a first My Workspace builder: user-owned schema-2 Workspaces are persisted under the portable application root, applications can be searched and checked/unchecked from the catalog, optional built-in templates can be copied into a user-owned Workspace, and the existing persisted provisioning lifecycle remains the safety boundary.
-- The provisioning surface uses WinUI .resw localization for English and French, localized view-model status/progress messages, and explicit accessibility names for provisioning controls and status regions.
-- A dedicated Windows published-validation workflow now builds a self-contained x64 package, validates its required payload, runs the published CLI smoke test, launches the published WinUI executable for a timed smoke test, and uploads the validated package as an artifact.
+## Next work
 
-## Validation status
-- Repository source validation runs on GitHub-hosted Windows runners for pull requests and pushes to `main`.
-- Weekly/manual full validation already publishes a portable package and smoke-tests the packaged CLI.
-- The new Windows published-validation workflow adds a focused end-to-end package validation path for the desktop executable itself.
-- Real interactive UI behavior still requires a human Windows 11 validation pass; automated launch validation is not a substitute for visual, keyboard, accessibility, localization and DPI checks.
-
-## Current product-experience gap
-The first My Workspace editor is now functional end-to-end for application desired state, but the broader product experience remains incomplete. The portable-storage contract is explicit and guarded by regression tests and CI policy. The richer Home dashboard, first-class Applications management actions, semantic state presentation across domains, and Windows/Optimizations/Drivers/WSL/Diagnostics/Cleanup surfaces remain implementation work.
-
-## Next engineering priorities
-1. Expand My Workspace beyond application desired state to Windows settings, policies, optimizations and other supported capabilities.
-2. Build the first-class Applications catalogue and management actions on top of the shared inventory/provider contracts.
-3. Build the richer Home control-center dashboard and semantic state presentation.
-4. Execute and document real Windows 11 UI validation: navigation, localization, keyboard/focus, accessibility, DPI/scaling, long-running states, stale recovery, error presentation and visual clarity.
-5. Replace remaining infrastructure composition with a testable dependency-injection/composition strategy where it materially improves lifetime management.
-6. Complete Windows administration, policy, diagnostics, driver and WSL capability boundaries.
-7. Build richer desired-state diff presentation and risk/reversibility metadata.
-8. Harden verified installer reuse, artifact retention and integrity verification.
-9. Remove remaining historical names/dead documentation as each boundary becomes authoritative.
-
-## Reusable foundations
-- inventory providers and evidence/ownership;
-- installer verification;
-- cache staging and atomic promotion;
-- durable operations and recovery;
-- CLI contracts;
-- optimization scaffolding;
-- profile/configuration manifests;
-- published Windows package validation.
-
-These foundations are reusable implementation starting points, not proof that every product capability is complete.
+Prioritize product-experience completion over expanding infrastructure breadth. Keep the My Workspace model coherent while adding first-class domain surfaces and real Windows 11 validation.
