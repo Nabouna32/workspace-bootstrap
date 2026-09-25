@@ -31,10 +31,10 @@ public sealed record WorkspaceManifest(
     int SchemaVersion = 1,
     DesiredStateManifest? DesiredState = null)
 {
-    public IReadOnlyList<ProfileApplication> ApplicationRequests =>
+    public IReadOnlyList<WorkspaceApplication> ApplicationRequests =>
         SchemaVersion >= 2
             ? DesiredState?.Applications ?? []
-            : (Components ?? []).Select(componentId => new ProfileApplication(componentId)).ToArray();
+            : (Components ?? []).Select(componentId => new WorkspaceApplication(componentId)).ToArray();
 }
 
 public sealed record InstallerArtifact(
@@ -75,8 +75,8 @@ public static class ProvisioningActionCodes
 }
 
 public sealed record ProvisioningPlan(
-    string ProfileId,
-    string ProfileName,
+    string WorkspaceId,
+    string WorkspaceName,
     string InventoryScanId,
     IReadOnlyList<InventoryProviderDiagnostic> InventoryDiagnostics,
     IReadOnlyList<ProvisioningPlanItem> Items,
@@ -104,7 +104,7 @@ public sealed record ProvisioningStep(
 public sealed class ProvisioningOperation
 {
     public string OperationId { get; init; } = Guid.NewGuid().ToString("N");
-    public string ProfileId { get; init; } = "";
+    public string WorkspaceId { get; init; } = "";
     public string Status { get; set; } = ProvisioningOperationStatuses.AwaitingConfirmation;
     public ProvisioningPlan? Plan { get; set; }
     public int Completed { get; set; }
