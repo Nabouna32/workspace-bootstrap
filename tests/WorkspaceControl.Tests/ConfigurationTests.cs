@@ -211,7 +211,7 @@ public sealed class ConfigurationTests
 
         try
         {
-            var engine = new ProvisioningEngine(
+            var engine = new WorkspaceOperationEngine(
                 configuration,
                 new InstallerEngine(paths),
                 paths,
@@ -296,7 +296,7 @@ public sealed class ConfigurationTests
         {
             var registry = new RegistryDesiredStateObserver(
                 new FakeRegistryReader(new RegistryObservation(true, "0", "dword", null)));
-            var engine = new ProvisioningEngine(
+            var engine = new WorkspaceOperationEngine(
                 configuration,
                 new InstallerEngine(paths),
                 paths,
@@ -382,7 +382,7 @@ public sealed class ConfigurationTests
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-diff-tests", Guid.NewGuid().ToString("N")));
-        var engine = new ProvisioningEngine(
+        var engine = new WorkspaceOperationEngine(
             configuration,
             new InstallerEngine(paths),
             paths,
@@ -404,7 +404,7 @@ public sealed class ConfigurationTests
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-diff-tests", Guid.NewGuid().ToString("N")));
-        var engine = new ProvisioningEngine(
+        var engine = new WorkspaceOperationEngine(
             configuration,
             new InstallerEngine(paths),
             paths,
@@ -426,7 +426,7 @@ public sealed class ConfigurationTests
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
-        var engine = new ProvisioningEngine(
+        var engine = new WorkspaceOperationEngine(
             configuration,
             new InstallerEngine(paths),
             paths,
@@ -472,7 +472,7 @@ public sealed class ConfigurationTests
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
-        var engine = new ProvisioningEngine(
+        var engine = new WorkspaceOperationEngine(
             configuration,
             new InstallerEngine(paths),
             paths,
@@ -493,7 +493,7 @@ public sealed class ConfigurationTests
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
-        var engine = new ProvisioningEngine(
+        var engine = new WorkspaceOperationEngine(
             configuration,
             new InstallerEngine(paths),
             paths,
@@ -514,7 +514,7 @@ public sealed class ConfigurationTests
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
         var inventory = new InventoryScanner([new FailedInventoryProvider()]);
-        var engine = new ProvisioningEngine(
+        var engine = new WorkspaceOperationEngine(
             configuration,
             new InstallerEngine(paths),
             paths,
@@ -574,12 +574,12 @@ public sealed class ConfigurationTests
         public int CaptureCount { get; private set; }
         public int WriteCount { get; private set; }
         public int RestoreCount { get; private set; }
-        public ProvisioningRegistrySnapshot? RestoredSnapshot { get; private set; }
+        public WorkspaceRegistrySnapshot? RestoredSnapshot { get; private set; }
 
-        public ProvisioningRegistrySnapshot Capture(RegistrySettingDesiredState desired)
+        public WorkspaceRegistrySnapshot Capture(RegistrySettingDesiredState desired)
         {
             CaptureCount++;
-            return new ProvisioningRegistrySnapshot(
+            return new WorkspaceRegistrySnapshot(
                 desired.Hive,
                 desired.Key,
                 desired.ValueName,
@@ -590,7 +590,7 @@ public sealed class ConfigurationTests
 
         public void Write(RegistrySettingDesiredState desired) => WriteCount++;
 
-        public void Restore(ProvisioningRegistrySnapshot snapshot)
+        public void Restore(WorkspaceRegistrySnapshot snapshot)
         {
             RestoreCount++;
             RestoredSnapshot = snapshot;
@@ -685,14 +685,14 @@ public sealed class ConfigurationTests
 
 
 [TestClass]
-public sealed class ProvisioningPlanContractTests
+public sealed class WorkspacePlanContractTests
 {
     [TestMethod]
     public async Task Provisioning_plan_exposes_typed_contract_fields()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
-        var engine = new ProvisioningEngine(
+        var engine = new WorkspaceOperationEngine(
             configuration,
             new InstallerEngine(paths),
             paths,
