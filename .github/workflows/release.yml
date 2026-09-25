@@ -75,7 +75,7 @@ jobs:
         run: |
           $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-release"
           $winUiDesktop = Join-Path $package "WorkspaceControl/WorkspaceControl.exe"
-          $cli = Join-Path $package "WorkspaceBootstrap.Cli.exe"
+          $cli = Join-Path $package "WorkspaceControl.Cli.exe"
           $catalog = Join-Path $package "catalog/windows/components/catalog.json"
           $profiles = Join-Path $package "catalog/windows/templates"
           $readme = Join-Path $package "README.md"
