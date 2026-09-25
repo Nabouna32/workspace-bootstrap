@@ -32,6 +32,10 @@ The supported desktop stack is C#/.NET 10 with WinUI 3 / Windows App SDK on Wind
 
 The local product does not require an account or cloud service. Future cloud/fleet capabilities must reuse the local desired-state/execution model rather than introduce a second Windows engine.
 
+### Installation network policy
+
+Installation is currently **online-first**. A verified local installer may be reused when it already matches the requested current version, but the product does not currently support cache-only/offline provisioning. The historical brainstorming's offline/cache-only direction remains a future possibility unless explicitly promoted to a new product decision.
+
 ## Decision discipline
 
 When a new decision changes product direction, record it here and update affected canonical documents in the same coherent change.
