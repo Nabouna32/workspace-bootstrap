@@ -121,7 +121,7 @@ static object MapDiff(DesiredStateDiff diff)
     };
 }
 
-static object MapPlan(ProvisioningPlan plan)
+static object MapPlan(WorkspacePlan plan)
 {
     return new
     {
@@ -149,7 +149,7 @@ static object MapPlan(ProvisioningPlan plan)
     };
 }
 
-static object? MapOperation(ProvisioningOperation? operation)
+static object? MapOperation(WorkspaceOperation? operation)
 {
     if (operation is null) return null;
 
@@ -185,7 +185,7 @@ static object? MapOperation(ProvisioningOperation? operation)
     };
 }
 
-static object? MapDetail(ProvisioningOperation? operation)
+static object? MapDetail(WorkspaceOperation? operation)
 {
     if (operation is null) return null;
     return new
@@ -207,7 +207,7 @@ static object? MapDetail(ProvisioningOperation? operation)
     };
 }
 
-static object MapHistory(ProvisioningOperation operation) =>
+static object MapHistory(WorkspaceOperation operation) =>
     new
     {
         SchemaVersion = 1,
