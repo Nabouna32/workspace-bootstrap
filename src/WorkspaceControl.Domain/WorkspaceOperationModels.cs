@@ -5,7 +5,7 @@ namespace WorkspaceControl.Domain;
 public sealed record ComponentManifest(
     string Id,
     string Name,
-    string[]? Profiles,
+    [property: JsonPropertyName("profiles")] string[]? Templates,
     string? PackageId,
     string? Source,
     string? InstallerType,
