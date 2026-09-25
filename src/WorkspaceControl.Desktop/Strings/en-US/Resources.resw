@@ -178,4 +178,5 @@
   <data name="WorkspacePage_ScopeDescription.Text" xml:space="preserve"><value>Select only the things you want this Workspace to control. Detection alone never creates a requirement.</value></data>
   <data name="WorkspacePage_UpdatesSummary.Text" xml:space="preserve"><value>Updates detected</value></data>
   <data name="WorkspacePage_ReviewDescription.Text" xml:space="preserve"><value>No change is applied here. Review the proposed actions and their impact before confirming the operation.</value></data>
+  <data name="WorkspaceSelectionRequired" xml:space="preserve"><value>Select or create a Workspace before adding an application.</value></data>
 </root>
