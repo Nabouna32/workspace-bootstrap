@@ -152,12 +152,12 @@ public sealed class WorkspaceControlApplicationTests
 
     private sealed class FakeProvisioningService(params ProvisioningOperation[] history) : IProvisioningService
     {
-        public IReadOnlyList<ProfileManifest> GetProfiles() => [];
+        public IReadOnlyList<WorkspaceManifest> GetProfiles() => [];
         public IReadOnlyList<ComponentManifest> GetApplicationCatalog() => [];
-        public ProfileManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
+        public WorkspaceManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
             new("workspace-test", name, description, SchemaVersion: 2, DesiredState: new DesiredStateManifest(
                 componentIds.Select(id => new ProfileApplication(id)).ToArray(), [], [], [], [], []));
-        public void SaveWorkspace(ProfileManifest workspace) { }
+        public void SaveWorkspace(WorkspaceManifest workspace) { }
         public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string profileId, CancellationToken cancellationToken = default) =>
             Task.FromResult(new DesiredStateDiff(
                 profileId,
