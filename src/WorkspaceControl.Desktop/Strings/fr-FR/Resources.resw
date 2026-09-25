@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <data name="WorkspacePage_Title.Text" xml:space="preserve"><value>Profils et provisionnement</value></data>
-  <data name="WorkspacePage_Subtitle.Text" xml:space="preserve"><value>Vérifiez un plan enregistré avant que Workspace Control ne modifie ce PC.</value></data>
+  <data name="WorkspacePage_Title.Text" xml:space="preserve"><value>Mon Workspace</value></data>
+  <data name="WorkspacePage_Subtitle.Text" xml:space="preserve"><value>Définissez ce que ce PC doit gérer, comparez l’état réel, puis vérifiez et confirmez les changements.</value></data>
   <data name="WorkspacePage_ChooseHeading.Text" xml:space="preserve"><value>1. Choisir un état souhaité</value></data>
-  <data name="WorkspacePage_ProfileList.AutomationProperties.Name" xml:space="preserve"><value>Profils disponibles</value></data>
+  <data name="WorkspacePage_ProfileList.AutomationProperties.Name" xml:space="preserve"><value>Mes Workspaces</value></data>
   <data name="WorkspacePage_ReviewHeading.Text" xml:space="preserve"><value>3. Vérifier le plan</value></data>
-  <data name="WorkspacePage_PlanList.AutomationProperties.Name" xml:space="preserve"><value>Éléments du plan de provisionnement</value></data>
+  <data name="WorkspacePage_PlanList.AutomationProperties.Name" xml:space="preserve"><value>Éléments du plan</value></data>
   <data name="WorkspacePage_Confirm.Content" xml:space="preserve"><value>Confirmer et appliquer</value></data>
-  <data name="WorkspacePage_Confirm.AutomationProperties.Name" xml:space="preserve"><value>Confirmer et appliquer le plan de provisionnement</value></data>
+  <data name="WorkspacePage_Confirm.AutomationProperties.Name" xml:space="preserve"><value>Confirmer et appliquer le plan vérifié</value></data>
   <data name="WorkspacePage_Resume.Content" xml:space="preserve"><value>Reprendre en toute sécurité</value></data>
-  <data name="WorkspacePage_Resume.AutomationProperties.Name" xml:space="preserve"><value>Reprendre en toute sécurité l’opération de provisionnement en échec</value></data>
-  <data name="WorkspacePage_ProgressRing.AutomationProperties.Name" xml:space="preserve"><value>Opération de provisionnement en cours</value></data>
+  <data name="WorkspacePage_Resume.AutomationProperties.Name" xml:space="preserve"><value>Reprendre en toute sécurité l’opération en échec</value></data>
+  <data name="WorkspacePage_ProgressRing.AutomationProperties.Name" xml:space="preserve"><value>Opération Workspace en cours</value></data>
   <data name="WorkspacePage_StaleNote.Text" xml:space="preserve"><value>Si l’état observé change avant une étape non terminée, le plan enregistré devient obsolète et ne peut pas être repris. Générez un nouveau plan.</value></data>
-  <data name="WorkspacePage_ErrorInfoBar.Title" xml:space="preserve"><value>Erreur de provisionnement</value></data>
-  <data name="WorkspacePage_Status.AutomationProperties.Name" xml:space="preserve"><value>État du provisionnement</value></data>
-  <data name="WorkspacePage_Progress.AutomationProperties.Name" xml:space="preserve"><value>Progression du provisionnement</value></data>
-  <data name="WorkspacePage_CurrentComponent.AutomationProperties.Name" xml:space="preserve"><value>Composant de provisionnement actuel</value></data>
+  <data name="WorkspacePage_ErrorInfoBar.Title" xml:space="preserve"><value>Erreur de l’opération Workspace</value></data>
+  <data name="WorkspacePage_Status.AutomationProperties.Name" xml:space="preserve"><value>État de l’opération Workspace</value></data>
+  <data name="WorkspacePage_Progress.AutomationProperties.Name" xml:space="preserve"><value>Progression de l’opération Workspace</value></data>
+  <data name="WorkspacePage_CurrentComponent.AutomationProperties.Name" xml:space="preserve"><value>Élément actuel de l’opération</value></data>
   <data name="WorkspacePage_ActionCode.AutomationProperties.Name" xml:space="preserve"><value>Action prévue</value></data>
   <data name="WorkspacePage_InstalledVersion.Text" xml:space="preserve"><value>Installée</value></data>
   <data name="WorkspacePage_AvailableVersion.Text" xml:space="preserve"><value>Disponible</value></data>
@@ -106,7 +106,7 @@
   <data name="DiagnosticsPage_Subtitle.Text" xml:space="preserve"><value>Signaux des fournisseurs et de la découverte recueillis lors de la dernière analyse.</value></data>
   <data name="DiagnosticsPage_List.AutomationProperties.Name" xml:space="preserve"><value>Résultats des diagnostics</value></data>
   <data name="WorkspacePage_DiffHeading.Text" xml:space="preserve"><value>2. Observer et comparer</value></data>
-  <data name="WorkspacePage_DiffDescription.Text" xml:space="preserve"><value>Cette comparaison en lecture seule montre les besoins du profil sélectionné avant de créer un plan de modification.</value></data>
+  <data name="WorkspacePage_DiffDescription.Text" xml:space="preserve"><value>Cette comparaison en lecture seule montre comment votre Workspace diffère de l’état réel de ce PC avant de créer un plan.</value></data>
   <data name="WorkspacePage_DiffList.AutomationProperties.Name" xml:space="preserve"><value>Comparaison de l’état souhaité</value></data>
   <data name="WorkspacePage_DiffObserved.Text" xml:space="preserve"><value>Observé</value></data>
   <data name="WorkspacePage_DiffAvailable.Text" xml:space="preserve"><value>Disponible</value></data>
@@ -118,7 +118,7 @@
   <data name="DesiredStateObservationCancelled" xml:space="preserve"><value>Observation de l’état souhaité annulée</value></data>
   <data name="DesiredStateObservationFailed" xml:space="preserve"><value>Échec de l’observation de l’état souhaité</value></data>
   <data name="WorkspacePage_WorkspaceHeading.Text" xml:space="preserve"><value>Mon Workspace</value></data>
-  <data name="WorkspacePage_WorkspaceList.AutomationProperties.Name" xml:space="preserve"><value>Workspaces et modèles facultatifs</value></data>
+  <data name="WorkspacePage_WorkspaceList.AutomationProperties.Name" xml:space="preserve"><value>Mes Workspaces</value></data>
   <data name="WorkspacePage_Name.Header" xml:space="preserve"><value>Nom</value></data>
   <data name="WorkspacePage_Name.PlaceholderText" xml:space="preserve"><value>Nom du Workspace</value></data>
   <data name="WorkspacePage_Description.Header" xml:space="preserve"><value>Description</value></data>
@@ -137,7 +137,7 @@
   <data name="WorkspacePage_ObserveDiff.Content" xml:space="preserve"><value>Observer et comparer</value></data>
   <data name="WorkspacePage_ObserveDiff.AutomationProperties.Name" xml:space="preserve"><value>Observer le Workspace sélectionné et le comparer à ce PC</value></data>
   <data name="WorkspacePage_GeneratePlan.Content" xml:space="preserve"><value>Générer le plan à vérifier</value></data>
-  <data name="WorkspacePage_GeneratePlan.AutomationProperties.Name" xml:space="preserve"><value>Générer un plan de provisionnement à vérifier pour ce Workspace</value></data>
+  <data name="WorkspacePage_GeneratePlan.AutomationProperties.Name" xml:space="preserve"><value>Générer un plan à vérifier pour ce Workspace</value></data>
   <data name="DefaultWorkspaceName" xml:space="preserve"><value>Mon Workspace</value></data>
   <data name="DefaultWorkspaceDescription" xml:space="preserve"><value>Choisissez les applications et capacités que ce PC doit gérer.</value></data>
   <data name="WorkspaceCreated" xml:space="preserve"><value>Nouveau Workspace créé</value></data>
