@@ -1,0 +1,50 @@
+{
+  "id": "github-cli",
+  "name": "GitHub CLI",
+  "category": "development",
+  "profiles": [
+    "development"
+  ],
+  "platforms": [
+    "windows"
+  ],
+  "versionPolicy": "latest-stable",
+  "fallbackPackageManager": "winget",
+  "packageId": "GitHub.cli",
+  "source": "official",
+  "installerType": "msi",
+  "locale": "fr-FR",
+  "architecture": "x64",
+  "officialSource": {
+    "type": "github-release",
+    "repository": "cli/cli",
+    "assetRegex": "^gh_[0-9.]+_windows_amd64\\.msi$",
+    "versionRegex": "^v(.+)$"
+  },
+  "installArguments": [
+    "/qn",
+    "/norestart"
+  ],
+  "versionCommand": "gh",
+  "versionArguments": [
+    "--version"
+  ],
+  "dependencies": [
+    "git"
+  ],
+  "prerequisites": [
+    {
+      "type": "admin"
+    },
+    {
+      "type": "component",
+      "name": "git"
+    }
+  ],
+  "checks": [
+    {
+      "type": "command",
+      "name": "gh"
+    }
+  ]
+}
