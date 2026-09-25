@@ -206,7 +206,7 @@ public sealed class ConfigurationTests
             SchemaVersion: 2);
 
         File.WriteAllText(
-            Path.Combine(root, "catalog", "windows", "templates", "remove-app.json"),
+            Path.Combine(root, "workspaces", "remove-app.json"),
             JsonSerializer.Serialize(workspace, JsonDefaults.Options));
 
         try
@@ -388,7 +388,8 @@ public sealed class ConfigurationTests
             paths,
             new InventoryScanner([new VersionedInventoryProvider("Microsoft.VisualStudioCode", "1.0.0", "2.0.0")]));
 
-        var diff = await engine.DiffAsync("development-extended");
+        var workspaceId = CreateUserWorkspaceFromTemplate(configuration, "development-extended");
+        var diff = await engine.DiffAsync(workspaceId);
         var item = diff.Items.Single(item => item.TargetId == "vscode");
 
         Assert.AreEqual(DesiredStateDomainCodes.Application, item.Domain);
@@ -410,8 +411,9 @@ public sealed class ConfigurationTests
             paths,
             new InventoryScanner([new VersionedInventoryProvider("Microsoft.VisualStudioCode", "1.0.0", "2.0.0")]));
 
-        var diff = await engine.DiffAsync("development-extended");
-        var plan = await engine.PlanAsync("development-extended");
+        var workspaceId = CreateUserWorkspaceFromTemplate(configuration, "development-extended");
+        var diff = await engine.DiffAsync(workspaceId);
+        var plan = await engine.PlanAsync(workspaceId);
         var diffItem = diff.Items.Single(item => item.TargetId == "vscode");
         var planItem = plan.Items.Single(item => item.ComponentId == "vscode");
 
@@ -432,7 +434,8 @@ public sealed class ConfigurationTests
             paths,
             new InventoryScanner([new VersionedInventoryProvider("Microsoft.VisualStudioCode", "1.0.0", "2.0.0")]));
 
-        var plan = await engine.PlanAsync("development-extended");
+        var workspaceId = CreateUserWorkspaceFromTemplate(configuration, "development-extended");
+        var plan = await engine.PlanAsync(workspaceId);
         var item = plan.Items.Single(item => item.ComponentId == "vscode");
 
         Assert.AreEqual(ApplicationStateCodes.Outdated, item.StateCode);
@@ -478,7 +481,8 @@ public sealed class ConfigurationTests
             paths,
             new InventoryScanner([new VersionedInventoryProvider("Microsoft.VisualStudio.2022.BuildTools", "17.14.0", "17.14.1")]));
 
-        var plan = await engine.PlanAsync("development");
+        var workspaceId = CreateUserWorkspaceFromTemplate(configuration, "development");
+        var plan = await engine.PlanAsync(workspaceId);
         var item = plan.Items.Single(item => item.ComponentId == "visual-studio");
 
         Assert.AreEqual(ApplicationStateCodes.Outdated, item.StateCode);
@@ -499,7 +503,8 @@ public sealed class ConfigurationTests
             paths,
             new InventoryScanner([new VersionedInventoryProvider("EclipseAdoptium.Temurin.21.JDK", "21.0.0")]));
 
-        var plan = await engine.PlanAsync("development-extended");
+        var workspaceId = CreateUserWorkspaceFromTemplate(configuration, "development-extended");
+        var plan = await engine.PlanAsync(workspaceId);
         var item = plan.Items.Single(item => item.ComponentId == "temurin21");
 
         Assert.AreEqual(ApplicationStateCodes.Installed, item.StateCode);
@@ -520,12 +525,29 @@ public sealed class ConfigurationTests
             paths,
             inventory);
 
-        var plan = await engine.PlanAsync(configuration.LoadWorkspaces().Values.First().Id);
+        var workspaceId = CreateUserWorkspaceFromTemplate(configuration, configuration.LoadWorkspaceTemplates().Values.First().Id);
+        var plan = await engine.PlanAsync(workspaceId);
 
         Assert.IsNotEmpty(plan.Items);
         Assert.IsTrue(plan.Items.All(item =>
             item.StateCode == "UNKNOWN" &&
             item.ActionCode == "blocked"));
+    }
+
+
+    private static string CreateUserWorkspaceFromTemplate(ConfigurationStore configuration, string templateId)
+    {
+        var template = configuration.LoadWorkspaceTemplates().TryGetValue(templateId, out var value)
+            ? value
+            : throw new AssertFailedException($"Unknown workspace template: {templateId}");
+
+        var workspace = template with
+        {
+            Id = $"workspace-test-{template.Id}"
+        };
+
+        configuration.SaveWorkspace(workspace);
+        return workspace.Id;
     }
 
     private static string CreateConfigurationRoot()
