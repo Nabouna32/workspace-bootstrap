@@ -249,8 +249,8 @@ jobs:
           $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-weekly"
           $desktop = Join-Path $package "WorkspaceControl/WorkspaceControl.exe"
           $cli = Join-Path $package "WorkspaceBootstrap.Cli.exe"
-          $catalog = Join-Path $package "bootstrap/windows/components/catalog.json"
-          $profiles = Join-Path $package "bootstrap/windows/profiles"
+          $catalog = Join-Path $package "catalog/windows/components/catalog.json"
+          $profiles = Join-Path $package "catalog/windows/templates"
           $readme = Join-Path $package "README.md"
           $license = Join-Path $package "LICENSE"
           Copy-Item README.md $readme -Force
