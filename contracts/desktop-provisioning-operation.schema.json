@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Workspace Bootstrap Desktop Provisioning Operation",
+  "title": "Workspace Control Desktop Operation",
   "type": "object",
   "required": [
     "schemaVersion",
     "operationId",
     "status",
     "phase",
-    "profileId",
+    "workspaceId",
     "completed",
     "total",
     "percent",
@@ -24,9 +24,9 @@
     },
     "phase": {
       "type": "string",
-      "enum": ["starting", "component", "completed", "error", "reboot"]
+      "enum": ["planning", "awaiting-confirmation", "queued", "running", "completed", "failed", "stale"]
     },
-    "profileId": { "type": "string", "minLength": 1 },
+    "workspaceId": { "type": "string", "minLength": 1 },
     "currentComponentId": { "type": ["string", "null"] },
     "currentComponentName": { "type": ["string", "null"] },
     "completed": { "type": "integer", "minimum": 0 },
