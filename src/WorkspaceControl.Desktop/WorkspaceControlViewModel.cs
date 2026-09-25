@@ -247,8 +247,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             ClearDesiredStateDiff();
 
             Workspaces.Clear();
-            foreach (var profile in _application.GetWorkspaces())
-                Workspaces.Add(profile);
+            foreach (var workspace in _application.GetWorkspaces())
+                Workspaces.Add(workspace);
 
             var catalog = _application.GetApplicationCatalog();
             ApplicationOptions.Clear();
@@ -262,9 +262,9 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
             SetApplicationSearchText(string.Empty);
 
-            var selected = Workspaces.FirstOrDefault(profile =>
-                string.Equals(profile.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase))
-                ?? Workspaces.FirstOrDefault(profile =>
+            var selected = Workspaces.FirstOrDefault(workspace =>
+                string.Equals(workspace.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase))
+                ?? Workspaces.FirstOrDefault(workspace =>
                     profile.Id.StartsWith("workspace-", StringComparison.OrdinalIgnoreCase));
 
             if (selected is not null)
@@ -365,8 +365,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
     public void SelectWorkspace(string workspaceId)
     {
-        var workspace = Workspaces.FirstOrDefault(profile =>
-            string.Equals(profile.Id, workspaceId, StringComparison.OrdinalIgnoreCase));
+        var workspace = Workspaces.FirstOrDefault(workspace =>
+            string.Equals(workspace.Id, workspaceId, StringComparison.OrdinalIgnoreCase));
 
         if (workspace is null)
             return;
@@ -562,8 +562,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         {
             if (IsSelectedWorkspaceUserOwned && SelectedWorkspaceId is not null)
             {
-                var current = Workspaces.First(profile =>
-                    string.Equals(profile.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase));
+                var current = Workspaces.First(workspace =>
+                    string.Equals(workspace.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase));
 
                 var desiredState = current.DesiredState
                     ?? new DesiredStateManifest([], [], [], [], [], []);
