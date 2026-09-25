@@ -266,7 +266,7 @@
                         Width="180"
                         SelectedValue="{Binding WindowsAppearance, Mode=TwoWay}"
                         SelectedValuePath="Tag">
-                        <ComboBoxItem x:Uid="WorkspacePage_WindowsAppearanceUndefined" Tag="undefined" />
+                        <ComboBoxItem x:Uid="WorkspacePage_WindowsAppearanceSystem" Tag="system" />
                         <ComboBoxItem x:Uid="WorkspacePage_WindowsAppearanceLight" Tag="light" />
                         <ComboBoxItem x:Uid="WorkspacePage_WindowsAppearanceDark" Tag="dark" />
                     </ComboBox>
