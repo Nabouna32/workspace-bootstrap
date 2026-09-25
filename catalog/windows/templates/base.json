@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 2,
+  "id": "base",
+  "name": "Base du PC",
+  "description": "Base complète et polyvalente pour un PC Windows personnel, avec Git pour versionner le dépôt et conserver ses historiques.",
+  "desiredState": {
+    "applications": [
+      {
+        "componentId": "git"
+      },
+      {
+        "componentId": "chrome"
+      },
+      {
+        "componentId": "edge"
+      },
+      {
+        "componentId": "firefox"
+      },
+      {
+        "componentId": "winrar"
+      },
+      {
+        "componentId": "notepadpp"
+      },
+      {
+        "componentId": "vlc"
+      },
+      {
+        "componentId": "kodi"
+      }
+    ],
+    "windowsSettings": [],
+    "policies": [],
+    "registrySettings": [],
+    "optimizations": [],
+    "conditions": []
+  }
+}
