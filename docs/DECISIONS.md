@@ -89,3 +89,14 @@ The brainstorming includes cache and offline capabilities as a meaningful produc
 A new decision may refine or change the product direction, but implementation details do not become decisions merely because they exist in code.
 
 When historical context cannot be verified, record the uncertainty instead of reconstructing a false history.
+
+
+## Windows appearance intent
+
+The Windows appearance control uses **System**, **Light** and **Dark** as its user-facing choices. For this setting, System means that the Workspace does not impose an explicit light/dark registry value; it leaves the Windows appearance behavior unmanaged by this Workspace. It must not be presented as a scheduled automatic day/night switch, because the documented Windows appearance values represent light/dark modes rather than a separate system-mode value.
+
+The internal desired-state model retains **Undefined** as a general concept for domains where the user has expressed no requirement. The appearance UI uses the clearer System label because it describes the intended behavior for this specific setting.
+
+## Semantic visual grammar
+
+Workspace Control uses a consistent status grammar: green for success/healthy, blue for information/neutral action, amber/orange for warning/attention/risk, red for error/failure/blocked, and neutral colors for undefined or secondary information. Color is always paired with text, iconography and accessible semantics.
