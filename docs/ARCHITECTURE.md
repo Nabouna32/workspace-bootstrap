@@ -19,7 +19,7 @@ Contains stable concepts that can be tested without a live Windows machine:
 - applications and inventory;
 - capabilities;
 - desired state;
-- Workspaces / ProfileManifest;
+- Workspaces / WorkspaceManifest;
 - plans;
 - operations;
 - risk and reversibility;
