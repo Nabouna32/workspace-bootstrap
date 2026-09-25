@@ -55,7 +55,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "WinUI desktop build failed with exit code $LASTEXITCODE." }
 
       - name: Build CLI
-        run: dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release
+        run: dotnet build src/WorkspaceControl.Cli/WorkspaceControl.Cli.csproj --configuration Release
 
       - name: Analyze
         uses: github/codeql-action/analyze@v3
