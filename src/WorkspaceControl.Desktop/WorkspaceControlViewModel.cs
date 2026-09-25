@@ -156,7 +156,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public ObservableCollection<ApplicationCatalogItem> ApplicationCatalogItems { get; } = [];
     public ObservableCollection<ApplicationCatalogItem> VisibleApplicationCatalogItems { get; } = [];
     public ObservableCollection<string> Diagnostics { get; } = [];
-    public ObservableCollection<WorkspaceManifest> Profiles { get; } = [];
+    public ObservableCollection<WorkspaceManifest> Workspaces { get; } = [];
     public ObservableCollection<WorkspaceApplicationOption> ApplicationOptions { get; } = [];
     public ObservableCollection<WorkspaceApplicationOption> VisibleApplicationOptions { get; } = [];
     public ObservableCollection<DesiredStateDiffItem> DesiredStateDiffItems { get; } = [];
@@ -246,9 +246,9 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
             ClearDesiredStateDiff();
 
-            Profiles.Clear();
+            Workspaces.Clear();
             foreach (var profile in _application.GetWorkspaces())
-                Profiles.Add(profile);
+                Workspaces.Add(profile);
 
             var catalog = _application.GetApplicationCatalog();
             ApplicationOptions.Clear();
@@ -262,9 +262,9 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
             SetApplicationSearchText(string.Empty);
 
-            var selected = Profiles.FirstOrDefault(profile =>
+            var selected = Workspaces.FirstOrDefault(profile =>
                 string.Equals(profile.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase))
-                ?? Profiles.FirstOrDefault(profile =>
+                ?? Workspaces.FirstOrDefault(profile =>
                     profile.Id.StartsWith("workspace-", StringComparison.OrdinalIgnoreCase));
 
             if (selected is not null)
@@ -365,7 +365,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
     public void SelectWorkspace(string workspaceId)
     {
-        var workspace = Profiles.FirstOrDefault(profile =>
+        var workspace = Workspaces.FirstOrDefault(profile =>
             string.Equals(profile.Id, workspaceId, StringComparison.OrdinalIgnoreCase));
 
         if (workspace is null)
@@ -533,7 +533,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
                 _localizer.Get("DefaultWorkspaceDescription"),
                 []);
 
-            Profiles.Add(workspace);
+            Workspaces.Add(workspace);
             SelectWorkspace(workspace.Id);
             Status = _localizer.Get("WorkspaceCreated");
             Error = null;
@@ -562,7 +562,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         {
             if (IsSelectedWorkspaceUserOwned && SelectedWorkspaceId is not null)
             {
-                var current = Profiles.First(profile =>
+                var current = Workspaces.First(profile =>
                     string.Equals(profile.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase));
 
                 var desiredState = current.DesiredState
@@ -583,8 +583,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
                 _application.SaveWorkspace(updated);
 
-                var index = Profiles.IndexOf(current);
-                Profiles[index] = updated;
+                var index = Workspaces.IndexOf(current);
+                Workspaces[index] = updated;
                 SelectWorkspace(updated.Id);
                 Status = _localizer.Get("WorkspaceSaved");
                 Error = null;
@@ -596,7 +596,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
                 WorkspaceDescription.Trim(),
                 selectedApplications);
 
-            Profiles.Add(created);
+            Workspaces.Add(created);
             SelectWorkspace(created.Id);
             Status = _localizer.Get("WorkspaceCreatedFromTemplate");
             Error = null;
