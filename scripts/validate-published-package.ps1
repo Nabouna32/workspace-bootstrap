@@ -9,8 +9,8 @@ $ErrorActionPreference = 'Stop'
 
 $desktop = Join-Path $PackageRoot 'WorkspaceControl\WorkspaceControl.exe'
 $cli = Join-Path $PackageRoot 'WorkspaceControl.Cli.exe'
-$catalog = Join-Path $PackageRoot 'bootstrap\windows\components\catalog.json'
-$profiles = Join-Path $PackageRoot 'bootstrap\windows\profiles'
+$catalog = Join-Path $PackageRoot 'catalog\windows\components\catalog.json'
+$profiles = Join-Path $PackageRoot 'catalog\windows\templates'
 $readme = Join-Path $PackageRoot 'README.md'
 $license = Join-Path $PackageRoot 'LICENSE'
 $englishResources = Join-Path $PackageRoot 'WorkspaceControl\Strings\en-US\Resources.resw'
@@ -35,7 +35,7 @@ foreach ($path in $requiredFiles) {
 }
 
 if (-not (Test-Path $profiles -PathType Container)) {
-    throw "Published package is missing the bundled profiles directory: $profiles"
+    throw "Published package is missing the bundled workspace templates directory: $profiles"
 }
 
 Write-Host "Running published CLI capability smoke test..."
