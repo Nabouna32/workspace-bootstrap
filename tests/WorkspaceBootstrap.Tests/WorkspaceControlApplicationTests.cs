@@ -152,7 +152,7 @@ public sealed class WorkspaceControlApplicationTests
 
     private sealed class FakeProvisioningService(params ProvisioningOperation[] history) : IProvisioningService
     {
-        public IReadOnlyList<WorkspaceManifest> GetProfiles() => [];
+        public IReadOnlyList<WorkspaceManifest> GetWorkspaces() => [];
         public IReadOnlyList<ComponentManifest> GetApplicationCatalog() => [];
         public WorkspaceManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
             new("workspace-test", name, description, SchemaVersion: 2, DesiredState: new DesiredStateManifest(
