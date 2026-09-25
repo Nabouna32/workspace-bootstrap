@@ -45,7 +45,7 @@ public sealed record InstallerArtifact(
     string Url,
     string Sha256);
 
-public static class ProvisioningStateCodes
+public static class ApplicationStateCodes
 {
     public const string Missing = "MISSING";
     public const string Installed = "INSTALLED";
@@ -64,7 +64,7 @@ public static class WorkspaceOperationStatuses
     public const string Stale = "stale";
 }
 
-public static class ProvisioningActionCodes
+public static class DesiredStateActionCodes
 {
     public const string Install = "install";
     public const string Update = "update";
