@@ -10,6 +10,19 @@ This implementation is **not yet considered aligned with the intended product di
 
 The current code contains substantial desired-state, inventory and provisioning work, including a first My Workspace editor and persisted operation lifecycle. These capabilities are useful evidence and reusable material, but their existence does not make the current UX, architecture or product sequencing authoritative.
 
+## Product model being implemented
+
+The current realignment establishes these product fundamentals:
+
+- A Workspace is a user-owned **partial desired state**, not a list of applications.
+- The user explicitly chooses which parts of the machine are managed.
+- Undefined desired state means **no requirement and no inferred action**.
+- Unknown observed state remains distinct from undefined state.
+- A Workspace can be created through an explicit capture of the current machine, then saved, exported, imported and reused.
+- This supports both everyday maintenance and rebuilding an environment after formatting.
+- Optional templates can bootstrap a user-owned Workspace but do not replace it.
+- The same model is intended to remain viable for future multi-machine and organizational deployment.
+
 ## Realignment focus
 
 The next phase is to compare the actual implementation against the brainstorming and canonical product documents, then restore the intended direction.
@@ -31,12 +44,14 @@ A full or partial reconstruction is acceptable if incremental repair would prese
 - Local-first operation.
 - English and French.
 - Accessibility and semantic states are product requirements.
-- No silent interactive mutation.
+- No silent interactive mutation in normal interactive mode.
 - Existing code is not a constraint on the target product.
 
 ## Known implementation debt
 
 The implementation baseline has now been cleaned of the legacy bootstrap/provisioning runtime paths and public operation naming audited in this phase. Compatibility terminology remains in historical documentation and the component manifest schema, while the desktop navigation/UX still does not fully express the broader permanent control-center model described by the product documents.
+
+The current Workspace UX is still too application-centric and too close to the earlier checklist/profile prototype. It must evolve toward explicit desired-state domains, current-vs-desired comparison, controlled capture and review-before-apply.
 
 These remaining gaps are alignment work, not reasons to weaken the intended product direction.
 
