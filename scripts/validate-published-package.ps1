@@ -8,7 +8,7 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $desktop = Join-Path $PackageRoot 'WorkspaceControl\WorkspaceControl.exe'
-$cli = Join-Path $PackageRoot 'WorkspaceBootstrap.Cli.exe'
+$cli = Join-Path $PackageRoot 'WorkspaceControl.Cli.exe'
 $catalog = Join-Path $PackageRoot 'bootstrap\windows\components\catalog.json'
 $profiles = Join-Path $PackageRoot 'bootstrap\windows\profiles'
 $readme = Join-Path $PackageRoot 'README.md'
