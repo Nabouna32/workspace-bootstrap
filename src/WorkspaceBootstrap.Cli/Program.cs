@@ -35,7 +35,7 @@ try
             data = new { Restored = messages.Count };
             break;
         case "provisioning-profiles":
-            data = application.GetProfiles()
+            data = application.GetWorkspaces()
                 .Select(x => new { x.Id, x.Name, x.Description })
                 .ToArray();
             break;
