@@ -1,0 +1,31 @@
+{
+  "id": "vscode",
+  "name": "Visual Studio Code",
+  "category": "development",
+  "profiles": [
+    "development"
+  ],
+  "platforms": [
+    "windows"
+  ],
+  "versionPolicy": "latest-stable",
+  "packageId": "Microsoft.VisualStudioCode",
+  "installerType": "exe",
+  "dependencies": [],
+  "prerequisites": [
+    {
+      "type": "admin"
+    },
+    {
+      "type": "command",
+      "name": "winget"
+    }
+  ],
+  "checks": [
+    {
+      "type": "winget-package",
+      "id": "Microsoft.VisualStudioCode"
+    }
+  ],
+  "fallbackPackageManager": "winget"
+}
