@@ -46,7 +46,7 @@ public sealed class WorkspaceControlApplicationTests
         var provisioning = new FakeProvisioningService(operation);
         var application = CreateApplication(provisioning: provisioning);
 
-        var actual = await application.CreateProvisioningAsync("base");
+        var actual = await application.CreateWorkspaceOperationAsync("base");
 
         Assert.AreSame(operation, actual);
         Assert.AreEqual(WorkspaceOperationStatuses.AwaitingConfirmation, actual.Status);
@@ -60,7 +60,7 @@ public sealed class WorkspaceControlApplicationTests
         var provisioning = new FakeProvisioningService();
         var application = CreateApplication(provisioning: provisioning);
 
-        var operationId = application.ConfirmProvisioning("op-1");
+        var operationId = application.ConfirmWorkspaceOperation("op-1");
 
         Assert.AreEqual("op-1", operationId);
         Assert.IsTrue(provisioning.Confirmed);
@@ -85,7 +85,7 @@ public sealed class WorkspaceControlApplicationTests
         var application = CreateApplication(
             provisioning: new FakeProvisioningService(latestCompleted, olderFailed));
 
-        Assert.IsNull(application.GetProvisioningRecovery());
+        Assert.IsNull(application.GetRecoverableWorkspaceOperation());
     }
 
     [TestMethod]
@@ -102,7 +102,7 @@ public sealed class WorkspaceControlApplicationTests
         var application = CreateApplication(
             provisioning: new FakeProvisioningService(stale));
 
-        Assert.IsNull(application.GetProvisioningRecovery());
+        Assert.IsNull(application.GetRecoverableWorkspaceOperation());
     }
 
     [TestMethod]
@@ -124,7 +124,7 @@ public sealed class WorkspaceControlApplicationTests
         var application = CreateApplication(
             provisioning: new FakeProvisioningService(latestFailed, olderRunning));
 
-        Assert.AreSame(latestFailed, application.GetProvisioningRecovery());
+        Assert.AreSame(latestFailed, application.GetRecoverableWorkspaceOperation());
     }
 
     private static WorkspaceControlApplication CreateApplication(
@@ -167,7 +167,7 @@ public sealed class WorkspaceControlApplicationTests
                 [],
                 DateTimeOffset.UtcNow));
 
-        public Task<WorkspacePlan> GetPlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+        public Task<WorkspacePlan> CreateWorkspacePlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
             Task.FromResult(new WorkspacePlan(
                 workspaceId,
                 workspaceId,
