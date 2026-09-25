@@ -97,8 +97,8 @@
                 <Border Grid.Column="1" Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <StackPanel Spacing="8">
                         <TextBlock x:Uid="OverviewPage_ActivityHeading" FontSize="18" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding HomeProvisioningDisplay}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
-                        <TextBlock Text="{Binding ProvisioningProgressDisplay}" Opacity="0.72" />
+                        <TextBlock Text="{Binding HomeWorkspaceOperationDisplay}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding WorkspaceOperationProgressDisplay}" Opacity="0.72" />
                         <TextBlock Text="{Binding CurrentComponentDisplay}" Opacity="0.72" TextTrimming="CharacterEllipsis" />
                         <Button x:Uid="OverviewPage_ActivityAction" Click="Workspace_Click" HorizontalAlignment="Left" />
                     </StackPanel>
