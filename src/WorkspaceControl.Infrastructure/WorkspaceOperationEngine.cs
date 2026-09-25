@@ -103,7 +103,7 @@ public sealed class WorkspaceOperationEngine
         var unsupported = diff.Items
             .Where(item =>
                 item.Domain != DesiredStateDomainCodes.Application &&
-                item.ActionCode == ProvisioningActionCodes.Blocked)
+                item.ActionCode == DesiredStateActionCodes.Blocked)
             .ToArray();
 
         if (unsupported.Length > 0)
@@ -164,8 +164,8 @@ public sealed class WorkspaceOperationEngine
             return new WorkspacePlanItem(
                 component.Id,
                 component.Name,
-                ProvisioningStateCodes.Unknown,
-                ProvisioningActionCodes.Blocked,
+                ApplicationStateCodes.Unknown,
+                DesiredStateActionCodes.Blocked,
                 match?.Version,
                 null,
                 null,
@@ -184,8 +184,8 @@ public sealed class WorkspaceOperationEngine
                 return new WorkspacePlanItem(
                     component.Id,
                     component.Name,
-                    ProvisioningStateCodes.Unknown,
-                    ProvisioningActionCodes.Blocked,
+                    ApplicationStateCodes.Unknown,
+                    DesiredStateActionCodes.Blocked,
                     match?.Version,
                     null,
                     null,
@@ -197,8 +197,8 @@ public sealed class WorkspaceOperationEngine
                 return new WorkspacePlanItem(
                     component.Id,
                     component.Name,
-                    ProvisioningStateCodes.Absent,
-                    ProvisioningActionCodes.None,
+                    ApplicationStateCodes.Absent,
+                    DesiredStateActionCodes.None,
                     null,
                     null,
                     null,
@@ -210,8 +210,8 @@ public sealed class WorkspaceOperationEngine
                 return new WorkspacePlanItem(
                     component.Id,
                     component.Name,
-                    ProvisioningStateCodes.Unknown,
-                    ProvisioningActionCodes.Blocked,
+                    ApplicationStateCodes.Unknown,
+                    DesiredStateActionCodes.Blocked,
                     null,
                     null,
                     null,
@@ -223,8 +223,8 @@ public sealed class WorkspaceOperationEngine
                 return new WorkspacePlanItem(
                     component.Id,
                     component.Name,
-                    ProvisioningStateCodes.Unknown,
-                    ProvisioningActionCodes.Blocked,
+                    ApplicationStateCodes.Unknown,
+                    DesiredStateActionCodes.Blocked,
                     match.Version,
                     null,
                     null,
@@ -234,8 +234,8 @@ public sealed class WorkspaceOperationEngine
             return new WorkspacePlanItem(
                 component.Id,
                 component.Name,
-                ProvisioningStateCodes.Installed,
-                ProvisioningActionCodes.Remove,
+                ApplicationStateCodes.Installed,
+                DesiredStateActionCodes.Remove,
                 match.Version,
                 null,
                 null,
@@ -249,8 +249,8 @@ public sealed class WorkspaceOperationEngine
                 return new WorkspacePlanItem(
                     component.Id,
                     component.Name,
-                    ProvisioningStateCodes.Unknown,
-                    ProvisioningActionCodes.Blocked,
+                    ApplicationStateCodes.Unknown,
+                    DesiredStateActionCodes.Blocked,
                     null,
                     null,
                     null,
@@ -260,8 +260,8 @@ public sealed class WorkspaceOperationEngine
             return new WorkspacePlanItem(
                 component.Id,
                 component.Name,
-                ProvisioningStateCodes.Missing,
-                ProvisioningActionCodes.Install,
+                ApplicationStateCodes.Missing,
+                DesiredStateActionCodes.Install,
                 null,
                 null,
                 null,
@@ -279,8 +279,8 @@ public sealed class WorkspaceOperationEngine
                 return new WorkspacePlanItem(
                     component.Id,
                     component.Name,
-                    ProvisioningStateCodes.Unknown,
-                    ProvisioningActionCodes.Blocked,
+                    ApplicationStateCodes.Unknown,
+                    DesiredStateActionCodes.Blocked,
                     installedVersion,
                     availableVersion,
                     component.MinimumVersion,
@@ -293,8 +293,8 @@ public sealed class WorkspaceOperationEngine
                 return new WorkspacePlanItem(
                     component.Id,
                     component.Name,
-                    ProvisioningStateCodes.Outdated,
-                    ProvisioningActionCodes.Update,
+                    ApplicationStateCodes.Outdated,
+                    DesiredStateActionCodes.Update,
                     installedVersion,
                     availableVersion,
                     component.MinimumVersion,
@@ -304,8 +304,8 @@ public sealed class WorkspaceOperationEngine
             return new WorkspacePlanItem(
                 component.Id,
                 component.Name,
-                ProvisioningStateCodes.Installed,
-                ProvisioningActionCodes.None,
+                ApplicationStateCodes.Installed,
+                DesiredStateActionCodes.None,
                 installedVersion,
                 availableVersion,
                 component.MinimumVersion,
@@ -317,8 +317,8 @@ public sealed class WorkspaceOperationEngine
             return new WorkspacePlanItem(
                 component.Id,
                 component.Name,
-                ProvisioningStateCodes.Unknown,
-                ProvisioningActionCodes.Blocked,
+                ApplicationStateCodes.Unknown,
+                DesiredStateActionCodes.Blocked,
                 installedVersion,
                 availableVersion,
                 null,
@@ -334,8 +334,8 @@ public sealed class WorkspaceOperationEngine
             return new WorkspacePlanItem(
                 component.Id,
                 component.Name,
-                ProvisioningStateCodes.Outdated,
-                ProvisioningActionCodes.Update,
+                ApplicationStateCodes.Outdated,
+                DesiredStateActionCodes.Update,
                 installedVersion,
                 availableVersion,
                 availableVersion,
@@ -345,8 +345,8 @@ public sealed class WorkspaceOperationEngine
         return new WorkspacePlanItem(
             component.Id,
             component.Name,
-            ProvisioningStateCodes.Installed,
-            ProvisioningActionCodes.None,
+            ApplicationStateCodes.Installed,
+            DesiredStateActionCodes.None,
             installedVersion,
             null,
             null,
@@ -358,8 +358,8 @@ public sealed class WorkspaceOperationEngine
         WorkspacePlanItem planned,
         WorkspacePlanItem verified)
     {
-        if (verified.StateCode != ProvisioningStateCodes.Installed
-            || verified.ActionCode != ProvisioningActionCodes.None)
+        if (verified.StateCode != ApplicationStateCodes.Installed
+            || verified.ActionCode != DesiredStateActionCodes.None)
         {
             throw new InvalidOperationException(
                 $"Post-condition verification failed for '{component.Name}': {verified.Message}");
@@ -400,8 +400,8 @@ public sealed class WorkspaceOperationEngine
         WorkspacePlanItem planned,
         WorkspacePlanItem verified)
     {
-        if (verified.StateCode != ProvisioningStateCodes.Absent
-            || verified.ActionCode != ProvisioningActionCodes.None)
+        if (verified.StateCode != ApplicationStateCodes.Absent
+            || verified.ActionCode != DesiredStateActionCodes.None)
         {
             throw new InvalidOperationException(
                 $"Post-condition verification failed for '{planned.ComponentName}': {verified.Message}");
@@ -451,7 +451,7 @@ public sealed class WorkspaceOperationEngine
             throw new InvalidOperationException(
                 "The operation does not contain a provisioning plan.");
 
-        if (operation.Plan.Items.Any(item => item.ActionCode == ProvisioningActionCodes.Blocked))
+        if (operation.Plan.Items.Any(item => item.ActionCode == DesiredStateActionCodes.Blocked))
             throw new InvalidOperationException(
                 "The provisioning plan contains blocked actions and cannot be confirmed.");
 
@@ -524,10 +524,10 @@ public sealed class WorkspaceOperationEngine
                 operation.CurrentComponentName = planned.ComponentName;
                 Save(operation);
 
-                if (planned.ActionCode == ProvisioningActionCodes.Blocked)
+                if (planned.ActionCode == DesiredStateActionCodes.Blocked)
                     throw new InvalidOperationException(planned.Message);
 
-                if (planned.ActionCode == ProvisioningActionCodes.None)
+                if (planned.ActionCode == DesiredStateActionCodes.None)
                 {
                     operation.Steps.Add(
                         new WorkspaceOperationStep(
@@ -570,7 +570,7 @@ public sealed class WorkspaceOperationEngine
 
                         var component = ApplyWorkspaceOverrides(catalogComponent, request);
 
-                        if (planned.ActionCode == ProvisioningActionCodes.Remove)
+                        if (planned.ActionCode == DesiredStateActionCodes.Remove)
                         {
                             operation.ApplicationSnapshots.Add(
                                 new WorkspaceApplicationSnapshot(
@@ -618,7 +618,7 @@ public sealed class WorkspaceOperationEngine
                     }
                     else
                     {
-                        if (planned.ActionCode == ProvisioningActionCodes.Remove)
+                        if (planned.ActionCode == DesiredStateActionCodes.Remove)
                         {
                             ValidateRemovePostcondition(planned, verified);
                         }
@@ -704,14 +704,14 @@ public sealed class WorkspaceOperationEngine
                     continue;
                 }
 
-                if (planned.ActionCode == ProvisioningActionCodes.None)
+                if (planned.ActionCode == DesiredStateActionCodes.None)
                 {
-                    if (planned.StateCode == ProvisioningStateCodes.Absent)
+                    if (planned.StateCode == ApplicationStateCodes.Absent)
                     {
                         ValidateRemovePostcondition(planned, verified);
                     }
-                    else if (verified.StateCode != ProvisioningStateCodes.Installed
-                             || verified.ActionCode != ProvisioningActionCodes.None)
+                    else if (verified.StateCode != ApplicationStateCodes.Installed
+                             || verified.ActionCode != DesiredStateActionCodes.None)
                     {
                         throw new InvalidOperationException(
                             $"Final state verification failed for '{planned.ComponentName}': {verified.Message}");
@@ -720,7 +720,7 @@ public sealed class WorkspaceOperationEngine
                     continue;
                 }
 
-                if (planned.ActionCode == ProvisioningActionCodes.Remove)
+                if (planned.ActionCode == DesiredStateActionCodes.Remove)
                 {
                     ValidateRemovePostcondition(planned, verified);
                     continue;
@@ -967,8 +967,8 @@ public sealed class WorkspaceOperationEngine
                     DesiredStateDomainCodes.RegistrySetting,
                     targetId,
                     targetId,
-                    ProvisioningStateCodes.Unknown,
-                    ProvisioningActionCodes.Blocked,
+                    ApplicationStateCodes.Unknown,
+                    DesiredStateActionCodes.Blocked,
                     null,
                     null,
                     desired.Value,
@@ -982,8 +982,8 @@ public sealed class WorkspaceOperationEngine
                     DesiredStateDomainCodes.RegistrySetting,
                     targetId,
                     targetId,
-                    ProvisioningStateCodes.Missing,
-                    ProvisioningActionCodes.Set,
+                    ApplicationStateCodes.Missing,
+                    DesiredStateActionCodes.Set,
                     null,
                     null,
                     desired.Value,
@@ -1000,7 +1000,7 @@ public sealed class WorkspaceOperationEngine
                 targetId,
                 targetId,
                 matches ? DesiredStateStateCodes.Compliant : DesiredStateStateCodes.Drifted,
-                matches ? ProvisioningActionCodes.None : ProvisioningActionCodes.Set,
+                matches ? DesiredStateActionCodes.None : DesiredStateActionCodes.Set,
                 observation.Value,
                 observation.ValueType,
                 desired.Value,
@@ -1027,10 +1027,10 @@ public sealed class WorkspaceOperationEngine
                 evaluation.Condition.Fact,
                 evaluation.IsSatisfied
                     ? "COMPLIANT"
-                    : ProvisioningStateCodes.Unknown,
+                    : ApplicationStateCodes.Unknown,
                 evaluation.IsSatisfied
-                    ? ProvisioningActionCodes.None
-                    : ProvisioningActionCodes.Blocked,
+                    ? DesiredStateActionCodes.None
+                    : DesiredStateActionCodes.Blocked,
                 evaluation.IsKnown ? evaluation.Message : null,
                 null,
                 evaluation.Condition.Value,
@@ -1051,8 +1051,8 @@ public sealed class WorkspaceOperationEngine
             domain,
             sectionName,
             sectionName,
-            ProvisioningStateCodes.Unknown,
-            ProvisioningActionCodes.Blocked,
+            ApplicationStateCodes.Unknown,
+            DesiredStateActionCodes.Blocked,
             null,
             null,
             count.ToString(System.Globalization.CultureInfo.InvariantCulture),
@@ -1136,7 +1136,7 @@ public sealed class WorkspaceOperationEngine
         WorkspacePlanItem verified)
     {
         if (verified.StateCode != DesiredStateStateCodes.Compliant
-            || verified.ActionCode != ProvisioningActionCodes.None)
+            || verified.ActionCode != DesiredStateActionCodes.None)
         {
             throw new InvalidOperationException(
                 $"Post-condition verification failed for registry target '{planned.ComponentName}': {verified.Message}");
@@ -1196,7 +1196,7 @@ public sealed class WorkspaceOperationEngine
 
                 await _installer.InstallAsync(
                     component,
-                    ProvisioningActionCodes.Install,
+                    DesiredStateActionCodes.Install,
                     snapshot.InstalledVersion,
                     token);
             }
