@@ -140,7 +140,7 @@ jobs:
             }
           }
 
-          $profilesPage = Get-Content src/WorkspaceControl.Desktop/ProfilesPage.xaml -Raw
+          $profilesPage = Get-Content src/WorkspaceControl.Desktop/WorkspacePage.xaml -Raw
           if ($profilesPage -notmatch 'x:Uid="WorkspacePage_WorkspaceList"' -or
               $profilesPage -notmatch 'x:Uid="WorkspacePage_PlanList"' -or
               $profilesPage -notmatch 'x:Uid="WorkspacePage_ProgressRing"') {
