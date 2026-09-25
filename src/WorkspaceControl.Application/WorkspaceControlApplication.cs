@@ -25,11 +25,11 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
         _optimization = optimization ?? throw new ArgumentNullException(nameof(optimization));
     }
 
-    public IReadOnlyList<ProfileManifest> GetProfiles() => _provisioning.GetProfiles();
+    public IReadOnlyList<WorkspaceManifest> GetProfiles() => _provisioning.GetProfiles();
     public IReadOnlyList<ComponentManifest> GetApplicationCatalog() => _provisioning.GetApplicationCatalog();
-    public ProfileManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
+    public WorkspaceManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
         _provisioning.CreateWorkspace(name, description, componentIds);
-    public void SaveWorkspace(ProfileManifest workspace) => _provisioning.SaveWorkspace(workspace);
+    public void SaveWorkspace(WorkspaceManifest workspace) => _provisioning.SaveWorkspace(workspace);
 
     public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string profileId, CancellationToken cancellationToken = default) =>
         _provisioning.GetDesiredStateDiffAsync(profileId, cancellationToken);
