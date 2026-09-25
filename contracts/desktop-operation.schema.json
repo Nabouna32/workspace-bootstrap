@@ -20,7 +20,7 @@
     "operationId": { "type": "string", "minLength": 1 },
     "status": {
       "type": "string",
-      "enum": ["starting", "running", "completed", "failed", "reboot-required"]
+      "enum": ["awaiting-confirmation", "queued", "running", "completed", "failed", "stale"]
     },
     "phase": {
       "type": "string",
