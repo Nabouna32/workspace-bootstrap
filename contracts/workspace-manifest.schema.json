@@ -1,0 +1,309 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Nabouna32/workspace-control/blob/main/contracts/workspace-manifest.schema.json",
+  "title": "Workspace Control Workspace Manifest",
+  "description": "Versioned desired-state Workspace manifest consumed by the local Workspace Control engine.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "id",
+        "name",
+        "description",
+        "components"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "id",
+        "name",
+        "description",
+        "desiredState"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 2
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "desiredState": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applications",
+            "windowsSettings",
+            "policies",
+            "registrySettings",
+            "optimizations",
+            "conditions"
+          ],
+          "properties": {
+            "applications": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "componentId"
+                ],
+                "properties": {
+                  "componentId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "state": {
+                    "type": "string",
+                    "enum": [
+                      "present",
+                      "absent"
+                    ],
+                    "default": "present"
+                  },
+                  "versionPolicy": {
+                    "type": "string",
+                    "enum": [
+                      "latest-stable",
+                      "stable-compatible",
+                      "minimum"
+                    ]
+                  },
+                  "minimumVersion": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  }
+                }
+              }
+            },
+            "windowsSettings": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "value"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "scope": {
+                    "type": "string",
+                    "enum": [
+                      "user",
+                      "machine"
+                    ]
+                  }
+                }
+              }
+            },
+            "policies": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "value"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "scope": {
+                    "type": "string",
+                    "enum": [
+                      "user",
+                      "machine"
+                    ]
+                  }
+                }
+              }
+            },
+            "registrySettings": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "hive",
+                  "key",
+                  "valueName",
+                  "value",
+                  "valueType"
+                ],
+                "properties": {
+                  "hive": {
+                    "type": "string",
+                    "enum": [
+                      "HKCU",
+                      "HKLM"
+                    ]
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024
+                  },
+                  "valueName": {
+                    "type": "string",
+                    "maxLength": 256
+                  },
+                  "value": {
+                    "type": "string",
+                    "maxLength": 4096
+                  },
+                  "valueType": {
+                    "type": "string",
+                    "enum": [
+                      "string",
+                      "dword",
+                      "qword",
+                      "binary"
+                    ]
+                  },
+                  "scope": {
+                    "type": "string",
+                    "enum": [
+                      "user",
+                      "machine"
+                    ]
+                  }
+                }
+              }
+            },
+            "optimizations": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "enabled"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "conditions": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "fact",
+                  "operator",
+                  "value"
+                ],
+                "properties": {
+                  "fact": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "operator": {
+                    "type": "string",
+                    "enum": [
+                      "equals",
+                      "not-equals",
+                      "contains",
+                      "greater-than",
+                      "less-than",
+                      "greater-or-equal",
+                      "less-or-equal"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
