@@ -229,13 +229,13 @@
 
                     <TextBlock
                         x:Uid="WorkspacePage_Status"
-                        Text="{Binding ProvisioningStatusDisplay}"
+                        Text="{Binding WorkspaceOperationStatusDisplay}"
                         FontSize="17"
                         FontWeight="SemiBold" />
 
                     <TextBlock
                         x:Uid="WorkspacePage_Progress"
-                        Text="{Binding ProvisioningProgressDisplay}"
+                        Text="{Binding WorkspaceOperationProgressDisplay}"
                         Opacity="0.72" />
 
                     <TextBlock
@@ -300,8 +300,8 @@
 
                     <InfoBar
                         x:Uid="WorkspacePage_ErrorInfoBar"
-                        IsOpen="{Binding HasProvisioningError}"
-                        Message="{Binding ProvisioningError}"
+                        IsOpen="{Binding HasWorkspaceOperationError}"
+                        Message="{Binding WorkspaceOperationError}"
                         Severity="Error"
                         IsClosable="False" />
 
@@ -315,12 +315,12 @@
                             x:Name="ResumeButton"
                             x:Uid="WorkspacePage_Resume"
                             Click="ResumeButton_Click"
-                            IsEnabled="{Binding CanResumeProvisioning}" />
+                            IsEnabled="{Binding CanResumeWorkspaceOperation}" />
                     </StackPanel>
 
                     <ProgressRing
                         x:Uid="WorkspacePage_ProgressRing"
-                        IsActive="{Binding IsProvisioningActive}"
+                        IsActive="{Binding IsWorkspaceOperationActive}"
                         Width="28"
                         Height="28" />
 
