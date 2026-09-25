@@ -128,7 +128,7 @@ public sealed class ConfigurationTests
 
         try
         {
-            var malicious = new ProfileManifest(
+            var malicious = new WorkspaceManifest(
                 "../outside",
                 "Malicious",
                 "Invalid identifier",
@@ -184,7 +184,7 @@ public sealed class ConfigurationTests
             Path.Combine(componentDirectory, "component.json"),
             JsonSerializer.Serialize(component, JsonDefaults.Options));
 
-        var profile = new ProfileManifest(
+        var profile = new WorkspaceManifest(
             "remove-app",
             "Remove app",
             "Application removal test",
@@ -261,7 +261,7 @@ public sealed class ConfigurationTests
             "workspace-control-registry-plan-tests",
             Guid.NewGuid().ToString("N")));
 
-        var profile = new ProfileManifest(
+        var profile = new WorkspaceManifest(
             "registry-only",
             "Registry only",
             "Registry desired-state test",
@@ -438,7 +438,7 @@ public sealed class ConfigurationTests
     [TestMethod]
     public void Desired_state_profile_maps_applications_to_requests()
     {
-        var profile = new ProfileManifest(
+        var profile = new WorkspaceManifest(
             "test",
             "Test",
             "Test profile",
@@ -532,7 +532,7 @@ public sealed class ConfigurationTests
             Path.Combine(componentsRoot, "catalog.json"),
             """{"components":[]}""");
 
-        var profile = new ProfileManifest(
+        var profile = new WorkspaceManifest(
             "base",
             "Base",
             "Test profile",
