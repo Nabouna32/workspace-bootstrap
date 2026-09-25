@@ -449,11 +449,11 @@ public sealed class WorkspaceOperationEngine
 
         if (operation.Plan is null)
             throw new InvalidOperationException(
-                "The operation does not contain a provisioning plan.");
+                "The operation does not contain a workspace operation plan.");
 
         if (operation.Plan.Items.Any(item => item.ActionCode == DesiredStateActionCodes.Blocked))
             throw new InvalidOperationException(
-                "The provisioning plan contains blocked actions and cannot be confirmed.");
+                "The workspace operation plan contains blocked actions and cannot be confirmed.");
 
         operation.Status = WorkspaceOperationStatuses.Queued;
         operation.CanResume = false;
@@ -498,13 +498,13 @@ public sealed class WorkspaceOperationEngine
         var components = _config.LoadComponents();
         var plan = operation.Plan
             ?? throw new InvalidOperationException(
-                "The operation has no persisted provisioning plan.");
+                "The operation has no persisted workspace operation plan.");
 
         if (operation.Status is WorkspaceOperationStatuses.AwaitingConfirmation
             or WorkspaceOperationStatuses.Stale
             or WorkspaceOperationStatuses.Completed)
             throw new InvalidOperationException(
-                "The provisioning operation is not in an executable state.");
+                "The workspace operation is not in an executable state.");
 
         try
         {
@@ -872,7 +872,7 @@ public sealed class WorkspaceOperationEngine
                 CreateNoWindow = true
             };
             psi.ArgumentList.Add(entryAssembly);
-            psi.ArgumentList.Add("provisioning-worker");
+            psi.ArgumentList.Add("workspace-operation-worker");
             psi.ArgumentList.Add("--operation");
             psi.ArgumentList.Add(operationId);
         }
@@ -885,7 +885,7 @@ public sealed class WorkspaceOperationEngine
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
-            psi.ArgumentList.Add("provisioning-worker");
+            psi.ArgumentList.Add("workspace-operation-worker");
             psi.ArgumentList.Add("--operation");
             psi.ArgumentList.Add(operationId);
         }
@@ -899,7 +899,7 @@ public sealed class WorkspaceOperationEngine
 
     private async Task<FileStream> AcquireOperationLockAsync(CancellationToken token)
     {
-        var path = Path.Combine(_paths.StateRoot, "provisioning.lock");
+        var path = Path.Combine(_paths.StateRoot, "workspace-operation.lock");
 
         while (true)
         {
@@ -1087,7 +1087,7 @@ public sealed class WorkspaceOperationEngine
         {
             operation.Status = WorkspaceOperationStatuses.Stale;
             operation.CanResume = false;
-            operation.Error = "Provisioning plan is stale because the desired-state item set changed.";
+            operation.Error = "Workspace operation plan is stale because the desired-state item set changed.";
             throw new InvalidOperationException(operation.Error);
         }
 
@@ -1108,7 +1108,7 @@ public sealed class WorkspaceOperationEngine
                 operation.Status = WorkspaceOperationStatuses.Stale;
                 operation.CanResume = false;
                 operation.Error =
-                    $"Provisioning plan is stale for '{expected.ComponentName}'. " +
+                    $"Workspace operation plan is stale for '{expected.ComponentName}'. " +
                     $"Observed state is {observed.StateCode}/{observed.ActionCode} " +
                     $"but the confirmed plan expected {expected.StateCode}/{expected.ActionCode}.";
                 throw new InvalidOperationException(operation.Error);
