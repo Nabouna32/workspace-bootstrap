@@ -222,14 +222,14 @@ public sealed class ConfigurationTests
             var diff = await engine.DiffAsync("remove-app");
             var diffItem = diff.Items.Single(item => item.TargetId == "test-app");
 
-            Assert.AreEqual(ProvisioningStateCodes.Installed, diffItem.StateCode);
-            Assert.AreEqual(ProvisioningActionCodes.Remove, diffItem.ActionCode);
+            Assert.AreEqual(ApplicationStateCodes.Installed, diffItem.StateCode);
+            Assert.AreEqual(DesiredStateActionCodes.Remove, diffItem.ActionCode);
             Assert.AreEqual("2.0.0", diffItem.ObservedValue);
 
             var plan = await engine.PlanAsync("remove-app");
             var planItem = plan.Items.Single(item => item.ComponentId == "test-app");
 
-            Assert.AreEqual(ProvisioningActionCodes.Remove, planItem.ActionCode);
+            Assert.AreEqual(DesiredStateActionCodes.Remove, planItem.ActionCode);
             Assert.AreEqual("2.0.0", planItem.InstalledVersion);
             Assert.IsNull(planItem.DesiredVersion);
         }
@@ -307,13 +307,13 @@ public sealed class ConfigurationTests
             var diff = await engine.DiffAsync("registry-only");
             var diffItem = diff.Items.Single(item => item.Domain == DesiredStateDomainCodes.RegistrySetting);
             Assert.AreEqual(DesiredStateStateCodes.Drifted, diffItem.StateCode);
-            Assert.AreEqual(ProvisioningActionCodes.Set, diffItem.ActionCode);
+            Assert.AreEqual(DesiredStateActionCodes.Set, diffItem.ActionCode);
             StringAssert.Contains(diffItem.Message, "will be updated after explicit confirmation");
 
             var plan = await engine.PlanAsync("registry-only");
             var planItem = plan.Items.Single();
             Assert.AreEqual(DesiredStateDomainCodes.RegistrySetting, planItem.Domain);
-            Assert.AreEqual(ProvisioningActionCodes.Set, planItem.ActionCode);
+            Assert.AreEqual(DesiredStateActionCodes.Set, planItem.ActionCode);
             Assert.AreEqual(diffItem.TargetId, planItem.TargetId);
         }
         finally
@@ -392,8 +392,8 @@ public sealed class ConfigurationTests
         var item = diff.Items.Single(item => item.TargetId == "vscode");
 
         Assert.AreEqual(DesiredStateDomainCodes.Application, item.Domain);
-        Assert.AreEqual(ProvisioningStateCodes.Outdated, item.StateCode);
-        Assert.AreEqual(ProvisioningActionCodes.Update, item.ActionCode);
+        Assert.AreEqual(ApplicationStateCodes.Outdated, item.StateCode);
+        Assert.AreEqual(DesiredStateActionCodes.Update, item.ActionCode);
         Assert.AreEqual("1.0.0", item.ObservedValue);
         Assert.AreEqual("2.0.0", item.AvailableValue);
         Assert.AreEqual("2.0.0", item.DesiredValue);
@@ -435,8 +435,8 @@ public sealed class ConfigurationTests
         var plan = await engine.PlanAsync("development-extended");
         var item = plan.Items.Single(item => item.ComponentId == "vscode");
 
-        Assert.AreEqual(ProvisioningStateCodes.Outdated, item.StateCode);
-        Assert.AreEqual(ProvisioningActionCodes.Update, item.ActionCode);
+        Assert.AreEqual(ApplicationStateCodes.Outdated, item.StateCode);
+        Assert.AreEqual(DesiredStateActionCodes.Update, item.ActionCode);
         Assert.AreEqual("1.0.0", item.InstalledVersion);
         Assert.AreEqual("2.0.0", item.AvailableVersion);
         Assert.AreEqual("2.0.0", item.DesiredVersion);
@@ -481,8 +481,8 @@ public sealed class ConfigurationTests
         var plan = await engine.PlanAsync("development");
         var item = plan.Items.Single(item => item.ComponentId == "visual-studio");
 
-        Assert.AreEqual(ProvisioningStateCodes.Outdated, item.StateCode);
-        Assert.AreEqual(ProvisioningActionCodes.Update, item.ActionCode);
+        Assert.AreEqual(ApplicationStateCodes.Outdated, item.StateCode);
+        Assert.AreEqual(DesiredStateActionCodes.Update, item.ActionCode);
         Assert.AreEqual("17.14.0", item.InstalledVersion);
         Assert.AreEqual("17.14.1", item.AvailableVersion);
         Assert.AreEqual("17.14.1", item.DesiredVersion);
@@ -502,8 +502,8 @@ public sealed class ConfigurationTests
         var plan = await engine.PlanAsync("development-extended");
         var item = plan.Items.Single(item => item.ComponentId == "temurin21");
 
-        Assert.AreEqual(ProvisioningStateCodes.Installed, item.StateCode);
-        Assert.AreEqual(ProvisioningActionCodes.None, item.ActionCode);
+        Assert.AreEqual(ApplicationStateCodes.Installed, item.StateCode);
+        Assert.AreEqual(DesiredStateActionCodes.None, item.ActionCode);
         Assert.AreEqual("21.0.0", item.InstalledVersion);
         Assert.AreEqual("21.0.0", item.DesiredVersion);
     }
@@ -752,7 +752,7 @@ public sealed class InstallerEngineTests
 
         var arguments = InstallerEngine.BuildWingetArguments(
             component,
-            ProvisioningActionCodes.Install);
+            DesiredStateActionCodes.Install);
 
         Assert.AreEqual("install", arguments[0]);
         CollectionAssert.Contains(arguments.ToArray(), "Test.Package");
@@ -776,12 +776,12 @@ public sealed class InstallerEngineTests
 
         var installArguments = InstallerEngine.BuildWingetArguments(
             component,
-            ProvisioningActionCodes.Install,
+            DesiredStateActionCodes.Install,
             "2.0.0");
 
         var upgradeArguments = InstallerEngine.BuildWingetArguments(
             component,
-            ProvisioningActionCodes.Update,
+            DesiredStateActionCodes.Update,
             "2.0.0");
 
         CollectionAssert.AreEqual(
@@ -810,7 +810,7 @@ public sealed class InstallerEngineTests
 
         var arguments = InstallerEngine.BuildWingetArguments(
             component,
-            ProvisioningActionCodes.Remove);
+            DesiredStateActionCodes.Remove);
 
         CollectionAssert.AreEqual(
             new[] { "uninstall", "--id", "Test.Package", "--exact", "--accept-source-agreements", "--accept-package-agreements", "--silent" },
@@ -835,7 +835,7 @@ public sealed class InstallerEngineTests
 
         var arguments = InstallerEngine.BuildWingetArguments(
             component,
-            ProvisioningActionCodes.Update);
+            DesiredStateActionCodes.Update);
 
         Assert.AreEqual("upgrade", arguments[0]);
         CollectionAssert.Contains(arguments.ToArray(), "Test.Package");
