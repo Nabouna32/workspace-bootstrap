@@ -32,7 +32,7 @@ public sealed partial class WorkspacePage : Page
         {
             WorkspaceList.SelectedItem = _viewModel.Workspaces.FirstOrDefault(workspace =>
                 string.Equals(
-                    profile.Id,
+                    workspace.Id,
                     _viewModel.SelectedWorkspaceId,
                     StringComparison.OrdinalIgnoreCase));
         }
@@ -72,7 +72,7 @@ public sealed partial class WorkspacePage : Page
 
         WorkspaceList.SelectedItem = _viewModel.Workspaces.FirstOrDefault(workspace =>
             string.Equals(
-                profile.Id,
+                workspace.Id,
                 _viewModel.SelectedWorkspaceId,
                 StringComparison.OrdinalIgnoreCase));
 
