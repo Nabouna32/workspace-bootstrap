@@ -39,7 +39,7 @@ public sealed class WorkspaceControlApplicationTests
         var operation = new ProvisioningOperation
         {
             OperationId = "op-1",
-            ProfileId = "base",
+            WorkspaceId = "base",
             Plan = plan,
             Status = ProvisioningOperationStatuses.AwaitingConfirmation
         };
@@ -156,33 +156,33 @@ public sealed class WorkspaceControlApplicationTests
         public IReadOnlyList<ComponentManifest> GetApplicationCatalog() => [];
         public WorkspaceManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
             new("workspace-test", name, description, SchemaVersion: 2, DesiredState: new DesiredStateManifest(
-                componentIds.Select(id => new ProfileApplication(id)).ToArray(), [], [], [], [], []));
+                componentIds.Select(id => new WorkspaceApplication(id)).ToArray(), [], [], [], [], []));
         public void SaveWorkspace(WorkspaceManifest workspace) { }
-        public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string profileId, CancellationToken cancellationToken = default) =>
+        public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string workspaceId, CancellationToken cancellationToken = default) =>
             Task.FromResult(new DesiredStateDiff(
-                profileId,
-                profileId,
+                workspaceId,
+                workspaceId,
                 "test-scan",
                 [],
                 [],
                 DateTimeOffset.UtcNow));
 
-        public Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
+        public Task<ProvisioningPlan> GetPlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
             Task.FromResult(new ProvisioningPlan(
-                profileId,
-                profileId,
+                workspaceId,
+                workspaceId,
                 "test-scan",
                 [],
                 [],
                 DateTimeOffset.UtcNow));
         public bool Confirmed { get; private set; }
 
-        public Task<ProvisioningOperation> CreateAsync(string profileId, CancellationToken cancellationToken = default) =>
+        public Task<ProvisioningOperation> CreateAsync(string workspaceId, CancellationToken cancellationToken = default) =>
             Task.FromResult(history.FirstOrDefault() ?? new ProvisioningOperation
             {
                 OperationId = "operation",
-                ProfileId = profileId,
-                Plan = new ProvisioningPlan(profileId, profileId, "test-scan", [], [], DateTimeOffset.UtcNow),
+                WorkspaceId = workspaceId,
+                Plan = new ProvisioningPlan(workspaceId, workspaceId, "test-scan", [], [], DateTimeOffset.UtcNow),
                 Status = ProvisioningOperationStatuses.AwaitingConfirmation
             });
 
