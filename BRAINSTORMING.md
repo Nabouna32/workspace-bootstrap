@@ -831,7 +831,7 @@ La chaîne de référence du projet est :
 → état opérationnel actuel
 
 **Code + Git**
-→ réalité effectivement implémentée
+→ réalité effectivement implémentée, utilisée pour mesurer les écarts mais sans autorité pour redéfinir la vision
 
 BRAINSTORMING.md ne doit pas devenir un substitut aux documents canoniques ci-dessus.
 
