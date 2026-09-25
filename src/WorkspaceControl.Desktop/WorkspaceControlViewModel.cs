@@ -156,7 +156,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public ObservableCollection<ApplicationCatalogItem> ApplicationCatalogItems { get; } = [];
     public ObservableCollection<ApplicationCatalogItem> VisibleApplicationCatalogItems { get; } = [];
     public ObservableCollection<string> Diagnostics { get; } = [];
-    public ObservableCollection<ProfileManifest> Profiles { get; } = [];
+    public ObservableCollection<WorkspaceManifest> Profiles { get; } = [];
     public ObservableCollection<WorkspaceApplicationOption> ApplicationOptions { get; } = [];
     public ObservableCollection<WorkspaceApplicationOption> VisibleApplicationOptions { get; } = [];
     public ObservableCollection<DesiredStateDiffItem> DesiredStateDiffItems { get; } = [];
