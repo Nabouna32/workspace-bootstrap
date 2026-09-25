@@ -109,7 +109,7 @@ public sealed class WorkspaceOperationEngine
         if (unsupported.Length > 0)
         {
             throw new InvalidOperationException(
-                $"Profile '{diff.WorkspaceId}' contains desired-state sections that are not executable yet. " +
+                $"Workspace '{diff.WorkspaceId}' contains desired-state sections that are not executable yet. " +
                 "The diff identifies these sections explicitly; no mutation plan was created.");
         }
 
@@ -566,7 +566,7 @@ public sealed class WorkspaceOperationEngine
                             .FirstOrDefault(item =>
                                 string.Equals(item.ComponentId, planned.ComponentId, StringComparison.Ordinal))
                             ?? throw new InvalidOperationException(
-                                $"Profile '{profile.Id}' does not contain application '{planned.ComponentId}'.");
+                                $"Workspace '{profile.Id}' does not contain application '{planned.ComponentId}'.");
 
                         var component = ApplyWorkspaceOverrides(catalogComponent, request);
 
@@ -631,7 +631,7 @@ public sealed class WorkspaceOperationEngine
                                 .FirstOrDefault(item =>
                                     string.Equals(item.ComponentId, planned.ComponentId, StringComparison.Ordinal))
                                 ?? throw new InvalidOperationException(
-                                    $"Profile '{profile.Id}' does not contain application '{planned.ComponentId}'.");
+                                    $"Workspace '{profile.Id}' does not contain application '{planned.ComponentId}'.");
 
                             ValidatePostcondition(
                                 ApplyWorkspaceOverrides(catalogComponent, request),
@@ -733,7 +733,7 @@ public sealed class WorkspaceOperationEngine
                     .FirstOrDefault(item =>
                         string.Equals(item.ComponentId, planned.ComponentId, StringComparison.Ordinal))
                     ?? throw new InvalidOperationException(
-                        $"Profile '{profile.Id}' does not contain application '{planned.ComponentId}'.");
+                        $"Workspace '{profile.Id}' does not contain application '{planned.ComponentId}'.");
 
                 ValidatePostcondition(
                     ApplyWorkspaceOverrides(catalogComponent, request),
