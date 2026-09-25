@@ -31,14 +31,14 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
         _provisioning.CreateWorkspace(name, description, componentIds);
     public void SaveWorkspace(WorkspaceManifest workspace) => _provisioning.SaveWorkspace(workspace);
 
-    public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string profileId, CancellationToken cancellationToken = default) =>
-        _provisioning.GetDesiredStateDiffAsync(profileId, cancellationToken);
+    public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+        _provisioning.GetDesiredStateDiffAsync(workspaceId, cancellationToken);
 
-    public Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
-        _provisioning.GetPlanAsync(profileId, cancellationToken);
+    public Task<ProvisioningPlan> GetPlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+        _provisioning.GetPlanAsync(workspaceId, cancellationToken);
 
-    public Task<ProvisioningOperation> CreateProvisioningAsync(string profileId, CancellationToken cancellationToken = default) =>
-        _provisioning.CreateAsync(profileId, cancellationToken);
+    public Task<ProvisioningOperation> CreateProvisioningAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+        _provisioning.CreateAsync(workspaceId, cancellationToken);
 
     public string ConfirmProvisioning(string operationId) =>
         _provisioning.Confirm(operationId);
