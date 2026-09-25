@@ -44,8 +44,8 @@ jobs:
         run: |
           dotnet restore src/WorkspaceControl.Infrastructure/WorkspaceControl.Infrastructure.csproj
           dotnet restore src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj --runtime win-x64
-          dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
-          dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
+          dotnet restore src/WorkspaceControl.Cli/WorkspaceControl.Cli.csproj --runtime win-x64
+          dotnet restore tests/WorkspaceControl.Tests/WorkspaceControl.Tests.csproj
 
       - name: Build and test
         shell: pwsh
@@ -55,9 +55,9 @@ jobs:
           if (-not $msbuild) { throw "Visual Studio MSBuild could not be located." }
           & $msbuild src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj /t:Build /p:Configuration=Release /p:Platform=x64 /warnAsError
           if ($LASTEXITCODE -ne 0) { throw "WinUI desktop build failed with exit code $LASTEXITCODE." }
-          dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --no-restore --warnaserror
-          dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=tests-Release.trx"
-          dotnet format tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --no-restore --verify-no-changes
+          dotnet build src/WorkspaceControl.Cli/WorkspaceControl.Cli.csproj --configuration Release --no-restore --warnaserror
+          dotnet test tests/WorkspaceControl.Tests/WorkspaceControl.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=tests-Release.trx"
+          dotnet format tests/WorkspaceControl.Tests/WorkspaceControl.Tests.csproj --no-restore --verify-no-changes
 
       - name: Publish portable package
         shell: pwsh
@@ -68,7 +68,7 @@ jobs:
           if (-not $msbuild) { throw "Visual Studio MSBuild could not be located." }
           & $msbuild src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj /restore /t:Publish /p:Configuration=Release /p:Platform=x64 /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishDir="$package\WorkspaceControl\"
           if ($LASTEXITCODE -ne 0) { throw "Workspace Control publish failed with exit code $LASTEXITCODE." }
-          dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
+          dotnet publish src/WorkspaceControl.Cli/WorkspaceControl.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
 
       - name: Smoke-test package
         shell: pwsh
