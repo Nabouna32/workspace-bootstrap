@@ -18,8 +18,8 @@ public sealed class ConfigurationStore
                 ? AppContext.BaseDirectory
                 : contentRoot);
 
-        ComponentsRoot = Path.Combine(Root, "bootstrap", "windows", "components");
-        TemplatesRoot = Path.Combine(Root, "bootstrap", "windows", "profiles");
+        ComponentsRoot = Path.Combine(Root, "catalog", "windows", "components");
+        TemplatesRoot = Path.Combine(Root, "catalog", "windows", "templates");
         WorkspaceRoot = Path.GetFullPath(
             workspaceRoot
             ?? Path.Combine(Root, "workspaces"));
