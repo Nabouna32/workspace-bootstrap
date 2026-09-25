@@ -5,27 +5,27 @@ namespace WorkspaceControl.Infrastructure;
 
 public interface IRegistryWriter
 {
-    ProvisioningRegistrySnapshot Capture(RegistrySettingDesiredState desired);
+    WorkspaceRegistrySnapshot Capture(RegistrySettingDesiredState desired);
     void Write(RegistrySettingDesiredState desired);
-    void Restore(ProvisioningRegistrySnapshot snapshot);
+    void Restore(WorkspaceRegistrySnapshot snapshot);
 }
 
 public sealed class RegistryDesiredStateWriter(IRegistryWriter? writer = null)
 {
     private readonly IRegistryWriter _writer = writer ?? new WindowsRegistryWriter();
 
-    public ProvisioningRegistrySnapshot Capture(RegistrySettingDesiredState desired) =>
+    public WorkspaceRegistrySnapshot Capture(RegistrySettingDesiredState desired) =>
         _writer.Capture(desired);
 
     public void Write(RegistrySettingDesiredState desired) =>
         _writer.Write(desired);
 
-    public void Restore(ProvisioningRegistrySnapshot snapshot) =>
+    public void Restore(WorkspaceRegistrySnapshot snapshot) =>
         _writer.Restore(snapshot);
 
     private sealed class WindowsRegistryWriter : IRegistryWriter
     {
-        public ProvisioningRegistrySnapshot Capture(RegistrySettingDesiredState desired)
+        public WorkspaceRegistrySnapshot Capture(RegistrySettingDesiredState desired)
         {
             var hive = ParseHive(desired.Hive);
 
@@ -33,7 +33,7 @@ public sealed class RegistryDesiredStateWriter(IRegistryWriter? writer = null)
             using var key = baseKey.OpenSubKey(desired.Key, writable: false);
 
             if (key is null)
-                return new ProvisioningRegistrySnapshot(
+                return new WorkspaceRegistrySnapshot(
                     desired.Hive.ToUpperInvariant(),
                     desired.Key,
                     desired.ValueName,
@@ -47,7 +47,7 @@ public sealed class RegistryDesiredStateWriter(IRegistryWriter? writer = null)
                 RegistryValueOptions.DoNotExpandEnvironmentNames);
 
             if (value is null)
-                return new ProvisioningRegistrySnapshot(
+                return new WorkspaceRegistrySnapshot(
                     desired.Hive.ToUpperInvariant(),
                     desired.Key,
                     desired.ValueName,
@@ -55,7 +55,7 @@ public sealed class RegistryDesiredStateWriter(IRegistryWriter? writer = null)
                     null,
                     null);
 
-            return new ProvisioningRegistrySnapshot(
+            return new WorkspaceRegistrySnapshot(
                 desired.Hive.ToUpperInvariant(),
                 desired.Key,
                 desired.ValueName,
@@ -80,7 +80,7 @@ public sealed class RegistryDesiredStateWriter(IRegistryWriter? writer = null)
                 ParseValueKind(desired.ValueType));
         }
 
-        public void Restore(ProvisioningRegistrySnapshot snapshot)
+        public void Restore(WorkspaceRegistrySnapshot snapshot)
         {
             var hive = ParseHive(snapshot.Hive);
             using var baseKey = RegistryKey.OpenBaseKey(hive, RegistryView.Default);
