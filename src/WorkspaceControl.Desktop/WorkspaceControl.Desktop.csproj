@@ -24,12 +24,12 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
     <ProjectReference Include="..\WorkspaceControl.Application\WorkspaceControl.Application.csproj" />
     <ProjectReference Include="..\WorkspaceControl.Infrastructure\WorkspaceControl.Infrastructure.csproj" />
-    <Content Include="..\..\bootstrap\windows\components\**\*.json"
-             LinkBase="bootstrap\windows\components"
+    <Content Include="..\..\catalog\windows\components\**\*.json"
+             LinkBase="catalog\windows\components"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="..\..\bootstrap\windows\profiles\*.json"
-             LinkBase="bootstrap\windows\profiles"
+    <Content Include="..\..\catalog\windows\templates\*.json"
+             LinkBase="catalog\windows\templates"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
     <Content Include="Strings\en-US\Resources.resw"
