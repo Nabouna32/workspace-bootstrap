@@ -3,7 +3,7 @@ using WorkspaceControl.Domain;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WorkspaceControl.Infrastructure;
 
-namespace WorkspaceBootstrap.Tests;
+namespace WorkspaceControl.Tests;
 
 [TestClass]
 public sealed class ConfigurationTests
@@ -56,11 +56,11 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
-    public void Profiles_are_loadable_and_reference_known_components()
+    public void Workspace_templates_are_loadable_and_reference_known_components()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var components = configuration.LoadComponents();
-        var profiles = configuration.LoadWorkspaces();
+        var profiles = configuration.LoadWorkspaceTemplates();
 
         Assert.IsNotEmpty(profiles);
         Assert.AreEqual(
@@ -95,7 +95,7 @@ public sealed class ConfigurationTests
 
 
     [TestMethod]
-    public void Profile_export_and_import_validate_and_require_explicit_overwrite()
+    public void Workspace_export_and_import_validate_and_require_explicit_overwrite()
     {
         var root = CreateConfigurationRoot();
         var configuration = new ConfigurationStore(root);
@@ -103,13 +103,21 @@ public sealed class ConfigurationTests
         var exported = Path.Combine(Path.GetTempPath(), $"workspace-control-export-{Guid.NewGuid():N}.json");
         try
         {
-            var exportedPath = configuration.ExportProfile("base", exported);
+            var workspace = new WorkspaceManifest(
+                "workspace-export",
+                "Export workspace",
+                "User-owned workspace",
+                DesiredState: new DesiredStateManifest([], [], [], [], [], []),
+                SchemaVersion: 2);
+            configuration.SaveWorkspace(workspace);
+
+            var exportedPath = configuration.ExportWorkspace(workspace.Id, exported);
             Assert.IsTrue(File.Exists(exportedPath));
 
-            var imported = configuration.ImportProfile(exported, overwrite: true);
-            Assert.AreEqual("base", imported.Id);
+            var imported = configuration.ImportWorkspace(exported, overwrite: true);
+            Assert.AreEqual("workspace-export", imported.Id);
 
-            Assert.ThrowsExactly<IOException>(() => configuration.ImportProfile(exported));
+            Assert.ThrowsExactly<IOException>(() => configuration.ImportWorkspace(exported));
         }
         finally
         {
@@ -120,7 +128,7 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
-    public void Profile_import_rejects_path_traversal_identifier()
+    public void Workspace_import_rejects_path_traversal_identifier()
     {
         var root = CreateConfigurationRoot();
         var configuration = new ConfigurationStore(root);
@@ -137,7 +145,7 @@ public sealed class ConfigurationTests
 
             File.WriteAllText(source, JsonSerializer.Serialize(malicious, JsonDefaults.Options));
 
-            Assert.ThrowsExactly<InvalidOperationException>(() => configuration.ImportProfile(source));
+            Assert.ThrowsExactly<InvalidOperationException>(() => configuration.ImportWorkspace(source));
             Assert.IsFalse(File.Exists(Path.Combine(root, "outside.json")));
         }
         finally
@@ -184,7 +192,7 @@ public sealed class ConfigurationTests
             Path.Combine(componentDirectory, "component.json"),
             JsonSerializer.Serialize(component, JsonDefaults.Options));
 
-        var profile = new WorkspaceManifest(
+        var workspace = new WorkspaceManifest(
             "remove-app",
             "Remove app",
             "Application removal test",
@@ -199,7 +207,7 @@ public sealed class ConfigurationTests
 
         File.WriteAllText(
             Path.Combine(root, "bootstrap", "windows", "profiles", "remove-app.json"),
-            JsonSerializer.Serialize(profile, JsonDefaults.Options));
+            JsonSerializer.Serialize(workspace, JsonDefaults.Options));
 
         try
         {
@@ -281,7 +289,7 @@ public sealed class ConfigurationTests
                 []),
             SchemaVersion: 2);
 
-        var profilePath = Path.Combine(root, "bootstrap", "windows", "profiles", "registry-only.json");
+        var profilePath = Path.Combine(root, "workspaces", "registry-only.json");
         File.WriteAllText(profilePath, JsonSerializer.Serialize(profile, JsonDefaults.Options));
 
         try
