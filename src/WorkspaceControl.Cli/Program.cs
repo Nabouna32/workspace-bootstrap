@@ -7,7 +7,7 @@ try
 {
     var application = WorkspaceControlApplicationFactory.Create();
     var command = args.FirstOrDefault()?.ToLowerInvariant() ?? "help";
-    var profile = GetOption(args, "--profile");
+    var workspaceId = GetOption(args, "--workspace");
     var operation = GetOption(args, "--operation");
     object? data;
     IReadOnlyList<string> messages = Array.Empty<string>();
@@ -40,10 +40,16 @@ try
                 .ToArray();
             break;
         case "desired-state-diff":
-            data = MapDiff(await application.GetDesiredStateDiffAsync(profile ?? throw new ArgumentException("--profile est requis.")));
+            data = MapDiff(await application.GetDesiredStateDiffAsync(workspaceId ?? throw new ArgumentException("--workspace est requis.")));
             break;
         case "workspace-plan":
-            data = MapPlan(await application.CreateWorkspacePlanAsync(profile ?? throw new ArgumentException("--profile est requis.")));
+            data = MapPlan(await application.CreateWorkspacePlanAsync(workspaceId ?? throw new ArgumentException("--workspace est requis.")));
+            break;
+        case "workspace-operation-worker":
+            await application.RunWorkspaceOperationAsync(
+                operation ?? throw new ArgumentException("--operation est requis."),
+                CancellationToken.None);
+            data = new { OperationId = operation, Status = "completed" };
             break;
         case "operation-run":
             await application.RunWorkspaceOperationAsync(
@@ -53,7 +59,7 @@ try
             break;
         case "operation-start":
             data = MapOperation(await application.CreateWorkspaceOperationAsync(
-                profile ?? throw new ArgumentException("--profile est requis.")));
+                workspaceId ?? throw new ArgumentException("--workspace est requis.")));
             break;
         case "operation-confirm":
             data = new
