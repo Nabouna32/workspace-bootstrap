@@ -61,42 +61,23 @@ jobs:
         shell: pwsh
         run: |
           $required = @{
-            'AGENTS.md' = @(
-              'Documentation is a product contract',
-              'Portability and application-owned storage',
-              'Context reconstruction and decision audit'
-            )
-            'docs/PRODUCT-EXPERIENCE.md' = @(
-              'My Workspace',
-              'predefined profiles',
-              'Observe current PC',
-              'Review changes, risk and impact'
-            )
-            'docs/PORTABILITY.md' = @(
-              'portable',
-              'must not silently fall back to AppData',
-              'application-owned data'
-            )
-            'docs/DECISIONS.md' = @(
-              'repository history',
-              'does not invent them',
-              'Anti-drift rule'
-            )
-            'docs/ARCHITECTURE.md' = @(
-              'user-facing Workspace model',
-              'must not silently change the user-facing'
-            )
+            'AGENTS.md' = @('Product invariants', 'Storage invariant', 'Working rules')
+            'docs/PRODUCT-VISION.md' = @('My Workspace', 'local-first', 'Windows 11')
+            'docs/UX.md' = @('My Workspace', 'Simple', 'Advanced', 'Expert')
+            'docs/ARCHITECTURE.md' = @('Desktop / CLI', 'Application', 'Domain', 'persisted operation lifecycle')
+            'docs/PORTABILITY.md' = @('portable', 'must not silently fall back to AppData', 'Application-owned data')
+            'docs/DECISIONS.md' = @('Baseline decisions', 'My Workspace', 'Portability')
           }
 
           foreach ($file in $required.Keys) {
             if (-not (Test-Path $file)) {
-              throw "Documentation contract missing: $file"
+              throw "Canonical documentation missing: $file"
             }
 
             $content = Get-Content $file -Raw
             foreach ($assertion in $required[$file]) {
               if ($content -notmatch [regex]::Escape($assertion)) {
-                throw "Documentation contract assertion missing in ${file}: $assertion"
+                throw "Documentation assertion missing."
               }
             }
           }
@@ -114,6 +95,7 @@ jobs:
             $matches | ForEach-Object { $_.ToString() } | Write-Error
             throw "Documentation contract contradiction detected."
           }
+
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
