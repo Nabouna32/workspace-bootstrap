@@ -101,8 +101,8 @@ static object MapDiff(DesiredStateDiff diff)
     {
         Profile = new
         {
-            Id = diff.ProfileId,
-            Name = diff.ProfileName
+            Id = diff.WorkspaceId,
+            Name = diff.WorkspaceName
         },
         InventoryScanId = diff.InventoryScanId,
         InventoryDiagnostics = diff.InventoryDiagnostics,
@@ -127,8 +127,8 @@ static object MapPlan(ProvisioningPlan plan)
     {
         Profile = new
         {
-            Id = plan.ProfileId,
-            Name = plan.ProfileName
+            Id = plan.WorkspaceId,
+            Name = plan.WorkspaceName
         },
         InventoryScanId = plan.InventoryScanId,
         InventoryDiagnostics = plan.InventoryDiagnostics,
@@ -160,7 +160,7 @@ static object? MapOperation(ProvisioningOperation? operation)
         OperationId = operation.OperationId,
         Status = operation.Status,
         Phase = "provisioning",
-        ProfileId = operation.ProfileId,
+        WorkspaceId = operation.WorkspaceId,
         CurrentComponentId = operation.Steps.LastOrDefault(x => x.Status == "completed")?.ComponentId,
         CurrentComponentName = operation.CurrentComponentName,
         Completed = operation.Completed,
@@ -197,7 +197,7 @@ static object? MapDetail(ProvisioningOperation? operation)
         {
             RunId = operation.OperationId,
             Mode = "provisioning",
-            Selection = operation.ProfileId,
+            Selection = operation.WorkspaceId,
             StartedAt = operation.UpdatedAt,
             FinishedAt = operation.Status is "completed" or "failed" ? operation.UpdatedAt : (DateTimeOffset?)null,
             ExitCode = operation.Status == "completed" ? 0 : 1,
@@ -214,7 +214,7 @@ static object MapHistory(ProvisioningOperation operation) =>
         OperationId = operation.OperationId,
         Status = operation.Status,
         Phase = "provisioning",
-        ProfileId = operation.ProfileId,
+        WorkspaceId = operation.WorkspaceId,
         Completed = operation.Completed,
         Total = operation.Total,
         Percent = operation.Total == 0 ? 100 : operation.Completed * 100.0 / operation.Total,
