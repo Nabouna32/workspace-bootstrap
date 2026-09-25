@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: workspace-bootstrap-ci-${{ github.workflow }}-${{ github.ref }}
+  group: workspace-control-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
@@ -140,11 +140,11 @@ jobs:
             }
           }
 
-          $profilesPage = Get-Content src/WorkspaceControl.Desktop/WorkspacePage.xaml -Raw
-          if ($profilesPage -notmatch 'x:Uid="WorkspacePage_WorkspaceList"' -or
-              $profilesPage -notmatch 'x:Uid="WorkspacePage_PlanList"' -or
-              $profilesPage -notmatch 'x:Uid="WorkspacePage_ProgressRing"') {
-            throw "ProfilesPage.xaml is missing required accessibility resource bindings."
+          $workspacePage = Get-Content src/WorkspaceControl.Desktop/WorkspacePage.xaml -Raw
+          if ($workspacePage -notmatch 'x:Uid="WorkspacePage_WorkspaceList"' -or
+              $workspacePage -notmatch 'x:Uid="WorkspacePage_PlanList"' -or
+              $workspacePage -notmatch 'x:Uid="WorkspacePage_ProgressRing"') {
+            throw "WorkspacePage.xaml is missing required accessibility resource bindings."
           }
 
       - name: Build
@@ -234,7 +234,7 @@ jobs:
         if: matrix.configuration == 'Release'
         shell: pwsh
         run: |
-          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-weekly"
+          $package = Join-Path $env:RUNNER_TEMP "workspace-control-weekly"
           New-Item -ItemType Directory -Force -Path $package | Out-Null
           $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe | Select-Object -First 1
           if (-not $msbuild) { throw "Visual Studio MSBuild could not be located." }
@@ -246,9 +246,9 @@ jobs:
         if: matrix.configuration == 'Release'
         shell: pwsh
         run: |
-          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-weekly"
+          $package = Join-Path $env:RUNNER_TEMP "workspace-control-weekly"
           $desktop = Join-Path $package "WorkspaceControl/WorkspaceControl.exe"
-          $cli = Join-Path $package "WorkspaceBootstrap.Cli.exe"
+          $cli = Join-Path $package "WorkspaceControl.Cli.exe"
           $catalog = Join-Path $package "catalog/windows/components/catalog.json"
           $profiles = Join-Path $package "catalog/windows/templates"
           $readme = Join-Path $package "README.md"
@@ -259,7 +259,7 @@ jobs:
           if (-not (Test-Path $desktop)) { throw "Workspace Control executable is missing: $desktop" }
           if (-not (Test-Path $cli)) { throw "CLI executable is missing: $cli" }
           if (-not (Test-Path $catalog)) { throw "Bundled component catalog is missing: $catalog" }
-          if (-not (Test-Path $profiles -PathType Container)) { throw "Bundled profiles directory is missing: $profiles" }
+          if (-not (Test-Path $profiles -PathType Container)) { throw "Bundled workspace templates directory is missing: $profiles" }
           if (-not (Test-Path $readme)) { throw "Portable package README is missing: $readme" }
           if (-not (Test-Path $license)) { throw "Portable package LICENSE is missing: $license" }
 
