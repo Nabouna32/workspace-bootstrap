@@ -1,6 +1,6 @@
 # Workspace Control — Decisions
 
-This file records durable decisions and their context. It is not a development journal and it does not invent history that cannot be supported by repository evidence.
+This file records durable decisions and their context. It is not a development journal.
 
 ## Baseline decisions
 
@@ -32,10 +32,24 @@ The supported desktop stack is C#/.NET 10 with WinUI 3 / Windows App SDK on Wind
 
 The local product does not require an account or cloud service. Future cloud/fleet capabilities must reuse the local desired-state/execution model rather than introduce a second Windows engine.
 
+### Implementation realignment
+
+The current codebase is an implementation snapshot, not the authority for product direction. Where implementation has drifted from the brainstorming and validated product intent, the project will realign the implementation with that intent. Existing code, architecture or abstractions may be substantially rewritten or removed when that is the cleanest way to restore coherence. Preserving existing implementation is not itself a product constraint.
+
+The distinction is explicit:
+
+**product intent → validated decisions → architecture → implementation**
+
+not:
+
+**existing implementation → retroactive product decision**.
+
+### Historical installation direction
+
+The brainstorming includes cache and offline capabilities as a meaningful product direction. No later decision should demote that direction merely because the current implementation is online-first. Its exact scope and sequencing remain to be determined during product/architecture realignment.
+
 ## Decision discipline
 
-When a new decision changes product direction, record it here and update affected canonical documents in the same coherent change.
-
-Implementation details do not become product decisions merely because they exist in code.
+A new decision may refine or change the product direction, but implementation details do not become decisions merely because they exist in code.
 
 When historical context cannot be verified, record the uncertainty instead of reconstructing a false history.
