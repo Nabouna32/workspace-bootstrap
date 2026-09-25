@@ -242,7 +242,7 @@ Exemples issus du brainstorming :
 - RunDiagnostic ;
 - InstallWsl ;
 - ConfigureWsl ;
-- ApplyProfile ;
+- ApplyWorkspace ;
 - ManageCache.
 
 La même capacité doit pouvoir être consommée par l'interface, le CLI et, à terme, d'autres surfaces.
@@ -544,7 +544,7 @@ Exemples envisagés :
 
 - inventory ;
 - plan ;
-- provision / apply ;
+- workspace apply ;
 - update ;
 - cache ;
 - diagnose ;
@@ -747,7 +747,7 @@ Ces éléments représentent des **idées ou directions**, pas des engagements d
 Le brainstorming a notamment permis de faire évoluer ou d'écarter plusieurs directions :
 
 - le produit ne doit plus être pensé comme un simple bootstrapper ponctuel ;
-- le provisioning logiciel ne doit pas être considéré comme l'architecture centrale de tout le produit ;
+- l'application d'un Workspace ne doit pas être confondue avec le produit lui-même : le produit doit d'abord comprendre la machine, proposer les actions de maintenance et laisser l'utilisateur choisir ce qu'il veut changer ;
 - WinGet ne doit pas devenir le cœur du produit ;
 - l'interface ne doit pas être construite comme un simple ensemble de pages techniques ;
 - PowerShell ne doit pas devenir le moteur principal ;
@@ -815,7 +815,7 @@ Notamment :
 
 - le nom **Workspace Control** est désormais établi ;
 - le concept utilisateur **My Workspace** précise la notion de Workspace ;
-- ProfileManifest représente la forme technique versionnée du desired state ;
+- le desired state / Workspace dispose d'une représentation technique versionnée, mais cette représentation reste au service du concept utilisateur de Workspace ;
 - la séparation Domain / Application / Infrastructure / Desktop / CLI a été concrétisée ;
 - WinUI 3 a remplacé l'ancien prototype WPF ;
 - la gestion des applications et du provisioning a commencé à être implémentée ;
