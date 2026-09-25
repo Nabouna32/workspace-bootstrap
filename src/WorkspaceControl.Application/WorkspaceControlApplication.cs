@@ -34,30 +34,30 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
     public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string workspaceId, CancellationToken cancellationToken = default) =>
         _provisioning.GetDesiredStateDiffAsync(workspaceId, cancellationToken);
 
-    public Task<WorkspacePlan> GetPlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
-        _provisioning.GetPlanAsync(workspaceId, cancellationToken);
+    public Task<WorkspacePlan> CreateWorkspacePlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+        _provisioning.CreateWorkspacePlanAsync(workspaceId, cancellationToken);
 
-    public Task<WorkspaceOperation> CreateProvisioningAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+    public Task<WorkspaceOperation> CreateWorkspaceOperationAsync(string workspaceId, CancellationToken cancellationToken = default) =>
         _provisioning.CreateAsync(workspaceId, cancellationToken);
 
-    public string ConfirmProvisioning(string operationId) =>
+    public string ConfirmWorkspaceOperation(string operationId) =>
         _provisioning.Confirm(operationId);
 
-    public Task RunProvisioningAsync(
+    public Task RunWorkspaceOperationAsync(
         string operationId,
         CancellationToken cancellationToken = default) =>
         _provisioning.RunAsync(operationId, cancellationToken);
 
-    public WorkspaceOperation? GetProvisioningStatus(string operationId) =>
+    public WorkspaceOperation? GetWorkspaceOperation(string operationId) =>
         _provisioning.Get(operationId);
 
-    public string ResumeProvisioning(string operationId) =>
+    public string ResumeWorkspaceOperation(string operationId) =>
         _provisioning.Resume(operationId);
 
-    public IReadOnlyList<WorkspaceOperation> GetProvisioningHistory() =>
+    public IReadOnlyList<WorkspaceOperation> GetWorkspaceOperationHistory() =>
         _provisioning.GetHistory();
 
-    public WorkspaceOperation? GetProvisioningRecovery()
+    public WorkspaceOperation? GetRecoverableWorkspaceOperation()
     {
         var latest = _provisioning.GetHistory()
             .OrderByDescending(x => x.UpdatedAt)
@@ -71,7 +71,7 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
             : null;
     }
 
-    public WorkspaceOperation? GetProvisioningDetail(string operationId) =>
+    public WorkspaceOperation? GetWorkspaceOperationDetail(string operationId) =>
         _provisioning.Get(operationId);
 
     public Task<InventorySnapshot> GetInventoryAsync(CancellationToken cancellationToken = default) =>
