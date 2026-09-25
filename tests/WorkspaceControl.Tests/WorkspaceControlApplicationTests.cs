@@ -167,7 +167,7 @@ public sealed class WorkspaceControlApplicationTests
                 [],
                 DateTimeOffset.UtcNow));
 
-        public Task<WorkspacePlan> CreateWorkspacePlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+        public Task<WorkspacePlan> GetPlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
             Task.FromResult(new WorkspacePlan(
                 workspaceId,
                 workspaceId,
