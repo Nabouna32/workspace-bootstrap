@@ -10,11 +10,47 @@ Workspace Control is a permanent Windows 11 control center. The original bootstr
 
 ### User model
 
-**My Workspace** is the primary user-facing desired-state concept. Users choose what they want managed. Predefined profiles are optional editable templates.
+**My Workspace** is the primary user-facing desired-state concept. Users choose what they want managed. Predefined profiles/templates are optional starting points, not the primary product model.
+
+### Workspace semantics
+
+A Workspace is a **partial desired state**. Only elements explicitly defined by the user create desired-state requirements. Undefined elements are outside the Workspace's management scope and must not generate inferred mutations.
+
+The product must distinguish:
+
+- defined desired state;
+- undefined desired state;
+- unknown observed state.
+
+An unknown observed state is not permission to guess or mutate.
+
+### Workspace capture and reuse
+
+A Workspace may be created from an explicit capture of the current machine. Capture must be controllable so that the product does not automatically turn the complete machine inventory into a giant desired-state configuration.
+
+Workspaces are intended to be reusable artifacts. They may be saved, duplicated, exported, imported and applied to compatible machines.
+
+This supports both ongoing maintenance and reconstruction after formatting or a fresh Windows installation.
+
+### Templates
+
+Templates are optional starting configurations from which a user can create a Workspace. The resulting Workspace is independent and user-owned.
+
+The product should use **Workspace** as the primary domain concept and **template** for optional starting points. The term **profile** must not be allowed to silently become a competing primary model.
+
+### Personal and organizational use
+
+The same Workspace/desired-state model must be usable for a personal machine and extensible to future multi-machine or organizational deployment.
+
+Enterprise/fleet management is not required for the local product, but the architecture must not make it impossible. Future organizational capabilities should reuse the local desired-state and execution model rather than introduce a separate Windows configuration engine.
+
+The exact future concepts for organizations—such as groups, policies, inheritance, targeting and centralized authorization—remain intentionally undecided.
 
 ### Safety
 
 Normal interactive operation does not mutate silently. Important changes are planned, reviewed and explicitly confirmed before execution, followed by verification.
+
+Future explicitly authorized automated or organizational execution may use a separate policy/authorization model and does not imply interactive confirmation for every individual operation.
 
 ### Architecture
 
