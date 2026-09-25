@@ -60,36 +60,36 @@ public sealed class ConfigurationTests
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var components = configuration.LoadComponents();
-        var profiles = configuration.LoadWorkspaceTemplates();
+        var templates = configuration.LoadWorkspaceTemplates();
 
         Assert.IsNotEmpty(profiles);
         Assert.AreEqual(
-            profiles.Count,
-            profiles.Values.Select(x => x.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+            templates.Count,
+            templates.Values.Select(x => x.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count());
 
-        foreach (var profile in profiles.Values)
+        foreach (var profile in templates.Values)
         {
-            Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Id));
-            Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Name));
-            Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Description));
-            Assert.AreEqual(2, profile.SchemaVersion);
-            Assert.IsNotNull(profile.DesiredState);
-            Assert.IsNotEmpty(profile.ApplicationRequests);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(template.Id));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(template.Name));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(template.Description));
+            Assert.AreEqual(2, template.SchemaVersion);
+            Assert.IsNotNull(template.DesiredState);
+            Assert.IsNotEmpty(template.ApplicationRequests);
 
-            var componentIds = profile.ApplicationRequests.Select(x => x.ComponentId).ToArray();
+            var componentIds = template.ApplicationRequests.Select(x => x.ComponentId).ToArray();
             Assert.AreEqual(
                 componentIds.Length,
                 componentIds.Distinct(StringComparer.OrdinalIgnoreCase).Count(),
-                $"{profile.Id} contains duplicate applications.");
+                $"{template.Id} contains duplicate applications.");
 
             foreach (var componentId in componentIds)
-                Assert.IsTrue(components.ContainsKey(componentId), $"{profile.Id} references unknown component {componentId}.");
+                Assert.IsTrue(components.ContainsKey(componentId), $"{template.Id} references unknown component {componentId}.");
         }
 
         foreach (var component in components.Values)
         {
             foreach (var workspaceId in component.Workspaces ?? Array.Empty<string>())
-                Assert.IsTrue(profiles.ContainsKey(workspaceId), $"{component.Id} references unknown profile {workspaceId}.");
+                Assert.IsTrue(templates.ContainsKey(workspaceId), $"{component.Id} references unknown template {workspaceId}.");
         }
     }
 
@@ -186,7 +186,7 @@ public sealed class ConfigurationTests
             "test-app");
         Directory.CreateDirectory(componentDirectory);
         File.WriteAllText(
-            Path.Combine(root, "bootstrap", "windows", "components", "catalog.json"),
+            Path.Combine(root, "catalog", "windows", "components", "catalog.json"),
             """{"components":["test-app"]}""");
         File.WriteAllText(
             Path.Combine(componentDirectory, "component.json"),
@@ -206,7 +206,7 @@ public sealed class ConfigurationTests
             SchemaVersion: 2);
 
         File.WriteAllText(
-            Path.Combine(root, "bootstrap", "windows", "profiles", "remove-app.json"),
+            Path.Combine(root, "catalog", "windows", "templates", "remove-app.json"),
             JsonSerializer.Serialize(workspace, JsonDefaults.Options));
 
         try
@@ -400,7 +400,7 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
-    public async Task Provisioning_plan_is_derived_from_the_same_desired_state_diff()
+    public async Task Workspace_plan_is_derived_from_the_same_desired_state_diff()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-diff-tests", Guid.NewGuid().ToString("N")));
@@ -422,7 +422,7 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
-    public async Task Provisioning_plan_uses_available_version_for_latest_stable()
+    public async Task Workspace_plan_uses_available_version_for_latest_stable()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
@@ -459,16 +459,16 @@ public sealed class ConfigurationTests
                 []),
             SchemaVersion: 2);
 
-        var request = profile.ApplicationRequests.Single();
+        var request = template.ApplicationRequests.Single();
 
         Assert.AreEqual("vscode", request.ComponentId);
         Assert.AreEqual("minimum", request.VersionPolicy);
         Assert.AreEqual("1.2.3", request.MinimumVersion);
-        Assert.IsTrue(profile.DesiredState is not null);
+        Assert.IsTrue(template.DesiredState is not null);
     }
 
     [TestMethod]
-    public async Task Provisioning_plan_preserves_stable_compatible_policy()
+    public async Task Workspace_plan_preserves_stable_compatible_policy()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
@@ -489,7 +489,7 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
-    public async Task Provisioning_plan_applies_minimum_version_policy()
+    public async Task Workspace_plan_applies_minimum_version_policy()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
@@ -509,7 +509,7 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
-    public async Task Provisioning_plan_blocks_mutation_when_inventory_is_incomplete()
+    public async Task Workspace_plan_blocks_mutation_when_inventory_is_incomplete()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
@@ -531,10 +531,10 @@ public sealed class ConfigurationTests
     private static string CreateConfigurationRoot()
     {
         var root = Path.Combine(Path.GetTempPath(), "workspace-control-config-tests", Guid.NewGuid().ToString("N"));
-        var componentsRoot = Path.Combine(root, "bootstrap", "windows", "components");
-        var profilesRoot = Path.Combine(root, "bootstrap", "windows", "profiles");
+        var componentsRoot = Path.Combine(root, "catalog", "windows", "components");
+        var templatesRoot = Path.Combine(root, "catalog", "windows", "templates");
         Directory.CreateDirectory(componentsRoot);
-        Directory.CreateDirectory(profilesRoot);
+        Directory.CreateDirectory(templatesRoot);
 
         File.WriteAllText(
             Path.Combine(componentsRoot, "catalog.json"),
@@ -548,7 +548,7 @@ public sealed class ConfigurationTests
             SchemaVersion: 2);
 
         File.WriteAllText(
-            Path.Combine(profilesRoot, "base.json"),
+            Path.Combine(templatesRoot, "base.json"),
             JsonSerializer.Serialize(profile, JsonDefaults.Options));
 
         return root;
@@ -672,7 +672,7 @@ public sealed class ConfigurationTests
         var current = new DirectoryInfo(AppContext.BaseDirectory);
         while (current is not null)
         {
-            if (File.Exists(Path.Combine(current.FullName, "bootstrap", "windows", "components", "catalog.json")))
+            if (File.Exists(Path.Combine(current.FullName, "catalog", "windows", "components", "catalog.json")))
                 return current.FullName;
 
             current = current.Parent;
@@ -688,7 +688,7 @@ public sealed class ConfigurationTests
 public sealed class WorkspacePlanContractTests
 {
     [TestMethod]
-    public async Task Provisioning_plan_exposes_typed_contract_fields()
+    public async Task Workspace_plan_exposes_typed_contract_fields()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
@@ -719,7 +719,7 @@ public sealed class WorkspacePlanContractTests
         var current = new DirectoryInfo(AppContext.BaseDirectory);
         while (current is not null)
         {
-            if (File.Exists(Path.Combine(current.FullName, "bootstrap", "windows", "components", "catalog.json")))
+            if (File.Exists(Path.Combine(current.FullName, "catalog", "windows", "components", "catalog.json")))
                 return current.FullName;
 
             current = current.Parent;
@@ -882,7 +882,7 @@ public sealed class WorkspaceStorageContractTests
         var current = new DirectoryInfo(AppContext.BaseDirectory);
         while (current is not null)
         {
-            if (File.Exists(Path.Combine(current.FullName, "bootstrap", "windows", "components", "catalog.json")))
+            if (File.Exists(Path.Combine(current.FullName, "catalog", "windows", "components", "catalog.json")))
                 return current.FullName;
 
             current = current.Parent;
@@ -919,7 +919,7 @@ public sealed class WorkspaceStoreTests
             workspace.DesiredState!.Applications.Any(
                 application => application.ComponentId == "github-cli"));
         Assert.IsFalse(File.Exists(
-            Path.Combine(repositoryRoot, "bootstrap", "windows", "profiles", $"{workspace.Id}.json")));
+            Path.Combine(repositoryRoot, "catalog", "windows", "templates", $"{workspace.Id}.json")));
     }
 
     [TestMethod]
@@ -980,7 +980,7 @@ public sealed class WorkspaceStoreTests
         var current = new DirectoryInfo(AppContext.BaseDirectory);
         while (current is not null)
         {
-            if (File.Exists(Path.Combine(current.FullName, "bootstrap", "windows", "components", "catalog.json")))
+            if (File.Exists(Path.Combine(current.FullName, "catalog", "windows", "components", "catalog.json")))
                 return current.FullName;
 
             current = current.Parent;
