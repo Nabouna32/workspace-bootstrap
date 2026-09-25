@@ -3,7 +3,7 @@
   <data name="WorkspacePage_Title.Text" xml:space="preserve"><value>Mon Workspace</value></data>
   <data name="WorkspacePage_Subtitle.Text" xml:space="preserve"><value>Définissez ce que ce PC doit gérer, comparez l’état réel, puis vérifiez et confirmez les changements.</value></data>
   <data name="WorkspacePage_ChooseHeading.Text" xml:space="preserve"><value>1. Choisir un état souhaité</value></data>
-  <data name="WorkspacePage_ProfileList.AutomationProperties.Name" xml:space="preserve"><value>Mes Workspaces</value></data>
+  <data name="WorkspacePage_WorkspaceeList.AutomationProperties.Name" xml:space="preserve"><value>Mes Workspaces</value></data>
   <data name="WorkspacePage_ReviewHeading.Text" xml:space="preserve"><value>3. Vérifier le plan</value></data>
   <data name="WorkspacePage_PlanList.AutomationProperties.Name" xml:space="preserve"><value>Éléments du plan</value></data>
   <data name="WorkspacePage_Confirm.Content" xml:space="preserve"><value>Confirmer et appliquer</value></data>
@@ -21,7 +21,7 @@
   <data name="WorkspacePage_AvailableVersion.Text" xml:space="preserve"><value>Disponible</value></data>
   <data name="WorkspacePage_DesiredVersion.Text" xml:space="preserve"><value>Souhaitée</value></data>
   <data name="WorkspacePage_StateCode.AutomationProperties.Name" xml:space="preserve"><value>État observé</value></data>
-  <data name="NoProvisioningOperation" xml:space="preserve"><value>Aucune opération de provisionnement</value></data>
+  <data name="NoWorkspace operationOperation" xml:space="preserve"><value>Aucune opération de provisionnement</value></data>
   <data name="AwaitingConfirmation" xml:space="preserve"><value>En attente de votre confirmation</value></data>
   <data name="Queued" xml:space="preserve"><value>En file d’attente</value></data>
   <data name="ApplyingConfirmedPlan" xml:space="preserve"><value>Application du plan confirmé</value></data>
@@ -36,16 +36,16 @@
   <data name="ReadySoftwareEntriesFormat" xml:space="preserve"><value>Prêt · {0} entrées logicielles</value></data>
   <data name="RefreshCancelled" xml:space="preserve"><value>Actualisation annulée</value></data>
   <data name="RefreshFailed" xml:space="preserve"><value>Échec de l’actualisation</value></data>
-  <data name="GeneratingProvisioningPlan" xml:space="preserve"><value>Génération du plan de provisionnement…</value></data>
+  <data name="GeneratingWorkspace operationPlan" xml:space="preserve"><value>Génération du plan de provisionnement…</value></data>
   <data name="PlanReadyForReview" xml:space="preserve"><value>Plan prêt à être vérifié</value></data>
   <data name="PlanGenerationCancelled" xml:space="preserve"><value>Génération du plan annulée</value></data>
   <data name="PlanGenerationFailed" xml:space="preserve"><value>Échec de la génération du plan</value></data>
-  <data name="StartingProvisioning" xml:space="preserve"><value>Démarrage du provisionnement…</value></data>
-  <data name="ProvisioningStarted" xml:space="preserve"><value>Provisionnement démarré</value></data>
-  <data name="ProvisioningCouldNotStart" xml:space="preserve"><value>Impossible de démarrer le provisionnement</value></data>
-  <data name="ResumingProvisioning" xml:space="preserve"><value>Reprise du provisionnement…</value></data>
-  <data name="ProvisioningResumed" xml:space="preserve"><value>Provisionnement repris</value></data>
-  <data name="ProvisioningCouldNotResume" xml:space="preserve"><value>Impossible de reprendre le provisionnement</value></data>
+  <data name="StartingWorkspace operation" xml:space="preserve"><value>Démarrage du provisionnement…</value></data>
+  <data name="Workspace operationStarted" xml:space="preserve"><value>Provisionnement démarré</value></data>
+  <data name="Workspace operationCouldNotStart" xml:space="preserve"><value>Impossible de démarrer le provisionnement</value></data>
+  <data name="ResumingWorkspace operation" xml:space="preserve"><value>Reprise du provisionnement…</value></data>
+  <data name="Workspace operationResumed" xml:space="preserve"><value>Provisionnement repris</value></data>
+  <data name="Workspace operationCouldNotResume" xml:space="preserve"><value>Impossible de reprendre le provisionnement</value></data>
   <data name="MainWindow_Workspace.Content" xml:space="preserve"><value>Mon Workspace</value></data>
   <data name="MainWindow.Title" xml:space="preserve"><value>Workspace Control</value></data>
   <data name="MainWindow_Navigation.AutomationProperties.Name" xml:space="preserve"><value>Navigation principale</value></data>
