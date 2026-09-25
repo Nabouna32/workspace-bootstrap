@@ -25,7 +25,7 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
         _optimization = optimization ?? throw new ArgumentNullException(nameof(optimization));
     }
 
-    public IReadOnlyList<WorkspaceManifest> GetProfiles() => _provisioning.GetProfiles();
+    public IReadOnlyList<WorkspaceManifest> GetWorkspaces() => _provisioning.GetWorkspaces();
     public IReadOnlyList<ComponentManifest> GetApplicationCatalog() => _provisioning.GetApplicationCatalog();
     public WorkspaceManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
         _provisioning.CreateWorkspace(name, description, componentIds);
