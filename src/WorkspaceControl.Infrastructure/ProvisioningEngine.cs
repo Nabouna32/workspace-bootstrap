@@ -31,8 +31,8 @@ public sealed class ProvisioningEngine
         _registryWriter = registryWriter ?? new RegistryDesiredStateWriter();
     }
 
-    public IReadOnlyList<WorkspaceManifest> Profiles() =>
-        _config.LoadProfiles().Values.OrderBy(x => x.Name).ToArray();
+    public IReadOnlyList<WorkspaceManifest> Workspaces() =>
+        _config.LoadWorkspaces().Values.OrderBy(x => x.Name).ToArray();
 
     public IReadOnlyList<ComponentManifest> ApplicationCatalog() =>
         _config.LoadComponents().Values.OrderBy(x => x.Name).ToArray();
@@ -47,10 +47,10 @@ public sealed class ProvisioningEngine
         _config.SaveWorkspace(workspace);
 
     public async Task<DesiredStateDiff> DiffAsync(
-        string profileId,
+        string workspaceId,
         CancellationToken token = default)
     {
-        var profile = GetProfile(profileId);
+        var profile = GetWorkspace(workspaceId);
         var components = _config.LoadComponents();
         var inventory = await _inventory.ScanAsync(token);
 
@@ -61,7 +61,7 @@ public sealed class ProvisioningEngine
             if (!components.TryGetValue(request.ComponentId, out var catalogComponent))
                 throw new InvalidOperationException($"Unknown component: {request.ComponentId}");
 
-            var component = ApplyProfileOverrides(catalogComponent, request);
+            var component = ApplyWorkspaceOverrides(catalogComponent, request);
             var match = FindInventoryMatch(component, inventory.Items);
             var planItem = BuildApplicationPlanItem(
                 component,
@@ -95,10 +95,10 @@ public sealed class ProvisioningEngine
     }
 
     public async Task<ProvisioningPlan> PlanAsync(
-        string profileId,
+        string workspaceId,
         CancellationToken token = default)
     {
-        var diff = await DiffAsync(profileId, token);
+        var diff = await DiffAsync(workspaceId, token);
 
         var unsupported = diff.Items
             .Where(item =>
@@ -109,7 +109,7 @@ public sealed class ProvisioningEngine
         if (unsupported.Length > 0)
         {
             throw new InvalidOperationException(
-                $"Profile '{diff.ProfileId}' contains desired-state sections that are not executable yet. " +
+                $"Profile '{diff.WorkspaceId}' contains desired-state sections that are not executable yet. " +
                 "The diff identifies these sections explicitly; no mutation plan was created.");
         }
 
@@ -130,8 +130,8 @@ public sealed class ProvisioningEngine
             .ToArray();
 
         return new ProvisioningPlan(
-            diff.ProfileId,
-            diff.ProfileName,
+            diff.WorkspaceId,
+            diff.WorkspaceName,
             diff.InventoryScanId,
             diff.InventoryDiagnostics,
             items,
@@ -154,7 +154,7 @@ public sealed class ProvisioningEngine
 
     private static ProvisioningPlanItem BuildApplicationPlanItem(
         ComponentManifest component,
-        ProfileApplication request,
+        WorkspaceApplication request,
         InventoryItem? match,
         IReadOnlyList<InventoryProviderDiagnostic> diagnostics)
     {
@@ -421,13 +421,13 @@ public sealed class ProvisioningEngine
     }
 
     public async Task<ProvisioningOperation> CreateAsync(
-        string profileId,
+        string workspaceId,
         CancellationToken token = default)
     {
-        var plan = await PlanAsync(profileId, token);
+        var plan = await PlanAsync(workspaceId, token);
         var operation = new ProvisioningOperation
         {
-            ProfileId = plan.ProfileId,
+            WorkspaceId = plan.WorkspaceId,
             Plan = plan,
             Status = ProvisioningOperationStatuses.AwaitingConfirmation,
             Total = plan.Items.Count,
@@ -494,7 +494,7 @@ public sealed class ProvisioningEngine
         if (operation.Status is ProvisioningOperationStatuses.Completed)
             return;
 
-        var profile = GetProfile(operation.ProfileId);
+        var profile = GetWorkspace(operation.WorkspaceId);
         var components = _config.LoadComponents();
         var plan = operation.Plan
             ?? throw new InvalidOperationException(
@@ -508,7 +508,7 @@ public sealed class ProvisioningEngine
 
         try
         {
-            var currentPlan = await PlanAsync(operation.ProfileId, token);
+            var currentPlan = await PlanAsync(operation.WorkspaceId, token);
             ValidateUncompletedPlanState(operation, plan, currentPlan);
 
             operation.Status = ProvisioningOperationStatuses.Running;
@@ -568,7 +568,7 @@ public sealed class ProvisioningEngine
                             ?? throw new InvalidOperationException(
                                 $"Profile '{profile.Id}' does not contain application '{planned.ComponentId}'.");
 
-                        var component = ApplyProfileOverrides(catalogComponent, request);
+                        var component = ApplyWorkspaceOverrides(catalogComponent, request);
 
                         if (planned.ActionCode == ProvisioningActionCodes.Remove)
                         {
@@ -601,7 +601,7 @@ public sealed class ProvisioningEngine
                     operation.CurrentComponentName = $"Verifying: {planned.ComponentName}";
                     Save(operation);
 
-                    var verificationPlan = await PlanAsync(operation.ProfileId, token);
+                    var verificationPlan = await PlanAsync(operation.WorkspaceId, token);
                     var verified = verificationPlan.Items
                         .FirstOrDefault(item =>
                             string.Equals(item.TargetId, planned.TargetId, StringComparison.Ordinal)
@@ -634,7 +634,7 @@ public sealed class ProvisioningEngine
                                     $"Profile '{profile.Id}' does not contain application '{planned.ComponentId}'.");
 
                             ValidatePostcondition(
-                                ApplyProfileOverrides(catalogComponent, request),
+                                ApplyWorkspaceOverrides(catalogComponent, request),
                                 planned,
                                 verified);
                         }
@@ -682,7 +682,7 @@ public sealed class ProvisioningEngine
             operation.CurrentComponentName = "Verifying final state…";
             Save(operation);
 
-            var finalPlan = await PlanAsync(operation.ProfileId, token);
+            var finalPlan = await PlanAsync(operation.WorkspaceId, token);
             if (finalPlan.Items.Count != plan.Items.Count)
                 throw new InvalidOperationException(
                     "Final state verification failed because the desired-state item set changed.");
@@ -736,7 +736,7 @@ public sealed class ProvisioningEngine
                         $"Profile '{profile.Id}' does not contain application '{planned.ComponentId}'.");
 
                 ValidatePostcondition(
-                    ApplyProfileOverrides(catalogComponent, request),
+                    ApplyWorkspaceOverrides(catalogComponent, request),
                     planned,
                     verified);
             }
@@ -1059,9 +1059,9 @@ public sealed class ProvisioningEngine
             $"Desired-state section '{sectionName}' contains {count} item(s), but observation and execution are not implemented yet."));
     }
 
-    private static ComponentManifest ApplyProfileOverrides(
+    private static ComponentManifest ApplyWorkspaceOverrides(
         ComponentManifest component,
-        ProfileApplication request)
+        WorkspaceApplication request)
     {
         if (request.VersionPolicy is null && request.MinimumVersion is null)
             return component;
@@ -1073,8 +1073,8 @@ public sealed class ProvisioningEngine
         };
     }
 
-    private WorkspaceManifest GetProfile(string id) =>
-        _config.LoadProfiles().TryGetValue(id, out var profile)
+    private WorkspaceManifest GetWorkspace(string id) =>
+        _config.LoadWorkspaces().TryGetValue(id, out var profile)
             ? profile
             : throw new InvalidOperationException($"Unknown profile: {id}");
 
@@ -1247,7 +1247,7 @@ public sealed class ProvisioningEngine
     {
         if (string.IsNullOrWhiteSpace(operation.OperationId))
             throw new InvalidOperationException("Operation must have an identifier.");
-        if (string.IsNullOrWhiteSpace(operation.ProfileId))
+        if (string.IsNullOrWhiteSpace(operation.WorkspaceId))
             throw new InvalidOperationException("Operation must reference a profile.");
         if (operation.Completed < 0 || operation.Total < 0 || operation.Completed > operation.Total)
             throw new InvalidOperationException("Operation progress is inconsistent.");
