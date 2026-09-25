@@ -185,4 +185,6 @@
   <data name="WorkspacePage_WindowsAppearanceUndefined.Content" xml:space="preserve"><value>Undefined</value></data>
   <data name="WorkspacePage_WindowsAppearanceLight.Content" xml:space="preserve"><value>Light</value></data>
   <data name="WorkspacePage_WindowsAppearanceDark.Content" xml:space="preserve"><value>Dark</value></data>
+  <data name="WindowsAppearanceLight" xml:space="preserve"><value>Light</value></data>
+  <data name="WindowsAppearanceDark" xml:space="preserve"><value>Dark</value></data>
 </root>
