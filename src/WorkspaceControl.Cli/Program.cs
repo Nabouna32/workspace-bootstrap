@@ -43,44 +43,44 @@ try
             data = MapDiff(await application.GetDesiredStateDiffAsync(profile ?? throw new ArgumentException("--profile est requis.")));
             break;
         case "provisioning-plan":
-            data = MapPlan(await application.GetPlanAsync(profile ?? throw new ArgumentException("--profile est requis.")));
+            data = MapPlan(await application.CreateWorkspacePlanAsync(profile ?? throw new ArgumentException("--profile est requis.")));
             break;
         case "provisioning-worker":
-            await application.RunProvisioningAsync(
+            await application.RunWorkspaceOperationAsync(
                 operation ?? throw new ArgumentException("--operation est requis."),
                 CancellationToken.None);
             data = new { OperationId = operation, Status = "completed" };
             break;
         case "provisioning-start":
-            data = MapOperation(await application.CreateProvisioningAsync(
+            data = MapOperation(await application.CreateWorkspaceOperationAsync(
                 profile ?? throw new ArgumentException("--profile est requis.")));
             break;
         case "provisioning-confirm":
             data = new
             {
-                OperationId = application.ConfirmProvisioning(
+                OperationId = application.ConfirmWorkspaceOperation(
                     operation ?? throw new ArgumentException("--operation est requis.")),
                 Status = "queued"
             };
             break;
         case "provisioning-status":
-            data = MapOperation(application.GetProvisioningStatus(operation ?? throw new ArgumentException("--operation est requis.")));
+            data = MapOperation(application.GetWorkspaceOperation(operation ?? throw new ArgumentException("--operation est requis.")));
             break;
         case "provisioning-recovery":
-            data = MapOperation(application.GetProvisioningRecovery());
+            data = MapOperation(application.GetRecoverableWorkspaceOperation());
             break;
         case "provisioning-resume":
             data = new
             {
-                OperationId = application.ResumeProvisioning(operation ?? throw new ArgumentException("--operation est requis.")),
+                OperationId = application.ResumeWorkspaceOperation(operation ?? throw new ArgumentException("--operation est requis.")),
                 Status = "starting"
             };
             break;
         case "provisioning-history":
-            data = application.GetProvisioningHistory().Select(MapHistory).ToArray();
+            data = application.GetWorkspaceOperationHistory().Select(MapHistory).ToArray();
             break;
         case "provisioning-detail":
-            data = MapDetail(application.GetProvisioningDetail(operation ?? throw new ArgumentException("--operation est requis.")));
+            data = MapDetail(application.GetWorkspaceOperationDetail(operation ?? throw new ArgumentException("--operation est requis.")));
             break;
         default:
             throw new ArgumentException($"Commande inconnue : {command}");
