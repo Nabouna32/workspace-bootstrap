@@ -43,7 +43,7 @@ public sealed class ConfigurationStore
             .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
     }
 
-    public ProfileManifest CreateWorkspace(
+    public WorkspaceManifest CreateWorkspace(
         string name,
         string description,
         IReadOnlyCollection<string> componentIds)
@@ -73,7 +73,7 @@ public sealed class ConfigurationStore
         }
 
         var id = $"workspace-{Guid.NewGuid():N}";
-        var workspace = new ProfileManifest(
+        var workspace = new WorkspaceManifest(
             id,
             name.Trim(),
             description.Trim(),
@@ -90,7 +90,7 @@ public sealed class ConfigurationStore
         return workspace;
     }
 
-    public void SaveWorkspace(ProfileManifest workspace, bool overwrite = true)
+    public void SaveWorkspace(WorkspaceManifest workspace, bool overwrite = true)
     {
         ValidateWorkspace(workspace);
 
@@ -135,13 +135,13 @@ public sealed class ConfigurationStore
         return fullPath;
     }
 
-    public ProfileManifest ImportProfile(string sourcePath, bool overwrite = false)
+    public WorkspaceManifest ImportProfile(string sourcePath, bool overwrite = false)
     {
         var fullPath = Path.GetFullPath(sourcePath);
         if (!File.Exists(fullPath))
             throw new FileNotFoundException("Profile file was not found.", fullPath);
 
-        var profile = JsonSerializer.Deserialize<ProfileManifest>(
+        var profile = JsonSerializer.Deserialize<WorkspaceManifest>(
             File.ReadAllText(fullPath), JsonDefaults.Options)
             ?? throw new InvalidOperationException("The imported profile is invalid.");
 
@@ -166,7 +166,7 @@ public sealed class ConfigurationStore
         return profile;
     }
 
-    public IReadOnlyDictionary<string, ProfileManifest> LoadProfiles()
+    public IReadOnlyDictionary<string, WorkspaceManifest> LoadProfiles()
     {
         var profiles = LoadProfileDirectory(ProfilesRoot);
 
@@ -182,15 +182,15 @@ public sealed class ConfigurationStore
         return profiles;
     }
 
-    private static Dictionary<string, ProfileManifest> LoadProfileDirectory(string root)
+    private static Dictionary<string, WorkspaceManifest> LoadProfileDirectory(string root)
     {
         if (!Directory.Exists(root))
-            return new Dictionary<string, ProfileManifest>(StringComparer.OrdinalIgnoreCase);
+            return new Dictionary<string, WorkspaceManifest>(StringComparer.OrdinalIgnoreCase);
 
         return Directory.EnumerateFiles(root, "*.json")
             .Select(path =>
             {
-                var profile = JsonSerializer.Deserialize<ProfileManifest>(
+                var profile = JsonSerializer.Deserialize<WorkspaceManifest>(
                     File.ReadAllText(path), JsonDefaults.Options)
                     ?? throw new InvalidOperationException(
                         $"Invalid profile: {Path.GetFileName(path)}");
@@ -201,7 +201,7 @@ public sealed class ConfigurationStore
             .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
     }
 
-    private static void ValidateProfile(ProfileManifest profile, string sourceName)
+    private static void ValidateProfile(WorkspaceManifest profile, string sourceName)
     {
         if (profile.SchemaVersion is not (1 or 2))
             throw new InvalidOperationException(
@@ -235,7 +235,7 @@ public sealed class ConfigurationStore
         }
     }
 
-    private void ValidateWorkspace(ProfileManifest workspace)
+    private void ValidateWorkspace(WorkspaceManifest workspace)
     {
         ValidateProfile(workspace, $"{workspace.Id}.json");
 
@@ -264,7 +264,7 @@ public sealed class ConfigurationStore
         }
     }
 
-    private static void ValidateApplicationStates(ProfileManifest profile, string sourceName)
+    private static void ValidateApplicationStates(WorkspaceManifest profile, string sourceName)
     {
         if (profile.SchemaVersion < 2 || profile.DesiredState is null)
             return;
