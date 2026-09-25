@@ -1,42 +1,57 @@
 # Workspace Control — Roadmap
 
-This roadmap is directional. It does not turn every brainstorming idea into a commitment.
+This roadmap is directional. It follows the intended product direction and may require substantial implementation replacement.
 
-## Foundation
+## Phase 0 — Realignment
 
-- permanent Windows control-center model;
-- WinUI 3 desktop;
-- Domain / Application / Infrastructure separation;
-- provider boundary;
-- inventory and evidence;
-- desired state and persisted operations;
-- portable application-owned storage;
-- localization, accessibility and semantic states.
+- Reconcile brainstorming, product vision, UX and architecture into one coherent target.
+- Audit the existing implementation against that target.
+- Identify reusable code versus code that preserves the wrong product model.
+- Remove historical bootstrap/provisioning constraints where they no longer serve the product.
+- Establish the intended first-run and My Workspace experience before expanding feature breadth.
 
-## Product experience
+## Product foundation
 
-- complete My Workspace beyond applications;
-- first-class Applications catalogue, search, filters and actions;
-- richer Home dashboard;
-- clear state presentation across domains;
-- Windows administration surfaces;
-- Optimizations, Drivers, WSL, Diagnostics and Cleanup.
+- Permanent Windows control-center experience.
+- First-run observation of the real machine.
+- User-created Workspaces as the primary model.
+- Applications as one major domain, not the product itself.
+- Clear desired-state, diff, plan, confirmation and verification lifecycle.
+- Provider/capability architecture independent of WinGet.
+- Portable/local-first operation.
+- Localization, accessibility, themes and semantic states from the foundation.
+
+## Product domains
+
+- Applications and software management.
+- Windows administration and policies.
+- Optimizations.
+- Cleanup.
+- Diagnostics.
+- Drivers.
+- WSL.
+- Inventory.
+- Cache and offline capabilities.
+- Workspaces, conditions and desired-state management.
+
+Domains should be added through coherent product surfaces, not isolated technical pages.
 
 ## Desired-state maturity
 
-- richer diff and impact presentation;
-- conditions;
-- import/export;
-- stronger rollback/recovery where technically possible;
-- plugin SDK and trust boundary.
+- Rich diff, impact, risk and reversibility.
+- Conditions and declarative rules.
+- Import/export.
+- Recovery and rollback where technically possible.
+- Operation history and diagnostics.
+- Controlled plugin/provider extensibility.
 
 ## Future
 
-- optional cloud synchronization;
-- machine groups and fleet management;
-- remote orchestration;
-- reports and alerts.
+- Cloud synchronization.
+- Machine groups and fleet management.
+- Remote orchestration.
+- Reports and alerts.
 
 ## Quality bar
 
-A release is not considered complete merely because an engine foundation exists. The product must be understandable, safe, recoverable, tested on real Windows 11, accessible, localized and maintainable.
+The product is not complete because an engine or page exists. It must be understandable, pleasant, safe, recoverable, accessible, localized and genuinely validated on Windows 11.
