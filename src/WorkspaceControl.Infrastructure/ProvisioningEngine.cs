@@ -31,19 +31,19 @@ public sealed class ProvisioningEngine
         _registryWriter = registryWriter ?? new RegistryDesiredStateWriter();
     }
 
-    public IReadOnlyList<ProfileManifest> Profiles() =>
+    public IReadOnlyList<WorkspaceManifest> Profiles() =>
         _config.LoadProfiles().Values.OrderBy(x => x.Name).ToArray();
 
     public IReadOnlyList<ComponentManifest> ApplicationCatalog() =>
         _config.LoadComponents().Values.OrderBy(x => x.Name).ToArray();
 
-    public ProfileManifest CreateWorkspace(
+    public WorkspaceManifest CreateWorkspace(
         string name,
         string description,
         IReadOnlyCollection<string> componentIds) =>
         _config.CreateWorkspace(name, description, componentIds);
 
-    public void SaveWorkspace(ProfileManifest workspace) =>
+    public void SaveWorkspace(WorkspaceManifest workspace) =>
         _config.SaveWorkspace(workspace);
 
     public async Task<DesiredStateDiff> DiffAsync(
@@ -923,7 +923,7 @@ public sealed class ProvisioningEngine
     }
 
     private static void AddUnsupportedDesiredStateItems(
-        ProfileManifest profile,
+        WorkspaceManifest profile,
         List<DesiredStateDiffItem> items)
     {
         if (profile.DesiredState is null)
@@ -949,7 +949,7 @@ public sealed class ProvisioningEngine
     }
 
     private void AddRegistryDiffItems(
-        ProfileManifest profile,
+        WorkspaceManifest profile,
         List<DesiredStateDiffItem> items)
     {
         var registrySettings = profile.DesiredState?.RegistrySettings;
@@ -1011,7 +1011,7 @@ public sealed class ProvisioningEngine
     }
 
     private void AddConditionDiffItems(
-        ProfileManifest profile,
+        WorkspaceManifest profile,
         List<DesiredStateDiffItem> items)
     {
         var conditions = profile.DesiredState?.Conditions;
@@ -1073,7 +1073,7 @@ public sealed class ProvisioningEngine
         };
     }
 
-    private ProfileManifest GetProfile(string id) =>
+    private WorkspaceManifest GetProfile(string id) =>
         _config.LoadProfiles().TryGetValue(id, out var profile)
             ? profile
             : throw new InvalidOperationException($"Unknown profile: {id}");
@@ -1117,7 +1117,7 @@ public sealed class ProvisioningEngine
     }
 
     private static RegistrySettingDesiredState FindRegistryDesired(
-        ProfileManifest profile,
+        WorkspaceManifest profile,
         string targetId)
     {
         var desired = profile.DesiredState?.RegistrySettings
