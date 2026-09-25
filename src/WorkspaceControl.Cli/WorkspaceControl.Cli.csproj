@@ -13,7 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\WorkspaceControl.Application\WorkspaceControl.Application.csproj" />
     <ProjectReference Include="..\WorkspaceControl.Infrastructure\WorkspaceControl.Infrastructure.csproj" />
-    <Content Include="..\..\bootstrap\windows\components\**\*.json" LinkBase="bootstrap\windows\components" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="..\..\bootstrap\windows\profiles\*.json" LinkBase="bootstrap\windows\profiles" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\..\catalog\windows\components\**\*.json" LinkBase="catalog\windows\components" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\..\catalog\windows\templates\*.json" LinkBase="catalog\windows\templates" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
