@@ -88,7 +88,7 @@ public sealed class ConfigurationTests
 
         foreach (var component in components.Values)
         {
-            foreach (var workspaceId in component.Profiles ?? Array.Empty<string>())
+            foreach (var workspaceId in component.Workspaces ?? Array.Empty<string>())
                 Assert.IsTrue(profiles.ContainsKey(workspaceId), $"{component.Id} references unknown profile {workspaceId}.");
         }
     }
