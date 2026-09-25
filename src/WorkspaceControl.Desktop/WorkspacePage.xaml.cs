@@ -30,7 +30,7 @@ public sealed partial class WorkspacePage : Page
     {
         if (_viewModel.SelectedWorkspaceId is not null)
         {
-            WorkspaceList.SelectedItem = _viewModel.Workspaces.FirstOrDefault(profile =>
+            WorkspaceList.SelectedItem = _viewModel.Workspaces.FirstOrDefault(workspace =>
                 string.Equals(
                     profile.Id,
                     _viewModel.SelectedWorkspaceId,
@@ -70,7 +70,7 @@ public sealed partial class WorkspacePage : Page
     {
         _viewModel.SaveWorkspace();
 
-        WorkspaceList.SelectedItem = _viewModel.Workspaces.FirstOrDefault(profile =>
+        WorkspaceList.SelectedItem = _viewModel.Workspaces.FirstOrDefault(workspace =>
             string.Equals(
                 profile.Id,
                 _viewModel.SelectedWorkspaceId,
