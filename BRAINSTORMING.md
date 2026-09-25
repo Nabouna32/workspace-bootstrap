@@ -874,3 +874,72 @@ BRAINSTORMING.md ne doit pas devenir un substitut aux documents canoniques ci-de
 ## 20. Résumé en une phrase
 
 > **Workspace Control vise à devenir un centre de contrôle Windows 11 local-first, moderne et sûr, capable de comprendre l'état d'une machine, de le comparer à un environnement désiré, de planifier des changements explicables et de les appliquer avec confirmation et vérification, tout en restant extensible vers les providers, les Workspaces avancés, l'automatisation et, à terme, le cloud et la gestion de parc.**
+
+
+---
+
+## 12. Validated clarification of the Workspace model
+
+The original brainstorming explored profiles, Workspaces, installation and eventually broader machine management. The following clarification was validated during the product realignment and should guide future implementation work without rewriting the historical archive in `BRAINSTORMING-RAW.md`.
+
+### 12.1 Workspace is a partial desired state
+
+A Workspace is not an application checklist and does not need to describe the entire machine.
+
+It represents the parts of the Windows environment that the user explicitly wants Workspace Control to manage.
+
+This creates three important distinctions:
+
+- **Defined** — the user expressed a desired state;
+- **Undefined** — the user expressed no requirement, so Workspace Control should infer no action;
+- **Unknown** — the actual machine state cannot be established reliably enough.
+
+Undefined must not be interpreted as absent or unwanted, and unknown must not be guessed away.
+
+### 12.2 Capturing an existing machine
+
+A user may have a machine whose environment is already configured exactly as desired.
+
+Workspace Control should be able to observe that machine and create a Workspace from the current state.
+
+This is an explicit **capture** workflow, not an automatic conversion of the entire inventory into requirements. The user should be able to control what is captured.
+
+The resulting Workspace can then be:
+
+- saved;
+- duplicated;
+- exported;
+- imported;
+- reused on the same machine;
+- reused on another compatible machine.
+
+This makes Workspace useful both for continuous maintenance and for rebuilding an environment after formatting or a fresh Windows installation.
+
+### 12.3 Templates
+
+A template is an optional starting point for creating a Workspace.
+
+Once created, the Workspace is user-owned and independent from the template.
+
+The product model should therefore prefer:
+
+**Workspace = primary object**  
+**Template = optional starting point**
+
+The historical term **Profile** may still appear in older brainstorming material, but it must not silently become a competing primary model.
+
+### 12.4 Personal and enterprise use
+
+Workspace Control is not limited to personal machines.
+
+The same desired-state model should be able to evolve toward:
+
+- several machines owned by one user;
+- groups of machines;
+- organizational Workspaces or policies;
+- deployment and compliance;
+- centralized management.
+
+This does not make enterprise fleet management a requirement for the local product. The exact organizational model—groups, targeting, inheritance, authorization and policy precedence—remains future design work.
+
+The important architectural direction is that future fleet management should reuse the local desired-state and execution model rather than introduce a separate Windows configuration engine.
