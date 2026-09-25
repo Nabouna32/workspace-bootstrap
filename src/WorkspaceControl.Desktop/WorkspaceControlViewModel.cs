@@ -12,7 +12,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     private readonly IUiLocalizer _localizer;
     private BaselineSnapshot? _baseline;
     private SoftwareInventorySnapshot? _software;
-    private WorkspaceOperation? _provisioningOperation;
+    private WorkspaceOperation? _workspaceOperation;
     private DesiredStateDiff? _desiredStateDiff;
     private string? _desiredStateDiffWorkspaceId;
     private string? _selectedWorkspaceId;
@@ -48,10 +48,10 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
     public WorkspaceOperation? WorkspaceOperation
     {
-        get => _provisioningOperation;
+        get => _workspaceOperation;
         private set
         {
-            if (!SetField(ref _provisioningOperation, value))
+            if (!SetField(ref _workspaceOperation, value))
                 return;
 
             OnPropertyChanged(nameof(WorkspacePlan));
