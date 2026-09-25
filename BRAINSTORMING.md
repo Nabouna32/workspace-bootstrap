@@ -147,9 +147,11 @@ Un mode de session administrateur peut exister comme facilité d'utilisation, ma
 
 ### 3.1 Workspace
 
-Le concept produit central devient le **Workspace** : une représentation de l'environnement que l'utilisateur souhaite avoir.
+Le concept produit central devient le **Workspace** : une représentation personnalisée de l'environnement que l'utilisateur souhaite avoir sur sa machine.
 
-Un Workspace n'est pas simplement une liste de programmes.
+Un Workspace est créé et possédé par l'utilisateur. Il sert notamment à enregistrer une configuration qu'il souhaite pouvoir retrouver et réappliquer sans devoir rechercher à nouveau les mêmes applications ou réglages.
+
+Un Workspace n'est donc ni un profil imposé par le produit, ni une simple liste de programmes. Il peut servir de sauvegarde déclarative de ce que l'utilisateur souhaite conserver, installer, retirer ou configurer avant de demander l'application des changements.
 
 Il peut à terme exprimer :
 
@@ -182,7 +184,11 @@ Le moteur doit pouvoir fonctionner sur ces concepts indépendamment de l'interfa
 
 ### 3.3 Profiles
 
-Les anciens profils statiques évoluent vers une notion plus riche.
+Le terme **profil** désigne avant tout une configuration enregistrée par l'utilisateur. Il ne doit pas être confondu avec un profil prédéfini imposé par l'application.
+
+L'utilisateur doit pouvoir créer, modifier, dupliquer, enregistrer et réutiliser ses propres profils / Workspaces. Un profil peut notamment mémoriser les applications qu'il souhaite avoir installées ou retirées ainsi que des réglages Windows associés.
+
+Des profils prédéfinis peuvent éventuellement être proposés comme modèles facultatifs, mais ils ne constituent pas le modèle principal du produit et ne doivent jamais remplacer les configurations personnelles.
 
 Un profil peut être un environnement déclaratif exprimant par exemple :
 
@@ -255,6 +261,10 @@ Une opération doit pouvoir être suivie, diagnostiquée et, lorsque c'est possi
 
 ### 4.1 Applications et logiciels
 
+Workspace Control doit permettre de **constater l'état réel du PC puis de laisser l'utilisateur décider de l'état qu'il souhaite obtenir**.
+
+L'interface doit notamment permettre de sélectionner clairement les applications à conserver, installer, mettre à jour ou retirer dans le cadre d'une action ou d'un Workspace enregistré. Une application détectée sur le PC ne doit pas être interprétée automatiquement comme devant être supprimée, et une application absente ne doit pas être ajoutée sans intention explicite.
+
 Workspace Control doit permettre de :
 
 - inventorier les applications installées ;
@@ -317,6 +327,8 @@ Il peut couvrir notamment :
 Chaque domaine doit cependant rester explicable, testable et soumis aux mêmes principes de sécurité.
 
 ### 4.4 Optimisations
+
+Les optimisations doivent pouvoir être découvertes à partir de l'état réel de la machine, puis sélectionnées explicitement par l'utilisateur. Elles peuvent faire partie d'un Workspace enregistré afin de pouvoir être réappliquées plus tard.
 
 Les optimisations doivent être présentées comme des actions compréhensibles, et non comme des modifications techniques brutes.
 
@@ -435,7 +447,18 @@ Cette navigation est une direction UX et non une maquette figée.
 
 ### 5.4 Accueil
 
-L'accueil doit donner rapidement une vision de l'état de la machine :
+L'accueil doit d'abord aider l'utilisateur à comprendre **son PC actuel** et ce qui peut être fait pour le maintenir :
+
+- état général de la machine ;
+- applications installées et mises à jour disponibles ;
+- réglages ou problèmes détectés ;
+- maintenance et nettoyage disponibles ;
+- changements en attente ;
+- accès aux Workspaces enregistrés.
+
+L'utilisateur doit pouvoir passer naturellement de l'observation à la sélection des changements souhaités, puis à leur prévisualisation et à leur application.
+
+L'accueil doit également donner rapidement une vision de l'état de la machine :
 
 - état général ;
 - mises à jour ;
@@ -762,8 +785,8 @@ Les décisions les plus structurantes qui ressortent explicitement de la discuss
 1. Le produit s'appelle **Workspace Control**.
 2. La cible est **Windows 11**.
 3. Le produit est une application permanente, pas seulement un bootstrapper.
-4. Le cœur est un moteur local de gestion d'état et de capacités, pas un simple provisioning engine.
-5. Les Workspaces / profils représentent un état désiré configurable.
+4. Le cœur est un moteur local de gestion de l'état réel du PC, de l'état souhaité par l'utilisateur et des actions de maintenance nécessaires pour passer de l'un à l'autre, pas un simple provisioning engine.
+5. Les Workspaces / profils représentent une configuration personnalisée enregistrée par l'utilisateur : un état désiré qu'il peut construire, modifier et réutiliser.
 6. L'application doit fonctionner localement sans compte obligatoire.
 7. Le cloud et la gestion de parc sont des extensions futures.
 8. Le moteur doit être conçu pour être cloud-ready sans dépendre du cloud.
@@ -801,7 +824,7 @@ Notamment :
 - des workflows de validation Windows publiés ont été ajoutés ;
 - la gestion cloud/fleet reste future.
 
-Cette section est volontairement indicative : **le code et la documentation canonique du projet restent les sources de vérité pour l'état actuel**.
+Cette section est volontairement indicative : **le code et la documentation canonique décrivent l'état effectivement réalisé, mais ne donnent pas au code l'autorité pour redéfinir la vision produit issue du brainstorming**.
 
 ---
 
@@ -831,7 +854,7 @@ La chaîne de référence du projet est :
 → état opérationnel actuel
 
 **Code + Git**
-→ réalité effectivement implémentée, utilisée pour mesurer les écarts mais sans autorité pour redéfinir la vision
+→ réalité effectivement implémentée, utilisée pour mesurer les écarts avec la direction produit mais sans autorité pour redéfinir cette direction
 
 BRAINSTORMING.md ne doit pas devenir un substitut aux documents canoniques ci-dessus.
 
