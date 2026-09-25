@@ -50,11 +50,11 @@ public sealed class WorkspaceOperationEngine
         string workspaceId,
         CancellationToken token = default)
     {
-        var profile = GetWorkspace(workspaceId);
+        var workspace = GetWorkspace(workspaceId);
         var components = _config.LoadComponents();
         var inventory = await _inventory.ScanAsync(token);
 
-        var requests = profile.ApplicationRequests;
+        var requests = workspace.ApplicationRequests;
 
         var items = requests.Select(request =>
         {
@@ -81,13 +81,13 @@ public sealed class WorkspaceOperationEngine
                 planItem.Message);
         }).ToList();
 
-        AddUnsupportedDesiredStateItems(profile, items);
-        AddConditionDiffItems(profile, items);
-        AddRegistryDiffItems(profile, items);
+        AddUnsupportedDesiredStateItems(workspace, items);
+        AddConditionDiffItems(workspace, items);
+        AddRegistryDiffItems(workspace, items);
 
         return new DesiredStateDiff(
-            profile.Id,
-            profile.Name,
+            workspace.Id,
+            workspace.Name,
             inventory.ScanId,
             inventory.ProviderDiagnostics,
             items,
@@ -494,7 +494,7 @@ public sealed class WorkspaceOperationEngine
         if (operation.Status is WorkspaceOperationStatuses.Completed)
             return;
 
-        var profile = GetWorkspace(operation.WorkspaceId);
+        var workspace = GetWorkspace(operation.WorkspaceId);
         var components = _config.LoadComponents();
         var plan = operation.Plan
             ?? throw new InvalidOperationException(
@@ -546,7 +546,7 @@ public sealed class WorkspaceOperationEngine
                             DesiredStateDomainCodes.RegistrySetting,
                             StringComparison.Ordinal))
                     {
-                        var desired = FindRegistryDesired(profile, planned.TargetId ?? planned.ComponentId);
+                        var desired = FindRegistryDesired(workspace, planned.TargetId ?? planned.ComponentId);
                         var snapshot = _registryWriter.Capture(desired);
 
                         operation.RegistrySnapshots.Add(snapshot with { PlanIndex = index });
@@ -562,11 +562,11 @@ public sealed class WorkspaceOperationEngine
                         if (!components.TryGetValue(planned.ComponentId, out var catalogComponent))
                             throw new InvalidOperationException($"Unknown component: {planned.ComponentId}");
 
-                        var request = profile.ApplicationRequests
+                        var request = workspace.ApplicationRequests
                             .FirstOrDefault(item =>
                                 string.Equals(item.ComponentId, planned.ComponentId, StringComparison.Ordinal))
                             ?? throw new InvalidOperationException(
-                                $"Workspace '{profile.Id}' does not contain application '{planned.ComponentId}'.");
+                                $"Workspace '{workspace.Id}' does not contain application '{planned.ComponentId}'.");
 
                         var component = ApplyWorkspaceOverrides(catalogComponent, request);
 
@@ -627,11 +627,11 @@ public sealed class WorkspaceOperationEngine
                             if (!components.TryGetValue(planned.ComponentId, out var catalogComponent))
                                 throw new InvalidOperationException($"Unknown component: {planned.ComponentId}");
 
-                            var request = profile.ApplicationRequests
+                            var request = workspace.ApplicationRequests
                                 .FirstOrDefault(item =>
                                     string.Equals(item.ComponentId, planned.ComponentId, StringComparison.Ordinal))
                                 ?? throw new InvalidOperationException(
-                                    $"Workspace '{profile.Id}' does not contain application '{planned.ComponentId}'.");
+                                    $"Workspace '{workspace.Id}' does not contain application '{planned.ComponentId}'.");
 
                             ValidatePostcondition(
                                 ApplyWorkspaceOverrides(catalogComponent, request),
@@ -729,11 +729,11 @@ public sealed class WorkspaceOperationEngine
                 if (!components.TryGetValue(planned.ComponentId, out var catalogComponent))
                     throw new InvalidOperationException($"Unknown component: {planned.ComponentId}");
 
-                var request = profile.ApplicationRequests
+                var request = workspace.ApplicationRequests
                     .FirstOrDefault(item =>
                         string.Equals(item.ComponentId, planned.ComponentId, StringComparison.Ordinal))
                     ?? throw new InvalidOperationException(
-                        $"Workspace '{profile.Id}' does not contain application '{planned.ComponentId}'.");
+                        $"Workspace '{workspace.Id}' does not contain application '{planned.ComponentId}'.");
 
                 ValidatePostcondition(
                     ApplyWorkspaceOverrides(catalogComponent, request),
@@ -923,36 +923,36 @@ public sealed class WorkspaceOperationEngine
     }
 
     private static void AddUnsupportedDesiredStateItems(
-        WorkspaceManifest profile,
+        WorkspaceManifest workspace,
         List<DesiredStateDiffItem> items)
     {
-        if (profile.DesiredState is null)
+        if (workspace.DesiredState is null)
             return;
 
         AddUnsupportedSection(
-            profile.DesiredState.WindowsSettings.Count,
+            workspace.DesiredState.WindowsSettings.Count,
             DesiredStateDomainCodes.WindowsSetting,
             "windowsSettings",
             items);
 
         AddUnsupportedSection(
-            profile.DesiredState.Policies.Count,
+            workspace.DesiredState.Policies.Count,
             DesiredStateDomainCodes.Policy,
             "policies",
             items);
 
         AddUnsupportedSection(
-            profile.DesiredState.Optimizations.Count,
+            workspace.DesiredState.Optimizations.Count,
             DesiredStateDomainCodes.Optimization,
             "optimizations",
             items);
     }
 
     private void AddRegistryDiffItems(
-        WorkspaceManifest profile,
+        WorkspaceManifest workspace,
         List<DesiredStateDiffItem> items)
     {
-        var registrySettings = profile.DesiredState?.RegistrySettings;
+        var registrySettings = workspace.DesiredState?.RegistrySettings;
         if (registrySettings is null || registrySettings.Count == 0)
             return;
 
@@ -1011,10 +1011,10 @@ public sealed class WorkspaceOperationEngine
     }
 
     private void AddConditionDiffItems(
-        WorkspaceManifest profile,
+        WorkspaceManifest workspace,
         List<DesiredStateDiffItem> items)
     {
-        var conditions = profile.DesiredState?.Conditions;
+        var conditions = workspace.DesiredState?.Conditions;
         if (conditions is null || conditions.Count == 0)
             return;
 
@@ -1074,9 +1074,9 @@ public sealed class WorkspaceOperationEngine
     }
 
     private WorkspaceManifest GetWorkspace(string id) =>
-        _config.LoadWorkspaces().TryGetValue(id, out var profile)
-            ? profile
-            : throw new InvalidOperationException($"Unknown profile: {id}");
+        _config.LoadWorkspaces().TryGetValue(id, out var workspace)
+            ? workspace
+            : throw new InvalidOperationException($"Unknown workspace: {id}");
 
     private static void ValidateUncompletedPlanState(
         WorkspaceOperation operation,
@@ -1117,10 +1117,10 @@ public sealed class WorkspaceOperationEngine
     }
 
     private static RegistrySettingDesiredState FindRegistryDesired(
-        WorkspaceManifest profile,
+        WorkspaceManifest workspace,
         string targetId)
     {
-        var desired = profile.DesiredState?.RegistrySettings
+        var desired = workspace.DesiredState?.RegistrySettings
             .FirstOrDefault(item =>
                 string.Equals(
                     $"registry:{item.Hive}:{item.Key}:{item.ValueName}",
@@ -1248,7 +1248,7 @@ public sealed class WorkspaceOperationEngine
         if (string.IsNullOrWhiteSpace(operation.OperationId))
             throw new InvalidOperationException("Operation must have an identifier.");
         if (string.IsNullOrWhiteSpace(operation.WorkspaceId))
-            throw new InvalidOperationException("Operation must reference a profile.");
+            throw new InvalidOperationException("Operation must reference a workspace.");
         if (operation.Completed < 0 || operation.Total < 0 || operation.Completed > operation.Total)
             throw new InvalidOperationException("Operation progress is inconsistent.");
 
