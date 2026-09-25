@@ -10,7 +10,7 @@
 
     <ScrollViewer>
         <StackPanel Padding="28" Spacing="20">
-            <StackPanel Spacing="4">
+            <StackPanel Spacing="6">
                 <TextBlock x:Uid="WorkspacePage_Title" FontSize="32" FontWeight="SemiBold" />
                 <TextBlock
                     x:Uid="WorkspacePage_Subtitle"
@@ -18,63 +18,167 @@
                     TextWrapping="Wrap" />
             </StackPanel>
 
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border
+                    Padding="20"
+                    CornerRadius="14"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel Spacing="14">
+                        <TextBlock x:Uid="WorkspacePage_CurrentHeading" FontSize="20" FontWeight="SemiBold" />
+                        <ComboBox
+                            x:Name="WorkspaceList"
+                            x:Uid="WorkspacePage_WorkspaceList"
+                            ItemsSource="{Binding Workspaces}"
+                            SelectionChanged="WorkspaceList_SelectionChanged"
+                            HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Padding="4" Spacing="2">
+                                        <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Description}" Opacity="0.72" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox
+                                x:Name="WorkspaceNameBox"
+                                x:Uid="WorkspacePage_Name"
+                                Text="{Binding WorkspaceName, Mode=TwoWay}"
+                                Grid.Column="0" />
+                            <TextBox
+                                x:Name="WorkspaceDescriptionBox"
+                                x:Uid="WorkspacePage_Description"
+                                Text="{Binding WorkspaceDescription, Mode=TwoWay}"
+                                Grid.Column="1"
+                                TextWrapping="Wrap" />
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Button x:Uid="WorkspacePage_New" Click="NewWorkspaceButton_Click" />
+                            <Button
+                                x:Uid="WorkspacePage_Save"
+                                Click="SaveWorkspaceButton_Click"
+                                IsEnabled="{Binding HasSelectedWorkspace}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Grid.Column="1"
+                    Padding="20"
+                    CornerRadius="14"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock x:Uid="WorkspacePage_IntentHeading" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock
+                            x:Uid="WorkspacePage_IntentDescription"
+                            TextWrapping="Wrap"
+                            Opacity="0.72" />
+
+                        <Grid RowSpacing="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border Padding="12" CornerRadius="10">
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock x:Uid="WorkspacePage_ApplicationsDomain.Text" FontWeight="SemiBold" />
+                                        <TextBlock x:Uid="WorkspacePage_ApplicationsDomainHint.Text" Opacity="0.65" />
+                                    </StackPanel>
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Text="{Binding ApplicationInstalledCount}"
+                                        FontSize="20"
+                                        FontWeight="SemiBold" />
+                                </Grid>
+                            </Border>
+
+                            <Border Grid.Row="1" Padding="12" CornerRadius="10">
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock x:Uid="WorkspacePage_WindowsDomain.Text" FontWeight="SemiBold" />
+                                        <TextBlock x:Uid="WorkspacePage_WindowsDomainHint.Text" Opacity="0.65" />
+                                    </StackPanel>
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        x:Uid="WorkspacePage_Undefined.Text"
+                                        Opacity="0.65" />
+                                </Grid>
+                            </Border>
+
+                            <Border Grid.Row="2" Padding="12" CornerRadius="10">
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock x:Uid="WorkspacePage_OtherDomain.Text" FontWeight="SemiBold" />
+                                        <TextBlock x:Uid="WorkspacePage_OtherDomainHint.Text" Opacity="0.65" />
+                                    </StackPanel>
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        x:Uid="WorkspacePage_Undefined.Text"
+                                        Opacity="0.65" />
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
             <Border
-                Padding="18"
-                CornerRadius="12"
+                Padding="20"
+                CornerRadius="14"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                <StackPanel Spacing="12">
-                    <TextBlock x:Uid="WorkspacePage_WorkspaceHeading" FontSize="20" FontWeight="SemiBold" />
-
-                    <ComboBox
-                        x:Name="WorkspaceList"
-                        x:Uid="WorkspacePage_WorkspaceList"
-                        ItemsSource="{Binding Workspaces}"
-                        SelectionChanged="WorkspaceList_SelectionChanged"
-                        HorizontalAlignment="Stretch">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Padding="4" Spacing="2">
-                                    <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold" />
-                                    <TextBlock Text="{Binding Description}" Opacity="0.72" TextWrapping="Wrap" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-
-                    <Grid ColumnSpacing="12">
+                <StackPanel Spacing="14">
+                    <Grid ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox
-                            x:Name="WorkspaceNameBox"
-                            x:Uid="WorkspacePage_Name"
-                            Text="{Binding WorkspaceName, Mode=TwoWay}"
-                            Grid.Column="0" />
-                        <TextBox
-                            x:Name="WorkspaceDescriptionBox"
-                            x:Uid="WorkspacePage_Description"
-                            Text="{Binding WorkspaceDescription, Mode=TwoWay}"
-                            Grid.Column="1"
-                            TextWrapping="Wrap" />
+                        <StackPanel Spacing="4">
+                            <TextBlock x:Uid="WorkspacePage_ScopeHeading" FontSize="20" FontWeight="SemiBold" />
+                            <TextBlock
+                                x:Uid="WorkspacePage_ScopeDescription"
+                                TextWrapping="Wrap"
+                                Opacity="0.72" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="2" HorizontalAlignment="Right">
+                            <TextBlock
+                                x:Uid="WorkspacePage_UpdatesSummary"
+                                FontSize="13"
+                                Opacity="0.65" />
+                            <TextBlock
+                                Text="{Binding ApplicationUpdatesCount}"
+                                FontSize="20"
+                                FontWeight="SemiBold"
+                                HorizontalAlignment="Right" />
+                        </StackPanel>
                     </Grid>
 
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <Button x:Uid="WorkspacePage_New" Click="NewWorkspaceButton_Click" />
-                        <Button
-                            x:Uid="WorkspacePage_Save"
-                            Click="SaveWorkspaceButton_Click"
-                            IsEnabled="{Binding HasSelectedWorkspace}" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-
-            <Border
-                Padding="18"
-                CornerRadius="12"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                <StackPanel Spacing="12">
-                    <TextBlock x:Uid="WorkspacePage_ApplicationsHeading" FontSize="20" FontWeight="SemiBold" />
                     <TextBox
                         x:Name="ApplicationSearchBox"
                         x:Uid="WorkspacePage_ApplicationSearch"
@@ -140,10 +244,10 @@
             </Border>
 
             <Border
-                Padding="18"
-                CornerRadius="12"
+                Padding="20"
+                CornerRadius="14"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                <StackPanel Spacing="12">
+                <StackPanel Spacing="14">
                     <TextBlock x:Uid="WorkspacePage_DiffHeading" FontSize="20" FontWeight="SemiBold" />
                     <TextBlock
                         x:Uid="WorkspacePage_DiffDescription"
@@ -205,27 +309,31 @@
                         </ListView.ItemTemplate>
                     </ListView>
 
-                    <Button
-                        x:Name="ObserveDiffButton"
-                        x:Uid="WorkspacePage_ObserveDiff"
-                        Click="ObserveDiffButton_Click"
-                        HorizontalAlignment="Left"
-                        IsEnabled="False" />
-                    <Button
-                        x:Name="CreatePlanButton"
-                        x:Uid="WorkspacePage_GeneratePlan"
-                        Click="CreatePlanButton_Click"
-                        HorizontalAlignment="Left"
-                        IsEnabled="False" />
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Button
+                            x:Name="ObserveDiffButton"
+                            x:Uid="WorkspacePage_ObserveDiff"
+                            Click="ObserveDiffButton_Click"
+                            IsEnabled="False" />
+                        <Button
+                            x:Name="CreatePlanButton"
+                            x:Uid="WorkspacePage_GeneratePlan"
+                            Click="CreatePlanButton_Click"
+                            IsEnabled="False" />
+                    </StackPanel>
                 </StackPanel>
             </Border>
 
             <Border
-                Padding="18"
-                CornerRadius="12"
+                Padding="20"
+                CornerRadius="14"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                <StackPanel Spacing="12">
+                <StackPanel Spacing="14">
                     <TextBlock x:Uid="WorkspacePage_ReviewHeading" FontSize="20" FontWeight="SemiBold" />
+                    <TextBlock
+                        x:Uid="WorkspacePage_ReviewDescription"
+                        TextWrapping="Wrap"
+                        Opacity="0.72" />
 
                     <TextBlock
                         x:Uid="WorkspacePage_Status"
