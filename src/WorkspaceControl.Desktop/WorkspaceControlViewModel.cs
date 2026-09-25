@@ -123,7 +123,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public string SoftwareCountDisplay => $"{SoftwareItems.Count} detected entries";
     public int ApplicationInstalledCount => ApplicationCatalogItems.Count(item => item.IsInstalled);
     public int ApplicationUpdatesCount => ApplicationCatalogItems.Count(item => item.IsUpdateAvailable);
-    public int ApplicationAvailableCount => ApplicationCatalogItems.Count(item => string.Equals(item.StateCode, ProvisioningStateCodes.Missing, StringComparison.OrdinalIgnoreCase));
+    public int ApplicationAvailableCount => ApplicationCatalogItems.Count(item => string.Equals(item.StateCode, ApplicationStateCodes.Missing, StringComparison.OrdinalIgnoreCase));
     public int DiagnosticCount => Diagnostics.Count;
     public string HomeHealthCode
     {
@@ -447,19 +447,19 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
                 || string.Equals(item.Name, component.Name, StringComparison.OrdinalIgnoreCase));
 
             var state = software.Diagnostics.Count > 0 && installed is null
-                ? ProvisioningStateCodes.Unknown
+                ? ApplicationStateCodes.Unknown
                 : installed is null
-                    ? ProvisioningStateCodes.Missing
+                    ? ApplicationStateCodes.Missing
                     : !string.IsNullOrWhiteSpace(installed.AvailableVersion)
-                        ? ProvisioningStateCodes.Outdated
-                        : ProvisioningStateCodes.Installed;
+                        ? ApplicationStateCodes.Outdated
+                        : ApplicationStateCodes.Installed;
 
             var action = state switch
             {
-                ProvisioningStateCodes.Missing => ProvisioningActionCodes.Install,
-                ProvisioningStateCodes.Outdated => ProvisioningActionCodes.Update,
-                ProvisioningStateCodes.Unknown => ProvisioningActionCodes.Blocked,
-                _ => ProvisioningActionCodes.None
+                ApplicationStateCodes.Missing => DesiredStateActionCodes.Install,
+                ApplicationStateCodes.Outdated => DesiredStateActionCodes.Update,
+                ApplicationStateCodes.Unknown => DesiredStateActionCodes.Blocked,
+                _ => DesiredStateActionCodes.None
             };
 
             ApplicationCatalogItems.Add(new ApplicationCatalogItem(
@@ -498,7 +498,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             {
                 ApplicationCatalogFilters.Installed => item.IsInstalled,
                 ApplicationCatalogFilters.Updates => item.IsUpdateAvailable,
-                ApplicationCatalogFilters.Available => string.Equals(item.StateCode, ProvisioningStateCodes.Missing, StringComparison.OrdinalIgnoreCase),
+                ApplicationCatalogFilters.Available => string.Equals(item.StateCode, ApplicationStateCodes.Missing, StringComparison.OrdinalIgnoreCase),
                 _ => true
             };
 
@@ -733,7 +733,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 public sealed class WorkspaceApplicationOption : INotifyPropertyChanged
 {
     private bool _isSelected;
-    private string _stateCode = ProvisioningStateCodes.Unknown;
+    private string _stateCode = ApplicationStateCodes.Unknown;
     private string? _installedVersion;
     private string? _availableVersion;
 
@@ -767,8 +767,8 @@ public sealed class WorkspaceApplicationOption : INotifyPropertyChanged
     }
 
     public bool IsInstalled =>
-        string.Equals(StateCode, ProvisioningStateCodes.Installed, StringComparison.OrdinalIgnoreCase)
-        || string.Equals(StateCode, ProvisioningStateCodes.Outdated, StringComparison.OrdinalIgnoreCase);
+        string.Equals(StateCode, ApplicationStateCodes.Installed, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(StateCode, ApplicationStateCodes.Outdated, StringComparison.OrdinalIgnoreCase);
 
     public bool IsSelected
     {
@@ -828,5 +828,5 @@ public sealed record ApplicationCatalogItem(
     bool IsInstalled)
 {
     public bool IsUpdateAvailable =>
-        string.Equals(StateCode, ProvisioningStateCodes.Outdated, StringComparison.OrdinalIgnoreCase);
+        string.Equals(StateCode, ApplicationStateCodes.Outdated, StringComparison.OrdinalIgnoreCase);
 }
