@@ -180,12 +180,13 @@
   <data name="WorkspacePage_ReviewDescription.Text" xml:space="preserve"><value>No change is applied here. Review the proposed actions and their impact before confirming the operation.</value></data>
   <data name="WorkspaceSelectionRequired" xml:space="preserve"><value>Select or create a Workspace before adding an application.</value></data>
   <data name="WorkspacePage_WindowsAppearanceHeading.Text" xml:space="preserve"><value>Windows appearance</value></data>
-  <data name="WorkspacePage_WindowsAppearanceDescription.Text" xml:space="preserve"><value>Optionally keep the light or dark Windows appearance as part of this Workspace. Leave it undefined to make no change.</value></data>
+  <data name="WorkspacePage_WindowsAppearanceDescription.Text" xml:space="preserve"><value>Choose whether this Workspace follows Windows behavior or explicitly uses light or dark mode. System does not force a light or dark mode.</value></data>
   <data name="WorkspacePage_WindowsAppearance.Name" xml:space="preserve"><value>Windows appearance</value></data>
-  <data name="WorkspacePage_WindowsAppearanceUndefined.Content" xml:space="preserve"><value>Undefined</value></data>
+  <data name="WorkspacePage_WindowsAppearanceSystem.Content" xml:space="preserve"><value>System</value></data>
   <data name="WorkspacePage_WindowsAppearanceLight.Content" xml:space="preserve"><value>Light</value></data>
   <data name="WorkspacePage_WindowsAppearanceDark.Content" xml:space="preserve"><value>Dark</value></data>
   <data name="WindowsAppearanceLight" xml:space="preserve"><value>Light</value></data>
   <data name="WindowsAppearanceDark" xml:space="preserve"><value>Dark</value></data>
+  <data name="WindowsAppearanceSystem" xml:space="preserve"><value>System</value></data>
   <data name="Undefined" xml:space="preserve"><value>Undefined</value></data>
 </root>
