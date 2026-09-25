@@ -141,7 +141,6 @@
   <data name="DefaultWorkspaceName" xml:space="preserve"><value>Mon Workspace</value></data>
   <data name="DefaultWorkspaceDescription" xml:space="preserve"><value>Choisissez les applications et capacités que ce PC doit gérer.</value></data>
   <data name="WorkspaceCreated" xml:space="preserve"><value>Nouveau Workspace créé</value></data>
-  <data name="WorkspaceCreatedFromTemplate" xml:space="preserve"><value>Workspace enregistré comme copie utilisateur</value></data>
   <data name="WorkspaceSaved" xml:space="preserve"><value>Workspace enregistré</value></data>
   <data name="WorkspaceCreationFailed" xml:space="preserve"><value>Échec de la création du Workspace</value></data>
   <data name="WorkspaceSaveFailed" xml:space="preserve"><value>Impossible d’enregistrer le Workspace</value></data>
