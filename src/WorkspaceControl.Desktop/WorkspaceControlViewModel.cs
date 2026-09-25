@@ -598,7 +598,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
             Workspaces.Add(created);
             SelectWorkspace(created.Id);
-            Status = _localizer.Get("WorkspaceCreatedFromTemplate");
+            Status = _localizer.Get("WorkspaceCreated");
             Error = null;
         }
         catch (Exception ex)
