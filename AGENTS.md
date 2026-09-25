@@ -29,14 +29,19 @@ When sources disagree, identify the divergence. Do not rewrite product intent me
 
 ## Product invariants
 
-- Users build a Workspace by choosing what they want managed.
-- Predefined profiles are optional editable templates, never a mandatory primary UX.
+- Users build a Workspace by explicitly defining which parts of the machine they want managed.
+- A Workspace is a **partial desired state**, not an inventory checklist and not a list of applications.
+- Undefined desired state means no requirement and no inferred action.
+- Unknown observed state must remain distinct from undefined state.
+- A Workspace may be created through an explicit capture of the current machine, then saved, exported, imported, duplicated and reused.
+- Predefined templates are optional starting points for creating user-owned Workspaces, never a mandatory primary UX.
 - First-run experience observes the real machine before asking what to manage.
 - Normal interactive mode never mutates silently.
 - Important mutations follow **observe → desired state → diff/plan → review → explicit confirmation → apply → verify**.
 - Unknown, unavailable, blocked and error states remain distinct; never guess missing evidence.
 - WinGet is a provider, not the product architecture.
 - Desktop, CLI and future surfaces share the same application/domain contracts.
+- The local desired-state model must remain suitable for future multi-machine and organizational deployment.
 - Future cloud/fleet functionality must reuse the local execution model.
 - The original brainstorming direction remains the reference when deciding how to correct implementation drift.
 
