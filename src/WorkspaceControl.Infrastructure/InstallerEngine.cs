@@ -18,7 +18,7 @@ public sealed class InstallerEngine
         if (string.IsNullOrWhiteSpace(component.PackageId))
             throw new InvalidOperationException($"Le composant '{component.Id}' ne possède aucun packageId.");
 
-        if (actionCode is not (ProvisioningActionCodes.Install or ProvisioningActionCodes.Update))
+        if (actionCode is not (DesiredStateActionCodes.Install or DesiredStateActionCodes.Update))
             throw new InvalidOperationException($"Unsupported provisioning action '{actionCode}' for '{component.Name}'.");
 
         var artifact = await ResolveArtifactAsync(component, actionCode, desiredVersion, token);
@@ -67,7 +67,7 @@ public sealed class InstallerEngine
                 $"Application '{component.Name}' does not declare a package id.");
 
         await RunWingetAsync(
-            BuildWingetArguments(component, ProvisioningActionCodes.Remove),
+            BuildWingetArguments(component, DesiredStateActionCodes.Remove),
             component.Name,
             token);
     }
@@ -579,9 +579,9 @@ public sealed class InstallerEngine
 
         var command = actionCode switch
         {
-            ProvisioningActionCodes.Install => "install",
-            ProvisioningActionCodes.Update => "upgrade",
-            ProvisioningActionCodes.Remove => "uninstall",
+            DesiredStateActionCodes.Install => "install",
+            DesiredStateActionCodes.Update => "upgrade",
+            DesiredStateActionCodes.Remove => "uninstall",
             _ => throw new InvalidOperationException($"Unsupported WinGet provisioning action: {actionCode}")
         };
 
