@@ -79,7 +79,7 @@ public sealed class ConfigurationStore
             description.Trim(),
             SchemaVersion: 2,
             DesiredState: new DesiredStateManifest(
-                requestedIds.Select(componentId => new ProfileApplication(componentId)).ToArray(),
+                requestedIds.Select(componentId => new WorkspaceApplication(componentId)).ToArray(),
                 [],
                 [],
                 [],
@@ -118,11 +118,11 @@ public sealed class ConfigurationStore
         }
     }
 
-    public string ExportProfile(string profileId, string destinationPath)
+    public string ExportProfile(string workspaceId, string destinationPath)
     {
-        var profile = LoadProfiles().TryGetValue(profileId, out var value)
+        var profile = LoadWorkspaces().TryGetValue(workspaceId, out var value)
             ? value
-            : throw new KeyNotFoundException($"Unknown profile: {profileId}");
+            : throw new KeyNotFoundException($"Unknown profile: {workspaceId}");
 
         var fullPath = Path.GetFullPath(destinationPath);
         var parent = Path.GetDirectoryName(fullPath)
@@ -166,7 +166,7 @@ public sealed class ConfigurationStore
         return profile;
     }
 
-    public IReadOnlyDictionary<string, WorkspaceManifest> LoadProfiles()
+    public IReadOnlyDictionary<string, WorkspaceManifest> LoadWorkspaces()
     {
         var profiles = LoadProfileDirectory(ProfilesRoot);
 
@@ -207,7 +207,7 @@ public sealed class ConfigurationStore
             throw new InvalidOperationException(
                 $"Unsupported profile schema version '{profile.SchemaVersion}' in {sourceName}.");
 
-        if (!IsValidProfileId(profile.Id))
+        if (!IsValidWorkspaceId(profile.Id))
             throw new InvalidOperationException($"Profile id '{profile.Id}' is not a valid profile identifier.");
 
         if (profile.SchemaVersion == 1 && (profile.Components is null || profile.Components.Length == 0))
@@ -292,7 +292,7 @@ public sealed class ConfigurationStore
         }
     }
 
-    private static bool IsValidProfileId(string id)
+    private static bool IsValidWorkspaceId(string id)
     {
         if (string.IsNullOrWhiteSpace(id) || id.Length > 128)
             return false;
