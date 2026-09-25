@@ -120,7 +120,7 @@ public sealed partial class WorkspacePage : Page
         DispatcherQueueTimer sender,
         object args)
     {
-        _viewModel.RefreshProvisioningOperation();
+        _viewModel.RefreshWorkspaceOperation();
         UpdatePolling();
     }
 
