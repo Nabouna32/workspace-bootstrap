@@ -5,61 +5,61 @@ namespace WorkspaceControl.Application;
 
 public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
 {
-    private readonly IWorkspaceOperationService _provisioning;
+    private readonly IWorkspaceOperationService _workspaceOperations;
     private readonly IInventoryService _inventory;
     private readonly ISoftwareInventoryService _softwareInventory;
     private readonly IWindowsAdministrationService _windows;
     private readonly IOptimizationService _optimization;
 
     public WorkspaceControlApplication(
-        IWorkspaceOperationService provisioning,
+        IWorkspaceOperationService workspaceOperations,
         IInventoryService inventory,
         ISoftwareInventoryService softwareInventory,
         IWindowsAdministrationService windows,
         IOptimizationService optimization)
     {
-        _provisioning = provisioning ?? throw new ArgumentNullException(nameof(provisioning));
+        _workspaceOperations = workspaceOperations ?? throw new ArgumentNullException(nameof(workspaceOperations));
         _inventory = inventory ?? throw new ArgumentNullException(nameof(inventory));
         _softwareInventory = softwareInventory ?? throw new ArgumentNullException(nameof(softwareInventory));
         _windows = windows ?? throw new ArgumentNullException(nameof(windows));
         _optimization = optimization ?? throw new ArgumentNullException(nameof(optimization));
     }
 
-    public IReadOnlyList<WorkspaceManifest> GetWorkspaces() => _provisioning.GetWorkspaces();
-    public IReadOnlyList<ComponentManifest> GetApplicationCatalog() => _provisioning.GetApplicationCatalog();
+    public IReadOnlyList<WorkspaceManifest> GetWorkspaces() => _workspaceOperations.GetWorkspaces();
+    public IReadOnlyList<ComponentManifest> GetApplicationCatalog() => _workspaceOperations.GetApplicationCatalog();
     public WorkspaceManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
-        _provisioning.CreateWorkspace(name, description, componentIds);
-    public void SaveWorkspace(WorkspaceManifest workspace) => _provisioning.SaveWorkspace(workspace);
+        _workspaceOperations.CreateWorkspace(name, description, componentIds);
+    public void SaveWorkspace(WorkspaceManifest workspace) => _workspaceOperations.SaveWorkspace(workspace);
 
     public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string workspaceId, CancellationToken cancellationToken = default) =>
-        _provisioning.GetDesiredStateDiffAsync(workspaceId, cancellationToken);
+        _workspaceOperations.GetDesiredStateDiffAsync(workspaceId, cancellationToken);
 
     public Task<WorkspacePlan> CreateWorkspacePlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
-        _provisioning.GetPlanAsync(workspaceId, cancellationToken);
+        _workspaceOperations.GetPlanAsync(workspaceId, cancellationToken);
 
     public Task<WorkspaceOperation> CreateWorkspaceOperationAsync(string workspaceId, CancellationToken cancellationToken = default) =>
-        _provisioning.CreateAsync(workspaceId, cancellationToken);
+        _workspaceOperations.CreateAsync(workspaceId, cancellationToken);
 
     public string ConfirmWorkspaceOperation(string operationId) =>
-        _provisioning.Confirm(operationId);
+        _workspaceOperations.Confirm(operationId);
 
     public Task RunWorkspaceOperationAsync(
         string operationId,
         CancellationToken cancellationToken = default) =>
-        _provisioning.RunAsync(operationId, cancellationToken);
+        _workspaceOperations.RunAsync(operationId, cancellationToken);
 
     public WorkspaceOperation? GetWorkspaceOperation(string operationId) =>
-        _provisioning.Get(operationId);
+        _workspaceOperations.Get(operationId);
 
     public string ResumeWorkspaceOperation(string operationId) =>
-        _provisioning.Resume(operationId);
+        _workspaceOperations.Resume(operationId);
 
     public IReadOnlyList<WorkspaceOperation> GetWorkspaceOperationHistory() =>
-        _provisioning.GetHistory();
+        _workspaceOperations.GetHistory();
 
     public WorkspaceOperation? GetRecoverableWorkspaceOperation()
     {
-        var latest = _provisioning.GetHistory()
+        var latest = _workspaceOperations.GetHistory()
             .OrderByDescending(x => x.UpdatedAt)
             .FirstOrDefault();
 
@@ -72,7 +72,7 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
     }
 
     public WorkspaceOperation? GetWorkspaceOperationDetail(string operationId) =>
-        _provisioning.Get(operationId);
+        _workspaceOperations.Get(operationId);
 
     public Task<InventorySnapshot> GetInventoryAsync(CancellationToken cancellationToken = default) =>
         _inventory.ScanAsync(cancellationToken);
