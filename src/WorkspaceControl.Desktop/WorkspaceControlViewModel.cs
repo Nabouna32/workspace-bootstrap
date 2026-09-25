@@ -247,7 +247,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             ClearDesiredStateDiff();
 
             Profiles.Clear();
-            foreach (var profile in _application.GetProfiles())
+            foreach (var profile in _application.GetWorkspaces())
                 Profiles.Add(profile);
 
             var catalog = _application.GetApplicationCatalog();
