@@ -9,32 +9,43 @@
     </Page.Resources>
 
     <ScrollViewer>
-        <StackPanel Padding="28" Spacing="20">
-            <StackPanel Spacing="4">
-                <TextBlock x:Uid="OverviewPage_Title" FontSize="32" FontWeight="SemiBold" />
-                <TextBlock x:Uid="OverviewPage_Subtitle" Opacity="0.72" TextWrapping="Wrap" />
-            </StackPanel>
+        <StackPanel Padding="24" Spacing="16">
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Spacing="4">
+                    <TextBlock x:Uid="OverviewPage_Title" FontSize="32" FontWeight="SemiBold" />
+                    <TextBlock x:Uid="OverviewPage_Subtitle" Opacity="0.72" TextWrapping="Wrap" />
+                </StackPanel>
+                <Button
+                    x:Uid="OverviewPage_Refresh"
+                    Grid.Column="1"
+                    Click="Refresh_Click"
+                    VerticalAlignment="Center" />
+            </Grid>
 
             <Border Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                <Grid ColumnSpacing="18">
+                <Grid ColumnSpacing="20">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel Spacing="4">
+                    <StackPanel Spacing="5">
                         <TextBlock x:Uid="OverviewPage_HealthHeading" FontSize="16" FontWeight="SemiBold" />
                         <TextBlock
                             Text="{Binding HomeHealthDisplay}"
                             Foreground="{Binding HomeHealthCode, Converter={StaticResource SemanticStatusBrushConverter}}"
-                            FontSize="22"
+                            FontSize="24"
                             FontWeight="SemiBold" />
                         <TextBlock x:Uid="OverviewPage_HealthDescription" TextWrapping="Wrap" Opacity="0.72" />
                     </StackPanel>
-                    <Button
-                        x:Uid="OverviewPage_Refresh"
-                        Click="Refresh_Click"
-                        Grid.Column="1"
-                        VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Spacing="3" MinWidth="170">
+                        <TextBlock x:Uid="OverviewPage_WorkspaceHeading" FontSize="14" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding HomeWorkspaceDisplay}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <Button x:Uid="OverviewPage_WorkspaceAction" Click="Workspace_Click" HorizontalAlignment="Left" />
+                    </StackPanel>
                 </Grid>
             </Border>
 
@@ -42,59 +53,9 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Padding="18" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                    <StackPanel Spacing="5">
-                        <TextBlock x:Uid="OverviewPage_UpdatesCard" Opacity="0.68" />
-                        <TextBlock Text="{Binding ApplicationUpdatesCount}" FontSize="24" FontWeight="SemiBold" />
-                        <TextBlock x:Uid="OverviewPage_UpdatesHint" Opacity="0.72" />
-                    </StackPanel>
-                </Border>
-
-                <Border Grid.Column="1" Padding="18" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                    <StackPanel Spacing="5">
-                        <TextBlock x:Uid="OverviewPage_ApplicationsCard" Opacity="0.68" />
-                        <TextBlock Text="{Binding ApplicationInstalledCount}" FontSize="24" FontWeight="SemiBold" />
-                        <TextBlock x:Uid="OverviewPage_ApplicationsHint" Opacity="0.72" />
-                    </StackPanel>
-                </Border>
-
-                <Border Grid.Column="2" Padding="18" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                    <StackPanel Spacing="5">
-                        <TextBlock x:Uid="OverviewPage_AvailableCard" Opacity="0.68" />
-                        <TextBlock Text="{Binding ApplicationAvailableCount}" FontSize="24" FontWeight="SemiBold" />
-                        <TextBlock x:Uid="OverviewPage_AvailableHint" Opacity="0.72" />
-                    </StackPanel>
-                </Border>
-
-                <Border Grid.Column="3" Padding="18" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                    <StackPanel Spacing="5">
-                        <TextBlock x:Uid="OverviewPage_DiagnosticsCard" Opacity="0.68" />
-                        <TextBlock Text="{Binding DiagnosticCount}" FontSize="24" FontWeight="SemiBold" />
-                        <TextBlock x:Uid="OverviewPage_DiagnosticsHint" Opacity="0.72" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-
-            <Grid ColumnSpacing="16">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <Border Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                    <StackPanel Spacing="8">
-                        <TextBlock x:Uid="OverviewPage_WorkspaceHeading" FontSize="18" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding HomeWorkspaceDisplay}" FontSize="20" FontWeight="SemiBold" />
-                        <TextBlock x:Uid="OverviewPage_WorkspaceHint" Opacity="0.72" TextWrapping="Wrap" />
-                        <Button x:Uid="OverviewPage_WorkspaceAction" Click="Workspace_Click" HorizontalAlignment="Left" />
-                    </StackPanel>
-                </Border>
-
-                <Border Grid.Column="1" Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <Border Padding="18" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <StackPanel Spacing="8">
                         <TextBlock x:Uid="OverviewPage_ActivityHeading" FontSize="18" FontWeight="SemiBold" />
                         <TextBlock Text="{Binding HomeWorkspaceOperationDisplay}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
@@ -103,10 +64,57 @@
                         <Button x:Uid="OverviewPage_ActivityAction" Click="Workspace_Click" HorizontalAlignment="Left" />
                     </StackPanel>
                 </Border>
+
+                <Border Grid.Column="1" Padding="18" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel Spacing="8">
+                        <TextBlock x:Uid="WorkspacePage_DiffHeading" FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding DesiredStateDiffItems.Count}" FontSize="28" FontWeight="SemiBold" />
+                        <TextBlock x:Uid="WorkspacePage_IntentDescription" TextWrapping="Wrap" Opacity="0.72" />
+                        <Button x:Uid="OverviewPage_WorkspaceQuickAction" Click="Workspace_Click" HorizontalAlignment="Left" />
+                    </StackPanel>
+                </Border>
             </Grid>
 
-            <Border Padding="20" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                <StackPanel Spacing="10">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Padding="14" CornerRadius="10" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel Spacing="3">
+                        <TextBlock x:Uid="OverviewPage_UpdatesCard" Opacity="0.68" />
+                        <TextBlock Text="{Binding ApplicationUpdatesCount}" FontSize="22" FontWeight="SemiBold" />
+                        <TextBlock x:Uid="OverviewPage_UpdatesHint" Opacity="0.72" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Padding="14" CornerRadius="10" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel Spacing="3">
+                        <TextBlock x:Uid="OverviewPage_ApplicationsCard" Opacity="0.68" />
+                        <TextBlock Text="{Binding ApplicationInstalledCount}" FontSize="22" FontWeight="SemiBold" />
+                        <TextBlock x:Uid="OverviewPage_ApplicationsHint" Opacity="0.72" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Padding="14" CornerRadius="10" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel Spacing="3">
+                        <TextBlock x:Uid="OverviewPage_AvailableCard" Opacity="0.68" />
+                        <TextBlock Text="{Binding ApplicationAvailableCount}" FontSize="22" FontWeight="SemiBold" />
+                        <TextBlock x:Uid="OverviewPage_AvailableHint" Opacity="0.72" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="3" Padding="14" CornerRadius="10" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel Spacing="3">
+                        <TextBlock x:Uid="OverviewPage_DiagnosticsCard" Opacity="0.68" />
+                        <TextBlock Text="{Binding DiagnosticCount}" FontSize="22" FontWeight="SemiBold" />
+                        <TextBlock x:Uid="OverviewPage_DiagnosticsHint" Opacity="0.72" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Padding="18" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <StackPanel Spacing="8">
                     <TextBlock x:Uid="OverviewPage_QuickActionsHeading" FontSize="18" FontWeight="SemiBold" />
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <Button x:Uid="OverviewPage_ApplicationsAction" Click="Applications_Click" />
