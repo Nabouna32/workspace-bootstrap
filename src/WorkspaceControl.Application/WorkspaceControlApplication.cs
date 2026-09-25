@@ -5,14 +5,14 @@ namespace WorkspaceControl.Application;
 
 public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
 {
-    private readonly IProvisioningService _provisioning;
+    private readonly IWorkspaceOperationService _provisioning;
     private readonly IInventoryService _inventory;
     private readonly ISoftwareInventoryService _softwareInventory;
     private readonly IWindowsAdministrationService _windows;
     private readonly IOptimizationService _optimization;
 
     public WorkspaceControlApplication(
-        IProvisioningService provisioning,
+        IWorkspaceOperationService provisioning,
         IInventoryService inventory,
         ISoftwareInventoryService softwareInventory,
         IWindowsAdministrationService windows,
@@ -34,10 +34,10 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
     public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string workspaceId, CancellationToken cancellationToken = default) =>
         _provisioning.GetDesiredStateDiffAsync(workspaceId, cancellationToken);
 
-    public Task<ProvisioningPlan> GetPlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+    public Task<WorkspacePlan> GetPlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
         _provisioning.GetPlanAsync(workspaceId, cancellationToken);
 
-    public Task<ProvisioningOperation> CreateProvisioningAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+    public Task<WorkspaceOperation> CreateProvisioningAsync(string workspaceId, CancellationToken cancellationToken = default) =>
         _provisioning.CreateAsync(workspaceId, cancellationToken);
 
     public string ConfirmProvisioning(string operationId) =>
@@ -48,30 +48,30 @@ public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
         CancellationToken cancellationToken = default) =>
         _provisioning.RunAsync(operationId, cancellationToken);
 
-    public ProvisioningOperation? GetProvisioningStatus(string operationId) =>
+    public WorkspaceOperation? GetProvisioningStatus(string operationId) =>
         _provisioning.Get(operationId);
 
     public string ResumeProvisioning(string operationId) =>
         _provisioning.Resume(operationId);
 
-    public IReadOnlyList<ProvisioningOperation> GetProvisioningHistory() =>
+    public IReadOnlyList<WorkspaceOperation> GetProvisioningHistory() =>
         _provisioning.GetHistory();
 
-    public ProvisioningOperation? GetProvisioningRecovery()
+    public WorkspaceOperation? GetProvisioningRecovery()
     {
         var latest = _provisioning.GetHistory()
             .OrderByDescending(x => x.UpdatedAt)
             .FirstOrDefault();
 
-        return latest?.Status is ProvisioningOperationStatuses.AwaitingConfirmation
-            or ProvisioningOperationStatuses.Queued
-            or ProvisioningOperationStatuses.Running
-            or ProvisioningOperationStatuses.Failed
+        return latest?.Status is WorkspaceOperationStatuses.AwaitingConfirmation
+            or WorkspaceOperationStatuses.Queued
+            or WorkspaceOperationStatuses.Running
+            or WorkspaceOperationStatuses.Failed
             ? latest
             : null;
     }
 
-    public ProvisioningOperation? GetProvisioningDetail(string operationId) =>
+    public WorkspaceOperation? GetProvisioningDetail(string operationId) =>
         _provisioning.Get(operationId);
 
     public Task<InventorySnapshot> GetInventoryAsync(CancellationToken cancellationToken = default) =>
