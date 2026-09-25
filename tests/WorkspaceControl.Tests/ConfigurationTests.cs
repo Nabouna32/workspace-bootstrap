@@ -62,12 +62,12 @@ public sealed class ConfigurationTests
         var components = configuration.LoadComponents();
         var templates = configuration.LoadWorkspaceTemplates();
 
-        Assert.IsNotEmpty(profiles);
+        Assert.IsNotEmpty(templates);
         Assert.AreEqual(
             templates.Count,
             templates.Values.Select(x => x.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count());
 
-        foreach (var profile in templates.Values)
+        foreach (var template in templates.Values)
         {
             Assert.IsFalse(string.IsNullOrWhiteSpace(template.Id));
             Assert.IsFalse(string.IsNullOrWhiteSpace(template.Name));
@@ -88,7 +88,7 @@ public sealed class ConfigurationTests
 
         foreach (var component in components.Values)
         {
-            foreach (var workspaceId in component.Workspaces ?? Array.Empty<string>())
+            foreach (var workspaceId in component.Templates ?? Array.Empty<string>())
                 Assert.IsTrue(templates.ContainsKey(workspaceId), $"{component.Id} references unknown template {workspaceId}.");
         }
     }
@@ -446,10 +446,10 @@ public sealed class ConfigurationTests
     [TestMethod]
     public void Desired_state_profile_maps_applications_to_requests()
     {
-        var profile = new WorkspaceManifest(
+        var workspace = new WorkspaceManifest(
             "test",
             "Test",
-            "Test profile",
+            "Test workspace",
             DesiredState: new DesiredStateManifest(
                 [new WorkspaceApplication("vscode", "minimum", "1.2.3")],
                 [],
@@ -459,12 +459,12 @@ public sealed class ConfigurationTests
                 []),
             SchemaVersion: 2);
 
-        var request = template.ApplicationRequests.Single();
+        var request = workspace.ApplicationRequests.Single();
 
         Assert.AreEqual("vscode", request.ComponentId);
         Assert.AreEqual("minimum", request.VersionPolicy);
         Assert.AreEqual("1.2.3", request.MinimumVersion);
-        Assert.IsTrue(template.DesiredState is not null);
+        Assert.IsTrue(workspace.DesiredState is not null);
     }
 
     [TestMethod]
