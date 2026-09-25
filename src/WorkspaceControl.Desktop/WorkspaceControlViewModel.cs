@@ -57,16 +57,16 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(WorkspacePlan));
             OnPropertyChanged(nameof(HasWorkspaceOperation));
             OnPropertyChanged(nameof(IsAwaitingConfirmation));
-            OnPropertyChanged(nameof(IsProvisioningActive));
-            OnPropertyChanged(nameof(IsProvisioningCompleted));
-            OnPropertyChanged(nameof(IsProvisioningFailed));
-            OnPropertyChanged(nameof(IsProvisioningStale));
+            OnPropertyChanged(nameof(IsWorkspaceOperationActive));
+            OnPropertyChanged(nameof(IsWorkspaceOperationCompleted));
+            OnPropertyChanged(nameof(IsWorkspaceOperationFailed));
+            OnPropertyChanged(nameof(IsWorkspaceOperationStale));
             OnPropertyChanged(nameof(CanResumeWorkspaceOperation));
-            OnPropertyChanged(nameof(ProvisioningStatusDisplay));
-            OnPropertyChanged(nameof(ProvisioningProgressDisplay));
+            OnPropertyChanged(nameof(WorkspaceOperationStatusDisplay));
+            OnPropertyChanged(nameof(WorkspaceOperationProgressDisplay));
             OnPropertyChanged(nameof(CurrentComponentDisplay));
-            OnPropertyChanged(nameof(ProvisioningError));
-            OnPropertyChanged(nameof(HasProvisioningError));
+            OnPropertyChanged(nameof(WorkspaceOperationError));
+            OnPropertyChanged(nameof(HasWorkspaceOperationError));
         }
     }
 
@@ -76,20 +76,20 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public bool HasWorkspaceOperation => WorkspaceOperation is not null;
     public bool IsAwaitingConfirmation =>
         WorkspaceOperation?.Status == WorkspaceOperationStatuses.AwaitingConfirmation;
-    public bool IsProvisioningActive =>
+    public bool IsWorkspaceOperationActive =>
         WorkspaceOperation?.Status is WorkspaceOperationStatuses.Queued
             or WorkspaceOperationStatuses.Running;
-    public bool IsProvisioningCompleted =>
+    public bool IsWorkspaceOperationCompleted =>
         WorkspaceOperation?.Status == WorkspaceOperationStatuses.Completed;
-    public bool IsProvisioningFailed =>
+    public bool IsWorkspaceOperationFailed =>
         WorkspaceOperation?.Status == WorkspaceOperationStatuses.Failed;
-    public bool IsProvisioningStale =>
+    public bool IsWorkspaceOperationStale =>
         WorkspaceOperation?.Status == WorkspaceOperationStatuses.Stale;
     public bool CanResumeWorkspaceOperation =>
         WorkspaceOperation?.Status == WorkspaceOperationStatuses.Failed
         && WorkspaceOperation.CanResume;
 
-    public string ProvisioningStatusDisplay =>
+    public string WorkspaceOperationStatusDisplay =>
         WorkspaceOperation?.Status switch
         {
             WorkspaceOperationStatuses.AwaitingConfirmation => _localizer.Get("AwaitingConfirmation"),
@@ -101,7 +101,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             _ => _localizer.Get("NoWorkspaceOperation")
         };
 
-    public string ProvisioningProgressDisplay =>
+    public string WorkspaceOperationProgressDisplay =>
         WorkspaceOperation is null
             ? _localizer.Get("NoOperation")
             : _localizer.Format(
@@ -114,8 +114,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             ? _localizer.Get("Preparing")
             : WorkspaceOperation.CurrentComponentName;
 
-    public string? ProvisioningError => WorkspaceOperation?.Error;
-    public bool HasProvisioningError => !string.IsNullOrWhiteSpace(ProvisioningError);
+    public string? WorkspaceOperationError => WorkspaceOperation?.Error;
+    public bool HasWorkspaceOperationError => !string.IsNullOrWhiteSpace(WorkspaceOperationError);
 
     public string MemoryDisplay => Baseline is null ? "—" : $"{Baseline.MemoryGB:F1} GB RAM";
     public string CpuCoresDisplay => Baseline is null ? "—" : $"{Baseline.CpuCores} logical cores";
@@ -129,7 +129,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     {
         get
         {
-            if (HasError || IsProvisioningFailed || IsProvisioningStale)
+            if (HasError || IsWorkspaceOperationFailed || IsWorkspaceOperationStale)
                 return "ERROR";
 
             if (DiagnosticCount > 0 || ApplicationUpdatesCount > 0)
@@ -147,9 +147,9 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public string HomeWorkspaceDisplay => HasSelectedWorkspace
         ? WorkspaceName
         : _localizer.Get("HomeNoWorkspace");
-    public string HomeProvisioningDisplay => WorkspaceOperation is null
+    public string HomeWorkspaceOperationDisplay => WorkspaceOperation is null
         ? _localizer.Get("NoWorkspaceOperation")
-        : ProvisioningStatusDisplay;
+        : WorkspaceOperationStatusDisplay;
     public bool HasError => !string.IsNullOrWhiteSpace(Error);
 
     public ObservableCollection<SoftwareItem> SoftwareItems { get; } = [];
@@ -646,19 +646,19 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             return;
 
         Error = null;
-        Status = _localizer.Get("StartingProvisioning");
+        Status = _localizer.Get("StartingWorkspaceOperation");
 
         try
         {
             _application.ConfirmWorkspaceOperation(WorkspaceOperation.OperationId);
             RefreshWorkspaceOperation();
-            Status = _localizer.Get("ProvisioningStarted");
+            Status = _localizer.Get("WorkspaceOperationStarted");
         }
         catch (Exception ex)
         {
             Error = ex.Message;
             RefreshWorkspaceOperation();
-            Status = _localizer.Get("ProvisioningCouldNotStart");
+            Status = _localizer.Get("WorkspaceOperationCouldNotStart");
         }
     }
 
@@ -668,19 +668,19 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             return;
 
         Error = null;
-        Status = _localizer.Get("ResumingProvisioning");
+        Status = _localizer.Get("ResumingWorkspaceOperation");
 
         try
         {
             _application.ResumeWorkspaceOperation(WorkspaceOperation.OperationId);
             RefreshWorkspaceOperation();
-            Status = _localizer.Get("ProvisioningResumed");
+            Status = _localizer.Get("WorkspaceOperationResumed");
         }
         catch (Exception ex)
         {
             Error = ex.Message;
             RefreshWorkspaceOperation();
-            Status = _localizer.Get("ProvisioningCouldNotResume");
+            Status = _localizer.Get("WorkspaceOperationCouldNotResume");
         }
     }
 
@@ -709,7 +709,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(HomeHealthCode));
         OnPropertyChanged(nameof(HomeHealthDisplay));
         OnPropertyChanged(nameof(HomeWorkspaceDisplay));
-        OnPropertyChanged(nameof(HomeProvisioningDisplay));
+        OnPropertyChanged(nameof(HomeWorkspaceOperationDisplay));
     }
 
     private void OnPropertyChanged(string? propertyName) =>
