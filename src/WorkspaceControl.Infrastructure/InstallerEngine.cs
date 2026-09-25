@@ -19,7 +19,7 @@ public sealed class InstallerEngine
             throw new InvalidOperationException($"Le composant '{component.Id}' ne possède aucun packageId.");
 
         if (actionCode is not (DesiredStateActionCodes.Install or DesiredStateActionCodes.Update))
-            throw new InvalidOperationException($"Unsupported provisioning action '{actionCode}' for '{component.Name}'.");
+            throw new InvalidOperationException($"Unsupported desired-state action '{actionCode}' for '{component.Name}'.");
 
         var artifact = await ResolveArtifactAsync(component, actionCode, desiredVersion, token);
         if (artifact is null)
@@ -153,7 +153,7 @@ public sealed class InstallerEngine
             ? $"https://api.github.com/repos/{source.Repository}/releases/latest"
             : $"https://api.github.com/repos/{source.Repository}/releases/tags/{Uri.EscapeDataString(desiredVersion.StartsWith('v') ? desiredVersion : $"v{desiredVersion}")}";
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.UserAgent.ParseAdd("WorkspaceBootstrap/1.0");
+        request.Headers.UserAgent.ParseAdd("WorkspaceControl/1.0");
 
         using var response = await _http.SendAsync(request, token);
         response.EnsureSuccessStatusCode();
@@ -201,7 +201,7 @@ public sealed class InstallerEngine
         using var request = new HttpRequestMessage(
             HttpMethod.Get,
             "https://www.rarlab.com/download.htm");
-        request.Headers.UserAgent.ParseAdd("WorkspaceBootstrap/1.0");
+        request.Headers.UserAgent.ParseAdd("WorkspaceControl/1.0");
 
         using var response = await _http.SendAsync(request, token);
         response.EnsureSuccessStatusCode();
@@ -582,7 +582,7 @@ public sealed class InstallerEngine
             DesiredStateActionCodes.Install => "install",
             DesiredStateActionCodes.Update => "upgrade",
             DesiredStateActionCodes.Remove => "uninstall",
-            _ => throw new InvalidOperationException($"Unsupported WinGet provisioning action: {actionCode}")
+            _ => throw new InvalidOperationException($"Unsupported WinGet desired-state action: {actionCode}")
         };
 
         var arguments = new List<string>
