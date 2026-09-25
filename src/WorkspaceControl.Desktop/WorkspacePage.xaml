@@ -247,6 +247,36 @@
                 Padding="20"
                 CornerRadius="14"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <Grid ColumnSpacing="20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="4">
+                        <TextBlock x:Uid="WorkspacePage_WindowsAppearanceHeading" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock
+                            x:Uid="WorkspacePage_WindowsAppearanceDescription"
+                            TextWrapping="Wrap"
+                            Opacity="0.72" />
+                    </StackPanel>
+                    <ComboBox
+                        x:Name="WindowsAppearanceComboBox"
+                        x:Uid="WorkspacePage_WindowsAppearance"
+                        Grid.Column="1"
+                        Width="180"
+                        SelectedValue="{Binding WindowsAppearance, Mode=TwoWay}"
+                        SelectedValuePath="Tag">
+                        <ComboBoxItem x:Uid="WorkspacePage_WindowsAppearanceUndefined" Tag="undefined" />
+                        <ComboBoxItem x:Uid="WorkspacePage_WindowsAppearanceLight" Tag="light" />
+                        <ComboBoxItem x:Uid="WorkspacePage_WindowsAppearanceDark" Tag="dark" />
+                    </ComboBox>
+                </Grid>
+            </Border>
+
+            <Border
+                Padding="20"
+                CornerRadius="14"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="14">
                     <TextBlock x:Uid="WorkspacePage_DiffHeading" FontSize="20" FontWeight="SemiBold" />
                     <TextBlock
