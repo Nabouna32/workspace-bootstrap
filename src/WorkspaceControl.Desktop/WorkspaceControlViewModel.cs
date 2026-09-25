@@ -14,7 +14,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     private SoftwareInventorySnapshot? _software;
     private ProvisioningOperation? _provisioningOperation;
     private DesiredStateDiff? _desiredStateDiff;
-    private string? _desiredStateDiffProfileId;
+    private string? _desiredStateDiffWorkspaceId;
     private string? _selectedWorkspaceId;
     private string _workspaceName = string.Empty;
     private string _workspaceDescription = string.Empty;
@@ -309,7 +309,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     }
 
     public async Task ObserveDesiredStateAsync(
-        string profileId,
+        string workspaceId,
         CancellationToken cancellationToken = default)
     {
         if (IsBusy)
@@ -321,9 +321,9 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
         try
         {
-            var diff = await _application.GetDesiredStateDiffAsync(profileId, cancellationToken);
+            var diff = await _application.GetDesiredStateDiffAsync(workspaceId, cancellationToken);
             _desiredStateDiff = diff;
-            _desiredStateDiffProfileId = profileId;
+            _desiredStateDiffWorkspaceId = workspaceId;
 
             DesiredStateDiffItems.Clear();
             foreach (var item in diff.Items)
@@ -350,14 +350,14 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         }
     }
 
-    public bool HasDesiredStateDiffFor(string profileId) =>
+    public bool HasDesiredStateDiffFor(string workspaceId) =>
         HasDesiredStateDiff &&
-        string.Equals(_desiredStateDiffProfileId, profileId, StringComparison.OrdinalIgnoreCase);
+        string.Equals(_desiredStateDiffWorkspaceId, workspaceId, StringComparison.OrdinalIgnoreCase);
 
     public void ClearDesiredStateDiff()
     {
         _desiredStateDiff = null;
-        _desiredStateDiffProfileId = null;
+        _desiredStateDiffWorkspaceId = null;
         DesiredStateDiffItems.Clear();
         OnPropertyChanged(nameof(DesiredStateDiff));
         OnPropertyChanged(nameof(HasDesiredStateDiff));
@@ -576,7 +576,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
                     DesiredState = desiredState with
                     {
                         Applications = selectedApplications
-                            .Select(componentId => new ProfileApplication(componentId))
+                            .Select(componentId => new WorkspaceApplication(componentId))
                             .ToArray()
                     }
                 };
@@ -609,7 +609,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     }
 
     public async Task CreateProvisioningAsync(
-        string profileId,
+        string workspaceId,
         CancellationToken cancellationToken = default)
     {
         if (IsBusy)
@@ -622,7 +622,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         try
         {
             SetProvisioningOperation(
-                await _application.CreateProvisioningAsync(profileId, cancellationToken));
+                await _application.CreateProvisioningAsync(workspaceId, cancellationToken));
             Status = _localizer.Get("PlanReadyForReview");
         }
         catch (OperationCanceledException)
