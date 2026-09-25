@@ -23,7 +23,7 @@ public sealed record OfficialSource(
     string? AssetRegex = null,
     string? VersionRegex = null);
 
-public sealed record ProfileManifest(
+public sealed record WorkspaceManifest(
     string Id,
     string Name,
     string Description,
