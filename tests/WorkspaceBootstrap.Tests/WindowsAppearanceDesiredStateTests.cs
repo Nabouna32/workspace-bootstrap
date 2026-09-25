@@ -14,6 +14,12 @@ public sealed class WindowsAppearanceDesiredStateTests
     }
 
     [TestMethod]
+    public void ReadReturnsSystemWhenAppearanceValuesAreNotDefined()
+    {
+        Assert.AreEqual(WindowsAppearanceValues.System, WindowsAppearanceSettings.Read([]));
+    }
+
+    [TestMethod]
     public void ReadReturnsDarkWhenBothWindowsAppearanceValuesAreDark()
     {
         var settings = CreateSettings("0");
@@ -59,7 +65,17 @@ public sealed class WindowsAppearanceDesiredStateTests
     }
 
     [TestMethod]
-    public void ApplyUndefinedRemovesAppearanceIntent()
+    public void ApplySystemRemovesExplicitAppearanceIntent()
+    {
+        var settings = CreateSettings("1");
+
+        var updated = WindowsAppearanceSettings.Apply(settings, WindowsAppearanceValues.System);
+
+        Assert.AreEqual(0, updated.Count);
+    }
+
+    [TestMethod]
+    public void ApplyUndefinedAlsoRemovesLegacyAppearanceIntent()
     {
         var settings = CreateSettings("1");
 
