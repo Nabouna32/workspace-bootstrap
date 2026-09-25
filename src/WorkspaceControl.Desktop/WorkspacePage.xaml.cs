@@ -9,7 +9,7 @@ public sealed partial class WorkspacePage : Page
 {
     private readonly WorkspaceControlViewModel _viewModel;
     private readonly DispatcherQueueTimer _pollTimer;
-    private ProfileManifest? _selectedWorkspace;
+    private WorkspaceManifest? _selectedWorkspace;
 
     public WorkspacePage()
     {
@@ -39,7 +39,7 @@ public sealed partial class WorkspacePage : Page
 
         ApplicationSearchBox.Text = _viewModel.ApplicationSearchText;
 
-        if (_viewModel.IsProvisioningActive)
+        if (_viewModel.IsWorkspaceOperationActive)
             _pollTimer.Start();
 
         UpdateButtons();
@@ -52,7 +52,7 @@ public sealed partial class WorkspacePage : Page
         object sender,
         SelectionChangedEventArgs e)
     {
-        _selectedWorkspace = WorkspaceList.SelectedItem as ProfileManifest;
+        _selectedWorkspace = WorkspaceList.SelectedItem as WorkspaceManifest;
         if (_selectedWorkspace is not null)
             _viewModel.SelectWorkspace(_selectedWorkspace.Id);
 
@@ -100,19 +100,19 @@ public sealed partial class WorkspacePage : Page
             return;
 
         CreatePlanButton.IsEnabled = false;
-        await _viewModel.CreateProvisioningAsync(_selectedWorkspace.Id);
+        await _viewModel.CreateWorkspaceOperationAsync(_selectedWorkspace.Id);
         UpdateButtons();
     }
 
     private void ConfirmButton_Click(object sender, RoutedEventArgs e)
     {
-        _viewModel.ConfirmProvisioning();
+        _viewModel.ConfirmWorkspaceOperation();
         UpdatePolling();
     }
 
     private void ResumeButton_Click(object sender, RoutedEventArgs e)
     {
-        _viewModel.ResumeProvisioning();
+        _viewModel.ResumeWorkspaceOperation();
         UpdatePolling();
     }
 
@@ -126,7 +126,7 @@ public sealed partial class WorkspacePage : Page
 
     private void UpdatePolling()
     {
-        if (_viewModel.IsProvisioningActive)
+        if (_viewModel.IsWorkspaceOperationActive)
             _pollTimer.Start();
         else
             _pollTimer.Stop();
@@ -139,7 +139,7 @@ public sealed partial class WorkspacePage : Page
         var canInteract =
             _selectedWorkspace is not null &&
             !_viewModel.IsBusy &&
-            !_viewModel.IsProvisioningActive;
+            !_viewModel.IsWorkspaceOperationActive;
 
         ObserveDiffButton.IsEnabled = canInteract;
         CreatePlanButton.IsEnabled =
