@@ -3,6 +3,7 @@ namespace WorkspaceControl.Domain;
 public static class WindowsAppearanceValues
 {
     public const string Undefined = "undefined";
+    public const string System = "system";
     public const string Light = "light";
     public const string Dark = "dark";
 }
@@ -26,6 +27,9 @@ public static class WindowsAppearanceSettings
             string.Equals(setting.ValueName, AppsValue, StringComparison.OrdinalIgnoreCase))?.Value;
         var system = relevant.FirstOrDefault(setting =>
             string.Equals(setting.ValueName, SystemValue, StringComparison.OrdinalIgnoreCase))?.Value;
+
+        if (apps is null && system is null)
+            return WindowsAppearanceValues.System;
 
         if (apps == "0" && system == "0")
             return WindowsAppearanceValues.Dark;
