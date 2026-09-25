@@ -265,7 +265,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             var selected = Workspaces.FirstOrDefault(workspace =>
                 string.Equals(workspace.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase))
                 ?? Workspaces.FirstOrDefault(workspace =>
-                    profile.Id.StartsWith("workspace-", StringComparison.OrdinalIgnoreCase));
+                    workspace.Id.StartsWith("workspace-", StringComparison.OrdinalIgnoreCase));
 
             if (selected is not null)
                 SelectWorkspace(selected.Id);
