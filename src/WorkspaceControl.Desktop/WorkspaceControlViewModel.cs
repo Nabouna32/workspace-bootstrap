@@ -61,7 +61,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(IsProvisioningCompleted));
             OnPropertyChanged(nameof(IsProvisioningFailed));
             OnPropertyChanged(nameof(IsProvisioningStale));
-            OnPropertyChanged(nameof(CanResumeProvisioning));
+            OnPropertyChanged(nameof(CanResumeWorkspaceOperation));
             OnPropertyChanged(nameof(ProvisioningStatusDisplay));
             OnPropertyChanged(nameof(ProvisioningProgressDisplay));
             OnPropertyChanged(nameof(CurrentComponentDisplay));
@@ -85,7 +85,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         WorkspaceOperation?.Status == WorkspaceOperationStatuses.Failed;
     public bool IsProvisioningStale =>
         WorkspaceOperation?.Status == WorkspaceOperationStatuses.Stale;
-    public bool CanResumeProvisioning =>
+    public bool CanResumeWorkspaceOperation =>
         WorkspaceOperation?.Status == WorkspaceOperationStatuses.Failed
         && WorkspaceOperation.CanResume;
 
@@ -272,7 +272,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             else
                 ClearWorkspaceEditor();
 
-            var recovery = _application.GetProvisioningRecovery();
+            var recovery = _application.GetRecoverableWorkspaceOperation();
             SetWorkspaceOperation(recovery);
 
             var software = await _application.GetSoftwareInventoryAsync(cancellationToken);
@@ -608,7 +608,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         }
     }
 
-    public async Task CreateProvisioningAsync(
+    public async Task CreateWorkspaceOperationAsync(
         string workspaceId,
         CancellationToken cancellationToken = default)
     {
@@ -622,7 +622,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         try
         {
             SetWorkspaceOperation(
-                await _application.CreateProvisioningAsync(workspaceId, cancellationToken));
+                await _application.CreateWorkspaceOperationAsync(workspaceId, cancellationToken));
             Status = _localizer.Get("PlanReadyForReview");
         }
         catch (OperationCanceledException)
@@ -640,7 +640,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         }
     }
 
-    public void ConfirmProvisioning()
+    public void ConfirmWorkspaceOperation()
     {
         if (WorkspaceOperation is null)
             return;
@@ -650,7 +650,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
         try
         {
-            _application.ConfirmProvisioning(WorkspaceOperation.OperationId);
+            _application.ConfirmWorkspaceOperation(WorkspaceOperation.OperationId);
             RefreshWorkspaceOperation();
             Status = _localizer.Get("ProvisioningStarted");
         }
@@ -662,7 +662,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         }
     }
 
-    public void ResumeProvisioning()
+    public void ResumeWorkspaceOperation()
     {
         if (WorkspaceOperation is null)
             return;
@@ -672,7 +672,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
         try
         {
-            _application.ResumeProvisioning(WorkspaceOperation.OperationId);
+            _application.ResumeWorkspaceOperation(WorkspaceOperation.OperationId);
             RefreshWorkspaceOperation();
             Status = _localizer.Get("ProvisioningResumed");
         }
@@ -689,7 +689,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         if (WorkspaceOperation is null)
             return false;
 
-        var operation = _application.GetProvisioningStatus(WorkspaceOperation.OperationId);
+        var operation = _application.GetWorkspaceOperation(WorkspaceOperation.OperationId);
         SetWorkspaceOperation(operation);
         return operation is not null;
     }
