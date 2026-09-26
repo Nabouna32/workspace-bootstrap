@@ -258,7 +258,6 @@
                                                     FontWeight="SemiBold"
                                                     VerticalAlignment="Center" />
                                                 <ComboBox
-                                                    x:Uid="WorkspacePage_ApplicationDesiredState"
                                                     Grid.Column="1"
                                                     Width="150"
                                                     SelectedValue="{Binding DesiredState, Mode=TwoWay}"
