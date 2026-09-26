@@ -127,7 +127,8 @@ public sealed class WinGetInventoryProvider : IInventoryProvider
                         false,
                         "winget")],
                 detectedAtUtc,
-                available));
+                available,
+                BuildRemovalCapability(id, source)));
         }
 
         return observations;
@@ -210,9 +211,8 @@ public sealed class WinGetInventoryProvider : IInventoryProvider
         name.Equals("Name", StringComparison.OrdinalIgnoreCase) ||
         id.Equals("Id", StringComparison.OrdinalIgnoreCase);
 
-    private static string? BuildRemovalCommand(
+    private static RemovalCapability? BuildRemovalCapability(
         string packageId,
-        string? version,
         string? source)
     {
         if (string.IsNullOrWhiteSpace(packageId))
@@ -220,18 +220,12 @@ public sealed class WinGetInventoryProvider : IInventoryProvider
             return null;
         }
 
-        var command = $"winget uninstall --id \"{packageId}\" --exact --disable-interactivity";
-        if (!string.IsNullOrWhiteSpace(version))
-        {
-            command += $" --version \"{version}\"";
-        }
-
-        if (source is "winget" or "msstore")
-        {
-            command += $" --source \"{source}\"";
-        }
-
-        return command;
+        return new RemovalCapability(
+            RemovalCapabilityKindCodes.WinGet,
+            "windows.winget",
+            packageId,
+            source,
+            InventoryScope.Unknown);
     }
 
     private static string? InferFamilyId(string displayName, string packageId)
