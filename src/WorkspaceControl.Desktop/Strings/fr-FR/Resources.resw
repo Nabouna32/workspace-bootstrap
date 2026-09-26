@@ -218,4 +218,6 @@
   <data name="WorkspacePage_ActionBlocked" xml:space="preserve"><value>Bloquée</value></data>
   <data name="WorkspacePage_ActionNone" xml:space="preserve"><value>Aucun changement</value></data>
   <data name="RemovalActionsFormat" xml:space="preserve"><value>{0} application(s) seront supprimées. Vérifiez les détails ci-dessous avant de confirmer.</value></data>
+  <data name="WorkspacePage_RemovalWarning.Title" xml:space="preserve"><value>La suppression nécessite une confirmation</value></data>
+  <data name="WorkspacePage_RemovalWarning.AutomationProperties.Name" xml:space="preserve"><value>Avertissement concernant la suppression d’applications</value></data>
 </root>
