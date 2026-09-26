@@ -331,21 +331,6 @@
                         x:Uid="WorkspacePage_DiffDescription"
                         TextWrapping="Wrap"
                         Opacity="0.72" />
-
-                    <Button
-                        x:Name="ObserveDiffButton"
-                        x:Uid="WorkspacePage_ObserveDiff"
-                        Click="ObserveDiffButton_Click"
-                        IsEnabled="False"
-                        HorizontalAlignment="Left" />
-
-                    <Button
-                        x:Name="CreatePlanButton"
-                        x:Uid="WorkspacePage_GeneratePlan"
-                        Click="CreatePlanButton_Click"
-                        IsEnabled="False"
-                        HorizontalAlignment="Left" />
-
                     <ListView
                         x:Name="DesiredStateDiffList"
                         x:Uid="WorkspacePage_DiffList"
