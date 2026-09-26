@@ -137,6 +137,13 @@
   <data name="WorkspacePage_ApplicationInstalled.Text" xml:space="preserve"><value>Installed</value><comment>Installed application version label in the Workspace editor.</comment></data>
   <data name="WorkspacePage_ApplicationAvailable.Text" xml:space="preserve"><value>Available</value><comment>Available application version label in the Workspace editor.</comment></data>
   <data name="WorkspacePage_ApplicationCheckBox.AutomationProperties.Name" xml:space="preserve"><value>Workspace application selection</value></data>
+  <data name="WorkspacePage_ApplicationIntent.AutomationProperties.Name" xml:space="preserve"><value>Application desired state</value></data>
+  <data name="WorkspacePage_ApplicationIntentUndefined.Content" xml:space="preserve"><value>Don't manage</value></data>
+  <data name="WorkspacePage_ApplicationIntentUndefined.AutomationProperties.Name" xml:space="preserve"><value>Do not manage this application</value></data>
+  <data name="WorkspacePage_ApplicationIntentPresent.Content" xml:space="preserve"><value>Keep</value></data>
+  <data name="WorkspacePage_ApplicationIntentPresent.AutomationProperties.Name" xml:space="preserve"><value>Keep this application installed</value></data>
+  <data name="WorkspacePage_ApplicationIntentAbsent.Content" xml:space="preserve"><value>Remove</value></data>
+  <data name="WorkspacePage_ApplicationIntentAbsent.AutomationProperties.Name" xml:space="preserve"><value>Remove this application</value></data>
   <data name="WorkspacePage_ObserveDiff.Content" xml:space="preserve"><value>Observe and compare</value></data>
   <data name="WorkspacePage_ObserveDiff.AutomationProperties.Name" xml:space="preserve"><value>Observe the selected Workspace and compare it with this PC</value></data>
   <data name="WorkspacePage_GeneratePlan.Content" xml:space="preserve"><value>Generate reviewable plan</value></data>

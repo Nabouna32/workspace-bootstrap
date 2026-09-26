@@ -38,6 +38,9 @@ Priority is:
 
 A full or partial reconstruction is acceptable if incremental repair would preserve the wrong architecture or UX.
 
+- Application desired-state intent is now explicitly modeled as **undefined / present / absent**, with observed application state kept separate.
+- The Workspace application editor now exposes **Don’t manage / Keep / Remove**, allowing debloat behavior to use the same desired-state pipeline as installation.
+- Removal planning and execution use the existing review → confirmation → apply → verification lifecycle; this slice makes the user intent for removal explicit in the Workspace UI.
 ## Current constraints
 
 - Windows 11 x64.
