@@ -93,7 +93,8 @@ public sealed record WorkspacePlanItem(
     string Message,
     string Domain = DesiredStateDomainCodes.Application,
     string? TargetId = null,
-    string? ObservedValue = null);
+    string? ObservedValue = null,
+    RemovalCapability? RemovalCapability = null);
 
 public sealed record WorkspaceOperationStep(
     string ComponentId,
@@ -121,6 +122,7 @@ public sealed class WorkspaceOperation
 public sealed record WorkspaceApplicationSnapshot(
     string ComponentId,
     string? InstalledVersion,
+    RemovalCapability? RemovalCapability = null,
     int PlanIndex = 0);
 
 public sealed record WorkspaceRegistrySnapshot(
