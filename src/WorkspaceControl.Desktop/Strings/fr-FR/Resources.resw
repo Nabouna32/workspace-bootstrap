@@ -192,4 +192,5 @@
   <data name="WindowsAppearanceDark" xml:space="preserve"><value>Sombre</value></data>
   <data name="WindowsAppearanceSystem" xml:space="preserve"><value>Système</value></data>
   <data name="Undefined" xml:space="preserve"><value>Non défini</value></data>
+  <data name="WorkspacePage_Capture.Text" xml:space="preserve"><value>Créer depuis ce PC</value></data>
 </root>
