@@ -555,6 +555,40 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         }
     }
 
+    public void CaptureCurrentMachineApplications()
+    {
+        if (Software is null)
+        {
+            Error = _localizer.Get("WorkspaceCaptureUnavailable");
+            Status = _localizer.Get("WorkspaceCaptureUnavailable");
+            return;
+        }
+
+        try
+        {
+            var capturedComponentIds = ApplicationCatalogItems
+                .Where(item => item.IsInstalled)
+                .Select(item => item.ComponentId)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            var workspace = _application.CreateWorkspace(
+                _localizer.Get("CapturedWorkspaceName"),
+                _localizer.Get("CapturedWorkspaceDescription"),
+                capturedComponentIds);
+
+            Workspaces.Add(workspace);
+            SelectWorkspace(workspace.Id);
+            Status = _localizer.Format("WorkspaceCaptured", capturedComponentIds.Length);
+            Error = null;
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+            Status = _localizer.Get("WorkspaceCaptureFailed");
+        }
+    }
+
     public void CreateBlankWorkspace()
     {
         try
