@@ -44,8 +44,16 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public SoftwareInventorySnapshot? Software
     {
         get => _software;
-        private set => SetField(ref _software, value);
+        private set
+        {
+            if (!SetField(ref _software, value))
+                return;
+
+            OnPropertyChanged(nameof(HasSoftwareObservation));
+        }
     }
+
+    public bool HasSoftwareObservation => Software is not null;
 
     public WorkspaceOperation? WorkspaceOperation
     {
