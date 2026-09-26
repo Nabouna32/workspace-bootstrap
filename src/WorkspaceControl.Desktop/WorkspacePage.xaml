@@ -6,6 +6,7 @@
 
     <Page.Resources>
         <local:SemanticStatusBrushConverter x:Key="SemanticStatusBrushConverter" />
+        <local:WorkspaceCodeDisplayConverter x:Key="WorkspaceCodeDisplayConverter" />
     </Page.Resources>
 
     <ScrollViewer>
@@ -247,18 +248,28 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
     
-                                        <StackPanel Spacing="2">
+                                        <StackPanel Spacing="6">
+                                            <TextBlock
+                                                Text="{Binding Name}"
+                                                FontSize="15"
+                                                FontWeight="SemiBold"
+                                                TextTrimming="CharacterEllipsis" />
                                             <ComboBox
                                                 x:Uid="WorkspacePage_ApplicationIntent"
                                                 SelectedValue="{Binding Intent, Mode=TwoWay}"
                                                 SelectedValuePath="Tag"
                                                 MinWidth="150"
-                                                HorizontalAlignment="Left">
-                                                <ComboBoxItem x:Uid="WorkspacePage_ApplicationIntentUndefined" Tag="undefined" />
-                                                <ComboBoxItem x:Uid="WorkspacePage_ApplicationIntentPresent" Tag="present" />
-                                                <ComboBoxItem x:Uid="WorkspacePage_ApplicationIntentAbsent" Tag="absent" />
-                                            </ComboBox>
+                                                HorizontalAlignment="Left" />
                                             <StackPanel Orientation="Horizontal" Spacing="12" Margin="32,0,0,0">
+                                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                                    <TextBlock
+                                                        x:Uid="WorkspacePage_ApplicationObserved"
+                                                        FontSize="12"
+                                                        Opacity="0.6" />
+                                                    <TextBlock
+                                                        Text="{Binding StateCode, Converter={StaticResource WorkspaceCodeDisplayConverter}, ConverterParameter=state}"
+                                                        FontSize="12" />
+                                                </StackPanel>
                                                 <TextBlock
                                                     Text="{Binding Source}"
                                                     Opacity="0.65"
@@ -273,6 +284,10 @@
                                                         FontSize="12" />
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal" Spacing="4">
+                                                    <TextBlock
+                                                        x:Uid="WorkspacePage_ApplicationAvailable"
+                                                        FontSize="12"
+                                                        Opacity="0.6" />
                                                     <TextBlock
                                                         x:Uid="WorkspacePage_ApplicationAvailable"
                                                         FontSize="12"
@@ -386,12 +401,12 @@
                                         <StackPanel Grid.Column="1" Spacing="2" HorizontalAlignment="Right">
                                             <TextBlock
                                                 x:Uid="WorkspacePage_DiffAction"
-                                                Text="{Binding ActionCode}"
+                                                Text="{Binding ActionCode, Converter={StaticResource WorkspaceCodeDisplayConverter}, ConverterParameter=action}"
                                                 Foreground="{Binding ActionCode, Converter={StaticResource SemanticStatusBrushConverter}, ConverterParameter=action}"
                                                 FontWeight="SemiBold" />
                                             <TextBlock
                                                 x:Uid="WorkspacePage_DiffState"
-                                                Text="{Binding StateCode}"
+                                                Text="{Binding StateCode, Converter={StaticResource WorkspaceCodeDisplayConverter}, ConverterParameter=state}"
                                                 Foreground="{Binding StateCode, Converter={StaticResource SemanticStatusBrushConverter}, ConverterParameter=state}"
                                                 Opacity="0.85" />
                                         </StackPanel>
