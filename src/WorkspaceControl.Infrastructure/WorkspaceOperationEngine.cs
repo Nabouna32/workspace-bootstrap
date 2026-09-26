@@ -6,21 +6,23 @@ namespace WorkspaceControl.Infrastructure;
 public sealed class WorkspaceOperationEngine
 {
     private readonly ConfigurationStore _config;
-    private readonly InstallerEngine _installer;
+    private readonly IInstallerEngine _installer;
     private readonly WorkspacePaths _paths;
     private readonly InventoryScanner _inventory;
     private readonly WindowsSystemService _windows;
     private readonly RegistryDesiredStateObserver _registry;
     private readonly RegistryDesiredStateWriter _registryWriter;
+    private readonly Action<string>? _workerLauncher;
 
     public WorkspaceOperationEngine(
         ConfigurationStore config,
-        InstallerEngine installer,
+        IInstallerEngine installer,
         WorkspacePaths paths,
         InventoryScanner inventory,
         WindowsSystemService? windows = null,
         RegistryDesiredStateObserver? registry = null,
-        RegistryDesiredStateWriter? registryWriter = null)
+        RegistryDesiredStateWriter? registryWriter = null,
+        Action<string>? workerLauncher = null)
     {
         _config = config;
         _installer = installer;
@@ -29,6 +31,7 @@ public sealed class WorkspaceOperationEngine
         _windows = windows ?? new WindowsSystemService();
         _registry = registry ?? new RegistryDesiredStateObserver();
         _registryWriter = registryWriter ?? new RegistryDesiredStateWriter();
+        _workerLauncher = workerLauncher;
     }
 
     public IReadOnlyList<WorkspaceManifest> Workspaces() =>
@@ -485,7 +488,7 @@ public sealed class WorkspaceOperationEngine
 
         try
         {
-            LaunchWorker(operation.OperationId);
+            (_workerLauncher ?? LaunchWorker)(operation.OperationId);
         }
         catch (Exception ex)
         {
@@ -868,7 +871,7 @@ public sealed class WorkspaceOperationEngine
 
         try
         {
-            LaunchWorker(operation.OperationId);
+            (_workerLauncher ?? LaunchWorker)(operation.OperationId);
         }
         catch (Exception ex)
         {
@@ -1256,27 +1259,38 @@ public sealed class WorkspaceOperationEngine
             throw new InvalidOperationException(
                 "Application rollback failed: " + string.Join(" | ", failures));
 
-        var verificationPlan = await PlanAsync(operation.WorkspaceId, token);
+        var inventory = await _inventory.ScanAsync(token);
         var verificationFailures = new List<string>();
 
         foreach (var snapshot in operation.ApplicationSnapshots)
         {
-            var verified = verificationPlan.Items.FirstOrDefault(item =>
-                string.Equals(item.Domain, DesiredStateDomainCodes.Application, StringComparison.Ordinal)
-                && string.Equals(item.ComponentId, snapshot.ComponentId, StringComparison.Ordinal));
+            var component = components.TryGetValue(snapshot.ComponentId, out var catalogComponent)
+                ? catalogComponent
+                : null;
 
-            if (verified is null
-                || verified.StateCode != ApplicationStateCodes.Installed
-                || verified.ActionCode != DesiredStateActionCodes.None
-                || !string.Equals(
-                    verified.InstalledVersion,
+            if (component is null)
+            {
+                verificationFailures.Add($"{snapshot.ComponentId}: catalog component is unavailable.");
+                continue;
+            }
+
+            var observed = FindInventoryMatch(component, inventory.Items);
+            if (observed is null)
+            {
+                verificationFailures.Add(
+                    $"{snapshot.ComponentId}: application is still absent after rollback; " +
+                    $"expected version '{snapshot.InstalledVersion}'.");
+                continue;
+            }
+
+            if (!string.Equals(
+                    observed.Version,
                     snapshot.InstalledVersion,
                     StringComparison.Ordinal))
             {
                 verificationFailures.Add(
                     $"{snapshot.ComponentId}: expected version '{snapshot.InstalledVersion}', " +
-                    $"observed '{verified?.InstalledVersion ?? "absent"}' with state/action " +
-                    $"{verified?.StateCode ?? "unknown"}/{verified?.ActionCode ?? "unknown"}");
+                    $"observed '{observed.Version ?? "unknown"}'.");
             }
         }
 
