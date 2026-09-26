@@ -41,6 +41,7 @@ A full or partial reconstruction is acceptable if incremental repair would prese
 - Application desired-state intent is now explicitly modeled as **undefined / present / absent**, with observed application state kept separate.
 - The Workspace application editor now exposes **Don’t manage / Keep / Remove**, allowing debloat behavior to use the same desired-state pipeline as installation.
 - Removal planning and execution use the existing review → confirmation → apply → verification lifecycle; this slice makes the user intent for removal explicit in the Workspace UI.
+- Application removal execution is now capability-driven: confirmed plans persist the observed WinGet package identity/source/version instead of assuming the catalog is the uninstall mechanism; removal is blocked when no supported capability is observed.
 ## Current constraints
 
 - Windows 11 x64.
