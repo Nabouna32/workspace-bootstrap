@@ -107,7 +107,8 @@
   <data name="DiagnosticsPage_List.AutomationProperties.Name" xml:space="preserve"><value>Diagnostics results</value></data>
   <data name="WorkspacePage_ObservedHeading.Text" xml:space="preserve"><value>Current machine</value></data>
   <data name="WorkspacePage_ObservedDescription.Text" xml:space="preserve"><value>These are observations from this PC. They describe what is detected now; they do not change your Workspace.</value></data>
-  <data name="WorkspacePage_DiffHeading.Text" xml:space="preserve"><value>2. Compare with this PC</value></data>
+  <data name="SoftwareCountFormat" xml:space="preserve"><value>{0} detected entries</value></data>
+  <data name="WorkspacePage_DiffHeading.Text" xml:space="preserve"><value>2. Compare</value></data>
   <data name="WorkspacePage_DiffDescription.Text" xml:space="preserve"><value>This read-only comparison shows how your desired Workspace differs from this PC before a plan is created.</value></data>
   <data name="WorkspacePage_DiffList.AutomationProperties.Name" xml:space="preserve"><value>Desired-state comparison</value></data>
   <data name="WorkspacePage_DiffObserved.Text" xml:space="preserve"><value>Observed</value></data>
@@ -172,7 +173,7 @@
   <data name="WorkspacePage_ApplicationsDomain.Text" xml:space="preserve"><value>Applications</value></data>
   <data name="WorkspacePage_ApplicationsDomainHint.Text" xml:space="preserve"><value>Explicit application requirements</value></data>
   <data name="WorkspacePage_WindowsDomain.Text" xml:space="preserve"><value>Windows</value></data>
-  <data name="WorkspacePage_WindowsDomainHint.Text" xml:space="preserve"><value>Windows settings are not defined here yet</value></data>
+  <data name="WorkspacePage_WindowsDomainHint.Text" xml:space="preserve"><value>Windows settings you explicitly want this Workspace to manage</value></data>
   <data name="WorkspacePage_OtherDomain.Text" xml:space="preserve"><value>Other system areas</value></data>
   <data name="WorkspacePage_OtherDomainHint.Text" xml:space="preserve"><value>Privacy, performance, drivers, WSL and more</value></data>
   <data name="WorkspacePage_Undefined.Text" xml:space="preserve"><value>Undefined</value></data>
