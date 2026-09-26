@@ -854,13 +854,6 @@ public sealed class WorkspaceApplicationOption : INotifyPropertyChanged
             : WorkspaceApplicationIntentCodes.Undefined;
     }
 
-    public string? IntentDisplay => Intent switch
-    {
-        WorkspaceApplicationIntentCodes.Present => "Keep",
-        WorkspaceApplicationIntentCodes.Absent => "Remove",
-        _ => "Don't manage"
-    };
-
     public string StateCode
     {
         get => _stateCode;
