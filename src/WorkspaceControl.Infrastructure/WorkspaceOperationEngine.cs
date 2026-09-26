@@ -785,11 +785,14 @@ public sealed class WorkspaceOperationEngine
         {
             try
             {
-                RollbackRegistrySnapshots(operation);
+                await RollbackSnapshotsAsync(
+                    operation,
+                    components,
+                    CancellationToken.None);
             }
             catch (Exception rollbackEx)
             {
-                operation.Error = $"Operation cancelled. Registry rollback failed: {rollbackEx.Message}";
+                operation.Error = $"Operation cancelled. Rollback failed: {rollbackEx.Message}";
                 operation.Status = WorkspaceOperationStatuses.Failed;
                 operation.CanResume = false;
                 Save(operation);
@@ -797,7 +800,7 @@ public sealed class WorkspaceOperationEngine
             }
 
             operation.Status = WorkspaceOperationStatuses.Failed;
-            operation.Error = "Operation cancelled.";
+            operation.Error = "Operation cancelled and completed changes were rolled back.";
             operation.CanResume = true;
             Save(operation);
             throw;
@@ -1252,6 +1255,35 @@ public sealed class WorkspaceOperationEngine
         if (failures.Count > 0)
             throw new InvalidOperationException(
                 "Application rollback failed: " + string.Join(" | ", failures));
+
+        var verificationPlan = await PlanAsync(operation.WorkspaceId, token);
+        var verificationFailures = new List<string>();
+
+        foreach (var snapshot in operation.ApplicationSnapshots)
+        {
+            var verified = verificationPlan.Items.FirstOrDefault(item =>
+                string.Equals(item.Domain, DesiredStateDomainCodes.Application, StringComparison.Ordinal)
+                && string.Equals(item.ComponentId, snapshot.ComponentId, StringComparison.Ordinal));
+
+            if (verified is null
+                || verified.StateCode != ApplicationStateCodes.Installed
+                || verified.ActionCode != DesiredStateActionCodes.None
+                || !string.Equals(
+                    verified.InstalledVersion,
+                    snapshot.InstalledVersion,
+                    StringComparison.Ordinal))
+            {
+                verificationFailures.Add(
+                    $"{snapshot.ComponentId}: expected version '{snapshot.InstalledVersion}', " +
+                    $"observed '{verified?.InstalledVersion ?? "absent"}' with state/action " +
+                    $"{verified?.StateCode ?? "unknown"}/{verified?.ActionCode ?? "unknown"}");
+            }
+        }
+
+        if (verificationFailures.Count > 0)
+            throw new InvalidOperationException(
+                "Application rollback verification failed: " +
+                string.Join(" | ", verificationFailures));
 
         operation.Completed = Math.Min(operation.Completed, rollbackStartIndex);
         operation.ApplicationSnapshots.Clear();
