@@ -105,6 +105,8 @@
   <data name="DiagnosticsPage_Title.Text" xml:space="preserve"><value>Diagnostics</value></data>
   <data name="DiagnosticsPage_Subtitle.Text" xml:space="preserve"><value>Signaux des fournisseurs et de la découverte recueillis lors de la dernière analyse.</value></data>
   <data name="DiagnosticsPage_List.AutomationProperties.Name" xml:space="preserve"><value>Résultats des diagnostics</value></data>
+  <data name="WorkspacePage_ObservedHeading.Text" xml:space="preserve"><value>État actuel du PC</value></data>
+  <data name="WorkspacePage_ObservedDescription.Text" xml:space="preserve"><value>Ces informations sont observées sur ce PC. Elles décrivent l’état détecté maintenant et ne modifient pas votre Workspace.</value></data>
   <data name="WorkspacePage_DiffHeading.Text" xml:space="preserve"><value>2. Observer et comparer</value></data>
   <data name="WorkspacePage_DiffDescription.Text" xml:space="preserve"><value>Cette comparaison en lecture seule montre comment votre Workspace diffère de l’état réel de ce PC avant de créer un plan.</value></data>
   <data name="WorkspacePage_DiffList.AutomationProperties.Name" xml:space="preserve"><value>Comparaison de l’état souhaité</value></data>
