@@ -656,9 +656,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
                     SchemaVersion = 2,
                     DesiredState = desiredState with
                     {
-                        Applications = selectedApplications
-                            .Select(componentId => new WorkspaceApplication(componentId))
-                            .ToArray(),
+                        Applications = selectedApplications,
                         RegistrySettings = WindowsAppearanceSettings.Apply(
                             desiredState.RegistrySettings,
                             WindowsAppearance)
@@ -678,7 +676,13 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             var created = _application.CreateWorkspace(
                 WorkspaceName.Trim(),
                 WorkspaceDescription.Trim(),
-                selectedApplications);
+                selectedApplications
+                    .Where(application => string.Equals(
+                        application.State,
+                        ApplicationDesiredStateCodes.Present,
+                        StringComparison.OrdinalIgnoreCase))
+                    .Select(application => application.ComponentId)
+                    .ToArray());
 
             Workspaces.Add(created);
             SelectWorkspace(created.Id);
