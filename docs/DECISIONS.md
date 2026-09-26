@@ -96,6 +96,14 @@ not:
 
 The brainstorming includes cache and offline capabilities as a meaningful product direction. No later decision should demote that direction merely because the current implementation is online-first. Its exact scope and sequencing remain to be determined during product/architecture realignment.
 
+## Application removal execution provenance
+
+Application removal plans must carry the removal capability observed during inventory rather than deriving an execution mechanism from the catalog component alone.
+
+The catalog describes the desired application identity; inventory provides the evidence and supported removal mechanism for the currently installed instance. A removal is blocked when no supported capability is observed. Confirmed plans persist that capability so execution cannot silently substitute a different mechanism after confirmation.
+
+The first supported capability is WinGet. Its observed package ID, source and installed version are retained for removal and rollback. Registry uninstall strings remain inventory evidence only until a dedicated, validated execution mechanism exists.
+
 ## Decision discipline
 
 A new decision may refine or change the product direction, but implementation details do not become decisions merely because they exist in code.
