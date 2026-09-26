@@ -9,7 +9,7 @@
     </Page.Resources>
 
     <ScrollViewer>
-        <StackPanel Padding="28" Spacing="20">
+        <StackPanel Padding="24" Spacing="16">
             <StackPanel Spacing="6">
                 <TextBlock x:Uid="WorkspacePage_Title" FontSize="32" FontWeight="SemiBold" />
                 <TextBlock
@@ -103,11 +103,6 @@
                                         <TextBlock x:Uid="WorkspacePage_ApplicationsDomain.Text" FontWeight="SemiBold" />
                                         <TextBlock x:Uid="WorkspacePage_ApplicationsDomainHint.Text" Opacity="0.65" />
                                     </StackPanel>
-                                    <TextBlock
-                                        Grid.Column="1"
-                                        Text="{Binding ApplicationInstalledCount}"
-                                        FontSize="20"
-                                        FontWeight="SemiBold" />
                                 </Grid>
                             </Border>
 
@@ -150,6 +145,47 @@
             </Grid>
 
             <Border
+                Padding="16"
+                CornerRadius="14"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <StackPanel Spacing="8">
+                    <TextBlock
+                        x:Uid="WorkspacePage_ObservedHeading"
+                        FontSize="20"
+                        FontWeight="SemiBold" />
+                    <TextBlock
+                        x:Uid="WorkspacePage_ObservedDescription"
+                        TextWrapping="Wrap"
+                        Opacity="0.72" />
+                    <Grid ColumnSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Padding="10" CornerRadius="10">
+                            <StackPanel Spacing="2">
+                                <TextBlock x:Uid="OverviewPage_DetectedEntries.Text" FontSize="12" Opacity="0.6" />
+                                <TextBlock Text="{Binding SoftwareCountDisplay}" FontSize="18" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="1" Padding="10" CornerRadius="10">
+                            <StackPanel Spacing="2">
+                                <TextBlock x:Uid="OverviewPage_UpdatesCard.Text" FontSize="12" Opacity="0.6" />
+                                <TextBlock Text="{Binding ApplicationUpdatesCount}" FontSize="18" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Padding="10" CornerRadius="10">
+                            <StackPanel Spacing="2">
+                                <TextBlock x:Uid="OverviewPage_DiagnosticsCard.Text" FontSize="12" Opacity="0.6" />
+                                <TextBlock Text="{Binding DiagnosticCount}" FontSize="18" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border
                 Padding="20"
                 CornerRadius="14"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
@@ -179,67 +215,74 @@
                         </StackPanel>
                     </Grid>
 
-                    <TextBox
-                        x:Name="ApplicationSearchBox"
-                        x:Uid="WorkspacePage_ApplicationSearch"
-                        TextChanged="ApplicationSearchBox_TextChanged" />
-
-                    <ListView
-                        x:Name="ApplicationList"
-                        x:Uid="WorkspacePage_ApplicationList"
-                        ItemsSource="{Binding VisibleApplicationOptions}"
-                        SelectionMode="None"
-                        MaxHeight="420">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Grid ColumnSpacing="16" Padding="4">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <StackPanel Spacing="2">
-                                        <CheckBox
-                                            x:Uid="WorkspacePage_ApplicationCheckBox"
-                                            Content="{Binding Name}"
-                                            IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                            HorizontalAlignment="Stretch" />
-                                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="32,0,0,0">
-                                            <TextBlock
-                                                Text="{Binding Source}"
-                                                Opacity="0.65"
-                                                TextTrimming="CharacterEllipsis" />
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                    <Expander IsExpanded="False">
+                        <Expander.Header>
+                            <TextBlock x:Uid="WorkspacePage_ApplicationsHeading" FontSize="16" FontWeight="SemiBold" />
+                        </Expander.Header>
+                        <StackPanel Spacing="8" Padding="0,8,0,0">
+                        <TextBox
+                            x:Name="ApplicationSearchBox"
+                            x:Uid="WorkspacePage_ApplicationSearch"
+                            TextChanged="ApplicationSearchBox_TextChanged" />
+    
+                        <ListView
+                            x:Name="ApplicationList"
+                            x:Uid="WorkspacePage_ApplicationList"
+                            ItemsSource="{Binding VisibleApplicationOptions}"
+                            SelectionMode="None"
+                            MaxHeight="300">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnSpacing="16" Padding="4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+    
+                                        <StackPanel Spacing="2">
+                                            <CheckBox
+                                                x:Uid="WorkspacePage_ApplicationCheckBox"
+                                                Content="{Binding Name}"
+                                                IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                HorizontalAlignment="Stretch" />
+                                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="32,0,0,0">
                                                 <TextBlock
-                                                    x:Uid="WorkspacePage_ApplicationInstalled"
-                                                    FontSize="12"
-                                                    Opacity="0.6" />
-                                                <TextBlock
-                                                    Text="{Binding InstalledVersion}"
-                                                    FontSize="12" />
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <TextBlock
-                                                    x:Uid="WorkspacePage_ApplicationAvailable"
-                                                    FontSize="12"
-                                                    Opacity="0.6" />
-                                                <TextBlock
-                                                    Text="{Binding AvailableVersion}"
-                                                    FontSize="12" />
+                                                    Text="{Binding Source}"
+                                                    Opacity="0.65"
+                                                    TextTrimming="CharacterEllipsis" />
+                                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                                    <TextBlock
+                                                        x:Uid="WorkspacePage_ApplicationInstalled"
+                                                        FontSize="12"
+                                                        Opacity="0.6" />
+                                                    <TextBlock
+                                                        Text="{Binding InstalledVersion}"
+                                                        FontSize="12" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                                    <TextBlock
+                                                        x:Uid="WorkspacePage_ApplicationAvailable"
+                                                        FontSize="12"
+                                                        Opacity="0.6" />
+                                                    <TextBlock
+                                                        Text="{Binding AvailableVersion}"
+                                                        FontSize="12" />
+                                                </StackPanel>
                                             </StackPanel>
                                         </StackPanel>
-                                    </StackPanel>
-
-                                    <TextBlock
-                                        Grid.Column="1"
-                                        Text="{Binding StateCode}"
-                                        Foreground="{Binding StateCode, Converter={StaticResource SemanticStatusBrushConverter}}"
-                                        FontWeight="SemiBold"
-                                        VerticalAlignment="Center" />
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+    
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Text="{Binding StateCode}"
+                                            Foreground="{Binding StateCode, Converter={StaticResource SemanticStatusBrushConverter}}"
+                                            FontWeight="SemiBold"
+                                            VerticalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        </StackPanel>
+                    </Expander>
                 </StackPanel>
             </Border>
 
@@ -274,22 +317,28 @@
             </Border>
 
             <Border
-                Padding="20"
+                Padding="16"
                 CornerRadius="14"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                <StackPanel Spacing="14">
+                <StackPanel Spacing="10">
                     <TextBlock x:Uid="WorkspacePage_DiffHeading" FontSize="20" FontWeight="SemiBold" />
                     <TextBlock
                         x:Uid="WorkspacePage_DiffDescription"
                         TextWrapping="Wrap"
                         Opacity="0.72" />
+                    <Button
+                        x:Name="ObserveDiffButton"
+                        x:Uid="WorkspacePage_ObserveDiff"
+                        Click="ObserveDiffButton_Click"
+                        IsEnabled="False"
+                        HorizontalAlignment="Left" />
 
                     <ListView
                         x:Name="DesiredStateDiffList"
                         x:Uid="WorkspacePage_DiffList"
                         ItemsSource="{Binding DesiredStateDiffItems}"
                         SelectionMode="None"
-                        MaxHeight="360">
+                        MaxHeight="300">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Border Padding="12" Margin="0,0,0,8" CornerRadius="8">
@@ -339,19 +388,12 @@
                         </ListView.ItemTemplate>
                     </ListView>
 
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <Button
-                            x:Name="ObserveDiffButton"
-                            x:Uid="WorkspacePage_ObserveDiff"
-                            Click="ObserveDiffButton_Click"
-                            IsEnabled="False" />
-                        <Button
-                            x:Name="CreatePlanButton"
-                            x:Uid="WorkspacePage_GeneratePlan"
-                            Click="CreatePlanButton_Click"
-                            IsEnabled="False" />
-                    </StackPanel>
-                </StackPanel>
+                    <Button
+                        x:Name="CreatePlanButton"
+                        x:Uid="WorkspacePage_GeneratePlan"
+                        Click="CreatePlanButton_Click"
+                        IsEnabled="False"
+                        HorizontalAlignment="Left" />                </StackPanel>
             </Border>
 
             <Border
