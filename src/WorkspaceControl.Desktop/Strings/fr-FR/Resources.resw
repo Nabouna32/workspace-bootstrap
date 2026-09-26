@@ -193,4 +193,5 @@
   <data name="WindowsAppearanceSystem" xml:space="preserve"><value>Système</value></data>
   <data name="Undefined" xml:space="preserve"><value>Non défini</value></data>
   <data name="WorkspacePage_Capture.Text" xml:space="preserve"><value>Créer depuis ce PC</value></data>
+  <data name="WorkspacePage_CaptureHint.Text" xml:space="preserve"><value>Crée un nouveau Workspace avec les applications détectées comme installées.</value></data>
 </root>
