@@ -105,6 +105,8 @@
   <data name="DiagnosticsPage_Title.Text" xml:space="preserve"><value>Diagnostics</value></data>
   <data name="DiagnosticsPage_Subtitle.Text" xml:space="preserve"><value>Provider and discovery signals collected during the latest scan.</value></data>
   <data name="DiagnosticsPage_List.AutomationProperties.Name" xml:space="preserve"><value>Diagnostics results</value></data>
+  <data name="WorkspacePage_ObservedHeading.Text" xml:space="preserve"><value>Current machine</value></data>
+  <data name="WorkspacePage_ObservedDescription.Text" xml:space="preserve"><value>These are observations from this PC. They describe what is detected now; they do not change your Workspace.</value></data>
   <data name="WorkspacePage_DiffHeading.Text" xml:space="preserve"><value>2. Compare with this PC</value></data>
   <data name="WorkspacePage_DiffDescription.Text" xml:space="preserve"><value>This read-only comparison shows how your desired Workspace differs from this PC before a plan is created.</value></data>
   <data name="WorkspacePage_DiffList.AutomationProperties.Name" xml:space="preserve"><value>Desired-state comparison</value></data>
