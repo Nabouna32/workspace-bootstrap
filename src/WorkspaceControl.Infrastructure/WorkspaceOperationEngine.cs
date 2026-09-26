@@ -6,7 +6,7 @@ namespace WorkspaceControl.Infrastructure;
 public sealed class WorkspaceOperationEngine
 {
     private readonly ConfigurationStore _config;
-    private readonly InstallerEngine _installer;
+    private readonly IInstallerEngine _installer;
     private readonly WorkspacePaths _paths;
     private readonly InventoryScanner _inventory;
     private readonly WindowsSystemService _windows;
@@ -15,7 +15,7 @@ public sealed class WorkspaceOperationEngine
 
     public WorkspaceOperationEngine(
         ConfigurationStore config,
-        InstallerEngine installer,
+        IInstallerEngine installer,
         WorkspacePaths paths,
         InventoryScanner inventory,
         WindowsSystemService? windows = null,
