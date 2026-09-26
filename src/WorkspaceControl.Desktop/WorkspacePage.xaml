@@ -301,7 +301,7 @@
     
                                         <TextBlock
                                             Grid.Column="1"
-                                            Text="{Binding StateCode}"
+                                            Text="{Binding StateCode, Converter={StaticResource WorkspaceCodeDisplayConverter}, ConverterParameter=state}"
                                             Foreground="{Binding StateCode, Converter={StaticResource SemanticStatusBrushConverter}}"
                                             FontWeight="SemiBold"
                                             VerticalAlignment="Center" />
