@@ -115,7 +115,6 @@ public sealed class WinGetInventoryProvider : IInventoryProvider
                 source ?? "winget",
                 InventoryScope.Unknown,
                 null,
-                BuildRemovalCapability(id, source),
                 null,
                 InventoryOwnership.Unknown,
                 Array.Empty<string>(),
