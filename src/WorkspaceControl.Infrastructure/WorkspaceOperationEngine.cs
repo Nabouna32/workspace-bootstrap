@@ -78,7 +78,8 @@ public sealed class WorkspaceOperationEngine
                 planItem.InstalledVersion,
                 planItem.AvailableVersion,
                 planItem.DesiredVersion,
-                planItem.Message);
+                planItem.Message,
+                planItem.RemovalCapability);
         }).ToList();
 
         AddUnsupportedDesiredStateItems(workspace, items);
@@ -126,7 +127,8 @@ public sealed class WorkspaceOperationEngine
                 item.Message,
                 item.Domain,
                 item.TargetId,
-                item.ObservedValue))
+                item.ObservedValue,
+                item.RemovalCapability))
             .ToArray();
 
         return new WorkspacePlan(
@@ -231,6 +233,26 @@ public sealed class WorkspaceOperationEngine
                     "Application does not declare a package id for the supported uninstall provider.");
             }
 
+            var removalCapability = match.RemovalCapabilities
+                .FirstOrDefault(capability =>
+                    string.Equals(
+                        capability.Kind,
+                        RemovalCapabilityKindCodes.WinGet,
+                        StringComparison.OrdinalIgnoreCase));
+
+            if (removalCapability is null)
+            {
+                return new WorkspacePlanItem(
+                    component.Id,
+                    component.Name,
+                    ApplicationStateCodes.Installed,
+                    DesiredStateActionCodes.Blocked,
+                    match.Version,
+                    null,
+                    null,
+                    "Application is installed, but no supported removal capability was observed.");
+            }
+
             return new WorkspacePlanItem(
                 component.Id,
                 component.Name,
@@ -239,7 +261,8 @@ public sealed class WorkspaceOperationEngine
                 match.Version,
                 null,
                 null,
-                $"Application version {match.Version} is installed but absent from the desired state and will be removed.");
+                $"Application version {match.Version} is installed but absent from the desired state and will be removed.",
+                RemovalCapability: removalCapability);
         }
 
         if (match is null)
@@ -576,10 +599,19 @@ public sealed class WorkspaceOperationEngine
                                 new WorkspaceApplicationSnapshot(
                                     planned.ComponentId,
                                     planned.InstalledVersion,
+                                    planned.RemovalCapability,
                                     index));
                             Save(operation);
 
-                            await _installer.UninstallAsync(component, token);
+                            if (planned.RemovalCapability is null)
+                                throw new InvalidOperationException(
+                                    $"No supported removal capability is persisted for '{planned.ComponentName}'.");
+
+                            await _installer.UninstallAsync(
+                                component,
+                                planned.RemovalCapability,
+                                planned.InstalledVersion,
+                                token);
                         }
                         else
                         {
@@ -1194,11 +1226,22 @@ public sealed class WorkspaceOperationEngine
                 if (!components.TryGetValue(snapshot.ComponentId, out var component))
                     throw new InvalidOperationException($"Unknown component '{snapshot.ComponentId}' during rollback.");
 
-                await _installer.InstallAsync(
-                    component,
-                    DesiredStateActionCodes.Install,
-                    snapshot.InstalledVersion,
-                    token);
+                if (snapshot.RemovalCapability is not null)
+                {
+                    await _installer.InstallFromRemovalCapabilityAsync(
+                        snapshot.RemovalCapability,
+                        component.Name,
+                        snapshot.InstalledVersion,
+                        token);
+                }
+                else
+                {
+                    await _installer.InstallAsync(
+                        component,
+                        DesiredStateActionCodes.Install,
+                        snapshot.InstalledVersion,
+                        token);
+                }
             }
             catch (Exception ex)
             {
