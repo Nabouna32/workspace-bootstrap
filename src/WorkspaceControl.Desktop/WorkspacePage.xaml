@@ -248,11 +248,16 @@
                                         </Grid.ColumnDefinitions>
     
                                         <StackPanel Spacing="2">
-                                            <CheckBox
-                                                x:Uid="WorkspacePage_ApplicationCheckBox"
-                                                Content="{Binding Name}"
-                                                IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                                HorizontalAlignment="Stretch" />
+                                            <ComboBox
+                                                x:Uid="WorkspacePage_ApplicationIntent"
+                                                SelectedValue="{Binding Intent, Mode=TwoWay}"
+                                                SelectedValuePath="Tag"
+                                                MinWidth="150"
+                                                HorizontalAlignment="Left">
+                                                <ComboBoxItem x:Uid="WorkspacePage_ApplicationIntentUndefined" Tag="undefined" />
+                                                <ComboBoxItem x:Uid="WorkspacePage_ApplicationIntentPresent" Tag="present" />
+                                                <ComboBoxItem x:Uid="WorkspacePage_ApplicationIntentAbsent" Tag="absent" />
+                                            </ComboBox>
                                             <StackPanel Orientation="Horizontal" Spacing="12" Margin="32,0,0,0">
                                                 <TextBlock
                                                     Text="{Binding Source}"
