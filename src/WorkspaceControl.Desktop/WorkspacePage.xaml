@@ -435,6 +435,13 @@
                         TextWrapping="Wrap"
                         Opacity="0.72" />
 
+                    <InfoBar
+                        x:Uid="WorkspacePage_RemovalWarning"
+                        IsOpen="{Binding HasRemovalActions}"
+                        Severity="Warning"
+                        IsClosable="False"
+                        Message="{Binding RemovalActionsDisplay}" />
+
                     <TextBlock
                         x:Uid="WorkspacePage_Status"
                         Text="{Binding WorkspaceOperationStatusDisplay}"
