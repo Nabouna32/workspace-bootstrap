@@ -12,6 +12,7 @@ public sealed class WorkspaceOperationEngine
     private readonly WindowsSystemService _windows;
     private readonly RegistryDesiredStateObserver _registry;
     private readonly RegistryDesiredStateWriter _registryWriter;
+    private readonly Action<string>? _workerLauncher;
 
     public WorkspaceOperationEngine(
         ConfigurationStore config,
@@ -20,7 +21,8 @@ public sealed class WorkspaceOperationEngine
         InventoryScanner inventory,
         WindowsSystemService? windows = null,
         RegistryDesiredStateObserver? registry = null,
-        RegistryDesiredStateWriter? registryWriter = null)
+        RegistryDesiredStateWriter? registryWriter = null,
+        Action<string>? workerLauncher = null)
     {
         _config = config;
         _installer = installer;
@@ -29,6 +31,7 @@ public sealed class WorkspaceOperationEngine
         _windows = windows ?? new WindowsSystemService();
         _registry = registry ?? new RegistryDesiredStateObserver();
         _registryWriter = registryWriter ?? new RegistryDesiredStateWriter();
+        _workerLauncher = workerLauncher;
     }
 
     public IReadOnlyList<WorkspaceManifest> Workspaces() =>
@@ -485,7 +488,7 @@ public sealed class WorkspaceOperationEngine
 
         try
         {
-            LaunchWorker(operation.OperationId);
+            (_workerLauncher ?? LaunchWorker)(operation.OperationId);
         }
         catch (Exception ex)
         {
@@ -868,7 +871,7 @@ public sealed class WorkspaceOperationEngine
 
         try
         {
-            LaunchWorker(operation.OperationId);
+            (_workerLauncher ?? LaunchWorker)(operation.OperationId);
         }
         catch (Exception ex)
         {
