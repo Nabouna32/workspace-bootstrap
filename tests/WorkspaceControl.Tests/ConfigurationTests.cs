@@ -363,7 +363,7 @@ public sealed class ConfigurationTests
                 configuration,
                 new InstallerEngine(paths),
                 paths,
-                new InventoryScanner([new FailingInventoryProvider("test.inventory", "Synthetic failure.")]));
+                new InventoryScanner([new FailedInventoryProvider()]));
 
             var item = (await engine.PlanAsync("remove-app")).Items.Single();
 
