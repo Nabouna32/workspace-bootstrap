@@ -197,4 +197,5 @@
   <data name="CapturedWorkspaceName.Text" xml:space="preserve"><value>Workspace capturé</value></data>
   <data name="CapturedWorkspaceDescription.Text" xml:space="preserve"><value>Capturé depuis ce PC. Seules les applications détectées comme installées sont incluses.</value></data>
   <data name="WorkspaceCaptured.Text" xml:space="preserve"><value>Workspace créé à partir de {0} applications détectées comme installées.</value></data>
+  <data name="WorkspaceCaptureUnavailable.Text" xml:space="preserve"><value>La capture est indisponible tant que ce PC n’a pas été observé.</value></data>
 </root>
