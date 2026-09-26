@@ -63,6 +63,16 @@ The UI must make the following distinction understandable:
 
 Observed state and desired state should be presented separately before their differences are presented.
 
+### Application intent
+
+For applications, the Workspace editor exposes an explicit intent choice:
+
+- **Don’t manage** — undefined; leave the application alone;
+- **Keep** — desired state is present;
+- **Remove** — desired state is absent.
+
+The current machine observation is shown separately from that intent. Differences can therefore describe both installation and removal without turning detection into an instruction. Capture from the current PC selects **Keep** only for applications actually detected as installed.
+
 ## Presentation levels
 
 The same underlying capability should support:
