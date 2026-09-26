@@ -200,4 +200,7 @@
   <data name="WorkspaceCaptured.Text" xml:space="preserve"><value>Workspace created from {0} detected installed applications.</value></data>
   <data name="WorkspaceCaptureUnavailable.Text" xml:space="preserve"><value>Capture is unavailable until this PC has been observed.</value></data>
   <data name="WorkspaceCaptureFailed.Text" xml:space="preserve"><value>Could not capture this PC into a Workspace.</value></data>
+  <data name="WorkspacePage_ApplicationDesiredUndefined.Content" xml:space="preserve"><value>Don't manage</value></data>
+  <data name="WorkspacePage_ApplicationDesiredPresent.Content" xml:space="preserve"><value>Keep / install</value></data>
+  <data name="WorkspacePage_ApplicationDesiredAbsent.Content" xml:space="preserve"><value>Remove</value></data>
 </root>

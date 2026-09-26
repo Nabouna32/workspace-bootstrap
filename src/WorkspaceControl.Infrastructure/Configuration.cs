@@ -278,8 +278,8 @@ public sealed class ConfigurationStore
 
         foreach (var application in workspace.DesiredState.Applications)
         {
-            if (!string.Equals(application.State, "present", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(application.State, "absent", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(application.State, ApplicationDesiredStateCodes.Present, StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(application.State, ApplicationDesiredStateCodes.Absent, StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException(
                     $"Workspace '{sourceName}' contains unsupported application state '{application.State}' for '{application.ComponentId}'.");

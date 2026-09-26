@@ -405,13 +405,16 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         WorkspaceName = workspace.Name;
         WorkspaceDescription = workspace.Description;
 
-        var selectedApplications = workspace.ApplicationRequests
-            .Where(application => string.Equals(application.State, "present", StringComparison.OrdinalIgnoreCase))
-            .Select(application => application.ComponentId)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var desiredApplications = workspace.DesiredState?.Applications
+            .ToDictionary(application => application.ComponentId, StringComparer.OrdinalIgnoreCase)
+            ?? new Dictionary<string, WorkspaceApplication>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var option in ApplicationOptions)
-            option.IsSelected = selectedApplications.Contains(option.ComponentId);
+        {
+            option.DesiredState = desiredApplications.TryGetValue(option.ComponentId, out var application)
+                ? application.State
+                : ApplicationDesiredStateCodes.Undefined;
+        }
 
         WindowsAppearance = WindowsAppearanceSettings.Read(
             workspace.DesiredState?.RegistrySettings ?? []);
@@ -428,7 +431,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         WorkspaceDescription = _localizer.Get("DefaultWorkspaceDescription");
 
         foreach (var option in ApplicationOptions)
-            option.IsSelected = false;
+            option.DesiredState = ApplicationDesiredStateCodes.Undefined;
 
         WindowsAppearance = WindowsAppearanceValues.Undefined;
 
@@ -466,7 +469,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         if (option is null)
             return;
 
-        option.IsSelected = true;
+        option.DesiredState = ApplicationDesiredStateCodes.Present;
         SaveWorkspace();
         Status = _localizer.Get("ApplicationAddedToWorkspace");
         Error = null;
@@ -627,8 +630,13 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         }
 
         var selectedApplications = ApplicationOptions
-            .Where(option => option.IsSelected)
-            .Select(option => option.ComponentId)
+            .Where(option => !string.Equals(
+                option.DesiredState,
+                ApplicationDesiredStateCodes.Undefined,
+                StringComparison.OrdinalIgnoreCase))
+            .Select(option => new WorkspaceApplication(
+                option.ComponentId,
+                State: option.DesiredState))
             .ToArray();
 
         try
@@ -648,9 +656,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
                     SchemaVersion = 2,
                     DesiredState = desiredState with
                     {
-                        Applications = selectedApplications
-                            .Select(componentId => new WorkspaceApplication(componentId))
-                            .ToArray(),
+                        Applications = selectedApplications,
                         RegistrySettings = WindowsAppearanceSettings.Apply(
                             desiredState.RegistrySettings,
                             WindowsAppearance)
@@ -670,7 +676,13 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             var created = _application.CreateWorkspace(
                 WorkspaceName.Trim(),
                 WorkspaceDescription.Trim(),
-                selectedApplications);
+                selectedApplications
+                    .Where(application => string.Equals(
+                        application.State,
+                        ApplicationDesiredStateCodes.Present,
+                        StringComparison.OrdinalIgnoreCase))
+                    .Select(application => application.ComponentId)
+                    .ToArray());
 
             Workspaces.Add(created);
             SelectWorkspace(created.Id);
@@ -808,7 +820,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
 public sealed class WorkspaceApplicationOption : INotifyPropertyChanged
 {
-    private bool _isSelected;
+    private string _desiredState = ApplicationDesiredStateCodes.Undefined;
     private string _stateCode = ApplicationStateCodes.Unknown;
     private string? _installedVersion;
     private string? _availableVersion;
@@ -846,16 +858,20 @@ public sealed class WorkspaceApplicationOption : INotifyPropertyChanged
         string.Equals(StateCode, ApplicationStateCodes.Installed, StringComparison.OrdinalIgnoreCase)
         || string.Equals(StateCode, ApplicationStateCodes.Outdated, StringComparison.OrdinalIgnoreCase);
 
-    public bool IsSelected
+    public string DesiredState
     {
-        get => _isSelected;
+        get => _desiredState;
         set
         {
-            if (_isSelected == value)
+            var normalized = string.IsNullOrWhiteSpace(value)
+                ? ApplicationDesiredStateCodes.Undefined
+                : value;
+
+            if (string.Equals(_desiredState, normalized, StringComparison.OrdinalIgnoreCase))
                 return;
 
-            _isSelected = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
+            _desiredState = normalized;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DesiredState)));
         }
     }
 
