@@ -24,6 +24,10 @@ public sealed class WinGetInventoryProviderTests
         Assert.AreEqual("25.00", sevenZip.AvailableVersion);
         Assert.AreEqual("winget:7zip.7zip", sevenZip.ProviderId);
         Assert.AreEqual(InventoryScope.Unknown, sevenZip.Scope);
+        Assert.IsNotNull(sevenZip.RemovalCapability);
+        Assert.AreEqual(RemovalCapabilityKindCodes.WinGet, sevenZip.RemovalCapability!.Kind);
+        Assert.AreEqual("7zip.7zip", sevenZip.RemovalCapability.PackageId);
+        Assert.AreEqual("winget", sevenZip.RemovalCapability.Source);
         Assert.IsTrue(sevenZip.Evidence.Any(x => x.Kind == "available-update"));
         Assert.AreEqual(detectedAt, sevenZip.DetectedAtUtc);
     }
