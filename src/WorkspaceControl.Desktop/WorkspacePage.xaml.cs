@@ -79,6 +79,13 @@ public sealed partial class WorkspacePage : Page
         UpdateButtons();
     }
 
+    private void CaptureWorkspaceButton_Click(object sender, RoutedEventArgs e)
+    {
+        _viewModel.CaptureCurrentMachineApplications();
+        WorkspaceList.SelectedItem = _viewModel.Workspaces.LastOrDefault();
+        UpdateButtons();
+    }
+
     private void ApplicationSearchBox_TextChanged(
         object sender,
         TextChangedEventArgs e) =>
