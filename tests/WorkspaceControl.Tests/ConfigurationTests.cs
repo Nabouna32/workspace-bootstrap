@@ -155,6 +155,91 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
+    public async Task Workspace_operation_rolls_back_when_removal_verification_fails()
+    {
+        var root = CreateConfigurationRoot();
+        var configuration = new ConfigurationStore(root);
+        var paths = new WorkspacePaths(Path.Combine(
+            Path.GetTempPath(),
+            "workspace-control-removal-rollback-tests",
+            Guid.NewGuid().ToString("N")));
+
+        var component = new ComponentManifest(
+            "test-app",
+            "Test app",
+            null,
+            "Test.Package",
+            null,
+            "exe",
+            null,
+            "x64",
+            null,
+            [],
+            "winget",
+            "latest-stable");
+
+        var componentDirectory = Path.Combine(root, "catalog", "windows", "components", "test-app");
+        Directory.CreateDirectory(componentDirectory);
+        File.WriteAllText(
+            Path.Combine(root, "catalog", "windows", "components", "catalog.json"),
+            """{"components":["test-app"]}""");
+        File.WriteAllText(
+            Path.Combine(componentDirectory, "component.json"),
+            JsonSerializer.Serialize(component, JsonDefaults.Options));
+
+        var workspace = new WorkspaceManifest(
+            "remove-app",
+            "Remove app",
+            "Rollback verification test",
+            DesiredState: new DesiredStateManifest(
+                [new WorkspaceApplication("test-app", State: WorkspaceApplicationIntentCodes.Absent)],
+                [],
+                [],
+                [],
+                [],
+                []),
+            SchemaVersion: 2);
+
+        File.WriteAllText(
+            Path.Combine(root, "workspaces", "remove-app.json"),
+            JsonSerializer.Serialize(workspace, JsonDefaults.Options));
+
+        var installer = new RecordingInstallerEngine();
+        var provider = new MutableInventoryProvider("Test.Package", "2.0.0");
+        var launchedOperationId = string.Empty;
+
+        try
+        {
+            var engine = new WorkspaceOperationEngine(
+                configuration,
+                installer,
+                paths,
+                new InventoryScanner([provider]),
+                workerLauncher: operationId => launchedOperationId = operationId);
+
+            var operation = await engine.CreateAsync("remove-app");
+            engine.Confirm(operation.OperationId);
+
+            Assert.AreEqual(operation.OperationId, launchedOperationId);
+
+            await engine.RunAsync(operation.OperationId, CancellationToken.None);
+
+            var failed = engine.Get(operation.OperationId);
+
+            Assert.IsNotNull(failed);
+            Assert.AreEqual(WorkspaceOperationStatuses.Failed, failed!.Status);
+            Assert.IsTrue(failed.CanResume);
+            StringAssert.Contains(failed.Error ?? string.Empty, "Post-condition verification failed");
+            Assert.AreEqual(1, installer.UninstallCount);
+            Assert.AreEqual(1, installer.RollbackInstallCount);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public async Task Desired_state_plan_uses_remove_for_absent_application()
     {
         var root = CreateConfigurationRoot();
@@ -872,6 +957,73 @@ public sealed class ConfigurationTests
                         "2.0.0")
                 ],
                 new InventoryProviderDiagnostic(Id, true, "Synthetic inventory.")));
+    }
+
+    private sealed class MutableInventoryProvider(string packageId, string version) : IInventoryProvider
+    {
+        public string Id => "test.mutable";
+
+        public Task<InventoryProviderResult> ScanAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(new InventoryProviderResult(
+                [
+                    new InventoryObservation(
+                        packageId,
+                        packageId,
+                        version,
+                        null,
+                        Id,
+                        packageId,
+                        "test",
+                        InventoryScope.System,
+                        null,
+                        null,
+                        "Test",
+                        InventoryOwnership.PackageManagerManaged,
+                        [],
+                        [new InventoryEvidence("installed", "installed", true, Id)],
+                        DateTimeOffset.UtcNow,
+                        null,
+                        new RemovalCapability(
+                            RemovalCapabilityKindCodes.WinGet,
+                            "windows.winget",
+                            packageId,
+                            "test",
+                            InventoryScope.System))
+                ],
+                new InventoryProviderDiagnostic(Id, true, "Synthetic mutable inventory.")));
+    }
+
+    private sealed class RecordingInstallerEngine : IInstallerEngine
+    {
+        public int UninstallCount { get; private set; }
+        public int RollbackInstallCount { get; private set; }
+
+        public Task InstallAsync(
+            ComponentManifest component,
+            string actionCode,
+            string? desiredVersion,
+            CancellationToken token) =>
+            Task.CompletedTask;
+
+        public Task UninstallAsync(
+            ComponentManifest component,
+            RemovalCapability removalCapability,
+            string? installedVersion,
+            CancellationToken token)
+        {
+            UninstallCount++;
+            return Task.CompletedTask;
+        }
+
+        public Task InstallFromRemovalCapabilityAsync(
+            RemovalCapability removalCapability,
+            string componentName,
+            string version,
+            CancellationToken token)
+        {
+            RollbackInstallCount++;
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class VersionedInventoryProvider(
