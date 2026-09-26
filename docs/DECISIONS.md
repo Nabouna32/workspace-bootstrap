@@ -32,6 +32,18 @@ Workspaces are intended to be reusable artifacts. They may be saved, duplicated,
 
 This supports both ongoing maintenance and reconstruction after formatting or a fresh Windows installation.
 
+### Application desired-state semantics
+
+Application intent uses three user-level states:
+
+- **Undefined / Don’t manage** — the Workspace expresses no requirement for that application; no install or removal action is inferred.
+- **Present / Keep** — the application should be present on the machine.
+- **Absent / Remove** — the application should be absent from the machine.
+
+Observed application state remains separate: installed, not installed or unknown. An explicit `Absent` intent may therefore produce a removal action when the application is observed as installed, while an undefined intent never produces an application mutation. Capture from the current machine sets detected installed applications to `Present`; it does not turn missing applications into `Absent` requirements.
+
+This makes debloating a normal Workspace desired-state operation rather than a separate debloater subsystem.
+
 ### Templates
 
 Templates are optional starting configurations from which a user can create a Workspace. The resulting Workspace is independent and user-owned.
