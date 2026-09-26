@@ -121,7 +121,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public string MemoryDisplay => Baseline is null ? "—" : $"{Baseline.MemoryGB:F1} GB RAM";
     public string CpuCoresDisplay => Baseline is null ? "—" : $"{Baseline.CpuCores} logical cores";
     public string UptimeDisplay => Baseline is null ? "—" : $"{Baseline.UptimeHours:F1} hours uptime";
-    public string SoftwareCountDisplay => $"{SoftwareItems.Count} detected entries";
+    public string SoftwareCountDisplay => _localizer.Format("SoftwareCountFormat", SoftwareItems.Count);
     public int ApplicationInstalledCount => ApplicationCatalogItems.Count(item => item.IsInstalled);
     public int ApplicationUpdatesCount => ApplicationCatalogItems.Count(item => item.IsUpdateAvailable);
     public int ApplicationAvailableCount => ApplicationCatalogItems.Count(item => string.Equals(item.StateCode, ApplicationStateCodes.Missing, StringComparison.OrdinalIgnoreCase));
