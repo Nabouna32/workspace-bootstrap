@@ -981,6 +981,51 @@ public sealed class WorkspaceStoreTests
     }
 
     [TestMethod]
+    public void Workspace_application_intent_round_trip_preserves_absent_and_undefined_scope()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var workspaceRoot = Path.Combine(
+            Path.GetTempPath(),
+            "workspace-control-workspaces",
+            Guid.NewGuid().ToString("N"));
+        var configuration = new ConfigurationStore(repositoryRoot, workspaceRoot);
+
+        var workspace = configuration.CreateWorkspace(
+            "Workspace",
+            "Application intent test",
+            []);
+
+        var updated = workspace with
+        {
+            DesiredState = workspace.DesiredState! with
+            {
+                Applications =
+                [
+                    new WorkspaceApplication("vscode", State: WorkspaceApplicationIntentCodes.Present),
+                    new WorkspaceApplication("git", State: WorkspaceApplicationIntentCodes.Absent)
+                ]
+            }
+        };
+
+        try
+        {
+            configuration.SaveWorkspace(updated);
+            var loaded = configuration.LoadWorkspaces()[workspace.Id];
+            var intents = loaded.ApplicationRequests.ToDictionary(
+                application => application.ComponentId,
+                StringComparer.OrdinalIgnoreCase);
+
+            Assert.AreEqual(WorkspaceApplicationIntentCodes.Present, intents["vscode"].State);
+            Assert.AreEqual(WorkspaceApplicationIntentCodes.Absent, intents["git"].State);
+            Assert.IsFalse(intents.ContainsKey("chrome"));
+        }
+        finally
+        {
+            Directory.Delete(workspaceRoot, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public void Workspace_rejects_unknown_application()
     {
         var repositoryRoot = FindRepositoryRoot();
