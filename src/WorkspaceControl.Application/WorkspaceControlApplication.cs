@@ -5,74 +5,74 @@ namespace WorkspaceControl.Application;
 
 public sealed class WorkspaceControlApplication : IWorkspaceControlApplication
 {
-    private readonly IProvisioningService _provisioning;
+    private readonly IWorkspaceOperationService _workspaceOperations;
     private readonly IInventoryService _inventory;
     private readonly ISoftwareInventoryService _softwareInventory;
     private readonly IWindowsAdministrationService _windows;
     private readonly IOptimizationService _optimization;
 
     public WorkspaceControlApplication(
-        IProvisioningService provisioning,
+        IWorkspaceOperationService workspaceOperations,
         IInventoryService inventory,
         ISoftwareInventoryService softwareInventory,
         IWindowsAdministrationService windows,
         IOptimizationService optimization)
     {
-        _provisioning = provisioning ?? throw new ArgumentNullException(nameof(provisioning));
+        _workspaceOperations = workspaceOperations ?? throw new ArgumentNullException(nameof(workspaceOperations));
         _inventory = inventory ?? throw new ArgumentNullException(nameof(inventory));
         _softwareInventory = softwareInventory ?? throw new ArgumentNullException(nameof(softwareInventory));
         _windows = windows ?? throw new ArgumentNullException(nameof(windows));
         _optimization = optimization ?? throw new ArgumentNullException(nameof(optimization));
     }
 
-    public IReadOnlyList<ProfileManifest> GetProfiles() => _provisioning.GetProfiles();
-    public IReadOnlyList<ComponentManifest> GetApplicationCatalog() => _provisioning.GetApplicationCatalog();
-    public ProfileManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
-        _provisioning.CreateWorkspace(name, description, componentIds);
-    public void SaveWorkspace(ProfileManifest workspace) => _provisioning.SaveWorkspace(workspace);
+    public IReadOnlyList<WorkspaceManifest> GetWorkspaces() => _workspaceOperations.GetWorkspaces();
+    public IReadOnlyList<ComponentManifest> GetApplicationCatalog() => _workspaceOperations.GetApplicationCatalog();
+    public WorkspaceManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
+        _workspaceOperations.CreateWorkspace(name, description, componentIds);
+    public void SaveWorkspace(WorkspaceManifest workspace) => _workspaceOperations.SaveWorkspace(workspace);
 
-    public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string profileId, CancellationToken cancellationToken = default) =>
-        _provisioning.GetDesiredStateDiffAsync(profileId, cancellationToken);
+    public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+        _workspaceOperations.GetDesiredStateDiffAsync(workspaceId, cancellationToken);
 
-    public Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
-        _provisioning.GetPlanAsync(profileId, cancellationToken);
+    public Task<WorkspacePlan> CreateWorkspacePlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+        _workspaceOperations.GetPlanAsync(workspaceId, cancellationToken);
 
-    public Task<ProvisioningOperation> CreateProvisioningAsync(string profileId, CancellationToken cancellationToken = default) =>
-        _provisioning.CreateAsync(profileId, cancellationToken);
+    public Task<WorkspaceOperation> CreateWorkspaceOperationAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+        _workspaceOperations.CreateAsync(workspaceId, cancellationToken);
 
-    public string ConfirmProvisioning(string operationId) =>
-        _provisioning.Confirm(operationId);
+    public string ConfirmWorkspaceOperation(string operationId) =>
+        _workspaceOperations.Confirm(operationId);
 
-    public Task RunProvisioningAsync(
+    public Task RunWorkspaceOperationAsync(
         string operationId,
         CancellationToken cancellationToken = default) =>
-        _provisioning.RunAsync(operationId, cancellationToken);
+        _workspaceOperations.RunAsync(operationId, cancellationToken);
 
-    public ProvisioningOperation? GetProvisioningStatus(string operationId) =>
-        _provisioning.Get(operationId);
+    public WorkspaceOperation? GetWorkspaceOperation(string operationId) =>
+        _workspaceOperations.Get(operationId);
 
-    public string ResumeProvisioning(string operationId) =>
-        _provisioning.Resume(operationId);
+    public string ResumeWorkspaceOperation(string operationId) =>
+        _workspaceOperations.Resume(operationId);
 
-    public IReadOnlyList<ProvisioningOperation> GetProvisioningHistory() =>
-        _provisioning.GetHistory();
+    public IReadOnlyList<WorkspaceOperation> GetWorkspaceOperationHistory() =>
+        _workspaceOperations.GetHistory();
 
-    public ProvisioningOperation? GetProvisioningRecovery()
+    public WorkspaceOperation? GetRecoverableWorkspaceOperation()
     {
-        var latest = _provisioning.GetHistory()
+        var latest = _workspaceOperations.GetHistory()
             .OrderByDescending(x => x.UpdatedAt)
             .FirstOrDefault();
 
-        return latest?.Status is ProvisioningOperationStatuses.AwaitingConfirmation
-            or ProvisioningOperationStatuses.Queued
-            or ProvisioningOperationStatuses.Running
-            or ProvisioningOperationStatuses.Failed
+        return latest?.Status is WorkspaceOperationStatuses.AwaitingConfirmation
+            or WorkspaceOperationStatuses.Queued
+            or WorkspaceOperationStatuses.Running
+            or WorkspaceOperationStatuses.Failed
             ? latest
             : null;
     }
 
-    public ProvisioningOperation? GetProvisioningDetail(string operationId) =>
-        _provisioning.Get(operationId);
+    public WorkspaceOperation? GetWorkspaceOperationDetail(string operationId) =>
+        _workspaceOperations.Get(operationId);
 
     public Task<InventorySnapshot> GetInventoryAsync(CancellationToken cancellationToken = default) =>
         _inventory.ScanAsync(cancellationToken);

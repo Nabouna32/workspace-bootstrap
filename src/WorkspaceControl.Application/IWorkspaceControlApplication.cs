@@ -4,20 +4,20 @@ namespace WorkspaceControl.Application;
 
 public interface IWorkspaceControlApplication
 {
-    IReadOnlyList<ProfileManifest> GetProfiles();
+    IReadOnlyList<WorkspaceManifest> GetWorkspaces();
     IReadOnlyList<ComponentManifest> GetApplicationCatalog();
-    ProfileManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds);
-    void SaveWorkspace(ProfileManifest workspace);
-    Task<DesiredStateDiff> GetDesiredStateDiffAsync(string profileId, CancellationToken cancellationToken = default);
-    Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default);
-    Task<ProvisioningOperation> CreateProvisioningAsync(string profileId, CancellationToken cancellationToken = default);
-    string ConfirmProvisioning(string operationId);
-    Task RunProvisioningAsync(string operationId, CancellationToken cancellationToken = default);
-    ProvisioningOperation? GetProvisioningStatus(string operationId);
-    string ResumeProvisioning(string operationId);
-    IReadOnlyList<ProvisioningOperation> GetProvisioningHistory();
-    ProvisioningOperation? GetProvisioningRecovery();
-    ProvisioningOperation? GetProvisioningDetail(string operationId);
+    WorkspaceManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds);
+    void SaveWorkspace(WorkspaceManifest workspace);
+    Task<DesiredStateDiff> GetDesiredStateDiffAsync(string workspaceId, CancellationToken cancellationToken = default);
+    Task<WorkspacePlan> CreateWorkspacePlanAsync(string workspaceId, CancellationToken cancellationToken = default);
+    Task<WorkspaceOperation> CreateWorkspaceOperationAsync(string workspaceId, CancellationToken cancellationToken = default);
+    string ConfirmWorkspaceOperation(string operationId);
+    Task RunWorkspaceOperationAsync(string operationId, CancellationToken cancellationToken = default);
+    WorkspaceOperation? GetWorkspaceOperation(string operationId);
+    string ResumeWorkspaceOperation(string operationId);
+    IReadOnlyList<WorkspaceOperation> GetWorkspaceOperationHistory();
+    WorkspaceOperation? GetRecoverableWorkspaceOperation();
+    WorkspaceOperation? GetWorkspaceOperationDetail(string operationId);
     Task<InventorySnapshot> GetInventoryAsync(CancellationToken cancellationToken = default);
     Task<SoftwareInventorySnapshot> GetSoftwareInventoryAsync(CancellationToken cancellationToken = default);
     BaselineSnapshot GetBaseline();

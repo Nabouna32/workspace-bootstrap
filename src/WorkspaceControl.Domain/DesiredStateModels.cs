@@ -1,14 +1,14 @@
 namespace WorkspaceControl.Domain;
 
 public sealed record DesiredStateManifest(
-    IReadOnlyList<ProfileApplication> Applications,
+    IReadOnlyList<WorkspaceApplication> Applications,
     IReadOnlyList<WindowsSettingDesiredState> WindowsSettings,
     IReadOnlyList<PolicyDesiredState> Policies,
     IReadOnlyList<RegistrySettingDesiredState> RegistrySettings,
     IReadOnlyList<OptimizationDesiredState> Optimizations,
     IReadOnlyList<MachineCondition> Conditions);
 
-public sealed record ProfileApplication(
+public sealed record WorkspaceApplication(
     string ComponentId,
     string? VersionPolicy = null,
     string? MinimumVersion = null,
@@ -69,8 +69,8 @@ public sealed record DesiredStateDiffItem(
     string Message);
 
 public sealed record DesiredStateDiff(
-    string ProfileId,
-    string ProfileName,
+    string WorkspaceId,
+    string WorkspaceName,
     string InventoryScanId,
     IReadOnlyList<InventoryProviderDiagnostic> InventoryDiagnostics,
     IReadOnlyList<DesiredStateDiffItem> Items,

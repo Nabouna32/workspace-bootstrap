@@ -6,7 +6,7 @@ public sealed class ConfigurationStore
 {
     public string Root { get; }
     public string ComponentsRoot { get; }
-    public string ProfilesRoot { get; }
+    public string TemplatesRoot { get; }
     public string WorkspaceRoot { get; }
 
     public ConfigurationStore(
@@ -18,8 +18,8 @@ public sealed class ConfigurationStore
                 ? AppContext.BaseDirectory
                 : contentRoot);
 
-        ComponentsRoot = Path.Combine(Root, "bootstrap", "windows", "components");
-        ProfilesRoot = Path.Combine(Root, "bootstrap", "windows", "profiles");
+        ComponentsRoot = Path.Combine(Root, "catalog", "windows", "components");
+        TemplatesRoot = Path.Combine(Root, "catalog", "windows", "templates");
         WorkspaceRoot = Path.GetFullPath(
             workspaceRoot
             ?? Path.Combine(Root, "workspaces"));
@@ -43,7 +43,7 @@ public sealed class ConfigurationStore
             .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
     }
 
-    public ProfileManifest CreateWorkspace(
+    public WorkspaceManifest CreateWorkspace(
         string name,
         string description,
         IReadOnlyCollection<string> componentIds)
@@ -73,13 +73,13 @@ public sealed class ConfigurationStore
         }
 
         var id = $"workspace-{Guid.NewGuid():N}";
-        var workspace = new ProfileManifest(
+        var workspace = new WorkspaceManifest(
             id,
             name.Trim(),
             description.Trim(),
             SchemaVersion: 2,
             DesiredState: new DesiredStateManifest(
-                requestedIds.Select(componentId => new ProfileApplication(componentId)).ToArray(),
+                requestedIds.Select(componentId => new WorkspaceApplication(componentId)).ToArray(),
                 [],
                 [],
                 [],
@@ -90,14 +90,14 @@ public sealed class ConfigurationStore
         return workspace;
     }
 
-    public void SaveWorkspace(ProfileManifest workspace, bool overwrite = true)
+    public void SaveWorkspace(WorkspaceManifest workspace, bool overwrite = true)
     {
         ValidateWorkspace(workspace);
 
-        var builtInProfiles = LoadProfileDirectory(ProfilesRoot);
-        if (builtInProfiles.ContainsKey(workspace.Id))
+        var templates = LoadWorkspaceTemplates();
+        if (templates.ContainsKey(workspace.Id))
             throw new InvalidOperationException(
-                $"Workspace id '{workspace.Id}' conflicts with a built-in profile.");
+                $"Workspace id '{workspace.Id}' conflicts with a built-in workspace template.");
 
         var destination = Path.Combine(WorkspaceRoot, $"{workspace.Id}.json");
         if (File.Exists(destination) && !overwrite)
@@ -118,11 +118,11 @@ public sealed class ConfigurationStore
         }
     }
 
-    public string ExportProfile(string profileId, string destinationPath)
+    public string ExportWorkspace(string workspaceId, string destinationPath)
     {
-        var profile = LoadProfiles().TryGetValue(profileId, out var value)
+        var workspace = LoadWorkspaces().TryGetValue(workspaceId, out var value)
             ? value
-            : throw new KeyNotFoundException($"Unknown profile: {profileId}");
+            : throw new KeyNotFoundException($"Unknown workspace: {workspaceId}");
 
         var fullPath = Path.GetFullPath(destinationPath);
         var parent = Path.GetDirectoryName(fullPath)
@@ -130,31 +130,33 @@ public sealed class ConfigurationStore
 
         Directory.CreateDirectory(parent);
 
-        var json = JsonSerializer.Serialize(profile, JsonDefaults.Options);
-        File.WriteAllText(fullPath, json);
+        File.WriteAllText(
+            fullPath,
+            JsonSerializer.Serialize(workspace, JsonDefaults.Options));
+
         return fullPath;
     }
 
-    public ProfileManifest ImportProfile(string sourcePath, bool overwrite = false)
+    public WorkspaceManifest ImportWorkspace(string sourcePath, bool overwrite = false)
     {
         var fullPath = Path.GetFullPath(sourcePath);
         if (!File.Exists(fullPath))
-            throw new FileNotFoundException("Profile file was not found.", fullPath);
+            throw new FileNotFoundException("Workspace file was not found.", fullPath);
 
-        var profile = JsonSerializer.Deserialize<ProfileManifest>(
+        var workspace = JsonSerializer.Deserialize<WorkspaceManifest>(
             File.ReadAllText(fullPath), JsonDefaults.Options)
-            ?? throw new InvalidOperationException("The imported profile is invalid.");
+            ?? throw new InvalidOperationException("The imported workspace is invalid.");
 
-        ValidateProfile(profile, Path.GetFileName(fullPath));
+        ValidateWorkspace(workspace);
 
-        var destination = Path.Combine(ProfilesRoot, $"{profile.Id}.json");
+        var destination = Path.Combine(WorkspaceRoot, $"{workspace.Id}.json");
         if (File.Exists(destination) && !overwrite)
-            throw new IOException($"Profile '{profile.Id}' already exists.");
+            throw new IOException($"Workspace '{workspace.Id}' already exists.");
 
         var temporary = destination + $".{Guid.NewGuid():N}.tmp";
         try
         {
-            File.WriteAllText(temporary, JsonSerializer.Serialize(profile, JsonDefaults.Options));
+            File.WriteAllText(temporary, JsonSerializer.Serialize(workspace, JsonDefaults.Options));
             File.Move(temporary, destination, overwrite: true);
         }
         finally
@@ -163,81 +165,72 @@ public sealed class ConfigurationStore
                 File.Delete(temporary);
         }
 
-        return profile;
+        return workspace;
     }
 
-    public IReadOnlyDictionary<string, ProfileManifest> LoadProfiles()
-    {
-        var profiles = LoadProfileDirectory(ProfilesRoot);
+    public IReadOnlyDictionary<string, WorkspaceManifest> LoadWorkspaces() =>
+        LoadManifestDirectory(WorkspaceRoot);
 
-        foreach (var workspace in LoadProfileDirectory(WorkspaceRoot))
-        {
-            if (!profiles.TryAdd(workspace.Key, workspace.Value))
-            {
-                throw new InvalidOperationException(
-                    $"Workspace '{workspace.Key}' conflicts with an existing built-in profile.");
-            }
-        }
+    public IReadOnlyDictionary<string, WorkspaceManifest> LoadWorkspaceTemplates() =>
+        LoadManifestDirectory(TemplatesRoot);
 
-        return profiles;
-    }
-
-    private static Dictionary<string, ProfileManifest> LoadProfileDirectory(string root)
+    private static Dictionary<string, WorkspaceManifest> LoadManifestDirectory(string root)
     {
         if (!Directory.Exists(root))
-            return new Dictionary<string, ProfileManifest>(StringComparer.OrdinalIgnoreCase);
+            return new Dictionary<string, WorkspaceManifest>(StringComparer.OrdinalIgnoreCase);
 
         return Directory.EnumerateFiles(root, "*.json")
             .Select(path =>
             {
-                var profile = JsonSerializer.Deserialize<ProfileManifest>(
+                var workspace = JsonSerializer.Deserialize<WorkspaceManifest>(
                     File.ReadAllText(path), JsonDefaults.Options)
                     ?? throw new InvalidOperationException(
-                        $"Invalid profile: {Path.GetFileName(path)}");
+                        $"Invalid workspace manifest: {Path.GetFileName(path)}");
 
-                ValidateProfile(profile, Path.GetFileName(path));
-                return profile;
+                ValidateWorkspaceManifest(workspace, Path.GetFileName(path));
+                return workspace;
             })
             .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
     }
 
-    private static void ValidateProfile(ProfileManifest profile, string sourceName)
+    private static void ValidateWorkspaceManifest(WorkspaceManifest workspace, string sourceName)
     {
-        if (profile.SchemaVersion is not (1 or 2))
+        if (workspace.SchemaVersion is not (1 or 2))
             throw new InvalidOperationException(
-                $"Unsupported profile schema version '{profile.SchemaVersion}' in {sourceName}.");
+                $"Unsupported workspace schema version '{workspace.SchemaVersion}' in {sourceName}.");
 
-        if (!IsValidProfileId(profile.Id))
-            throw new InvalidOperationException($"Profile id '{profile.Id}' is not a valid profile identifier.");
-
-        if (profile.SchemaVersion == 1 && (profile.Components is null || profile.Components.Length == 0))
+        if (!IsValidWorkspaceId(workspace.Id))
             throw new InvalidOperationException(
-                $"Legacy profile '{sourceName}' must declare at least one component.");
+                $"Workspace id '{workspace.Id}' is not a valid workspace identifier.");
 
-        if (profile.SchemaVersion == 2)
+        if (workspace.SchemaVersion == 1 && (workspace.Components is null || workspace.Components.Length == 0))
+            throw new InvalidOperationException(
+                $"Legacy workspace template '{sourceName}' must declare at least one component.");
+
+        if (workspace.SchemaVersion == 2)
         {
-            if (profile.DesiredState is null)
+            if (workspace.DesiredState is null)
                 throw new InvalidOperationException(
-                    $"Profile '{sourceName}' must declare desiredState for schema version 2.");
+                    $"Workspace '{sourceName}' must declare desiredState for schema version 2.");
 
-            if (profile.DesiredState.Applications is null ||
-                profile.DesiredState.WindowsSettings is null ||
-                profile.DesiredState.Policies is null ||
-                profile.DesiredState.RegistrySettings is null ||
-                profile.DesiredState.Optimizations is null ||
-                profile.DesiredState.Conditions is null)
+            if (workspace.DesiredState.Applications is null ||
+                workspace.DesiredState.WindowsSettings is null ||
+                workspace.DesiredState.Policies is null ||
+                workspace.DesiredState.RegistrySettings is null ||
+                workspace.DesiredState.Optimizations is null ||
+                workspace.DesiredState.Conditions is null)
             {
                 throw new InvalidOperationException(
-                    $"Profile '{sourceName}' contains an incomplete desiredState.");
+                    $"Workspace '{sourceName}' contains an incomplete desiredState.");
             }
 
-            ValidateApplicationStates(profile, sourceName);
+            ValidateApplicationStates(workspace, sourceName);
         }
     }
 
-    private void ValidateWorkspace(ProfileManifest workspace)
+    private void ValidateWorkspace(WorkspaceManifest workspace)
     {
-        ValidateProfile(workspace, $"{workspace.Id}.json");
+        ValidateWorkspaceManifest(workspace, $"{workspace.Id}.json");
 
         if (workspace.SchemaVersion != 2 || workspace.DesiredState is null)
             throw new InvalidOperationException("User workspaces must use desired-state schema version 2.");
@@ -264,12 +257,14 @@ public sealed class ConfigurationStore
         }
     }
 
-    private static void ValidateApplicationStates(ProfileManifest profile, string sourceName)
+    private static void ValidateApplicationStates(
+        WorkspaceManifest workspace,
+        string sourceName)
     {
-        if (profile.SchemaVersion < 2 || profile.DesiredState is null)
+        if (workspace.SchemaVersion < 2 || workspace.DesiredState is null)
             return;
 
-        var duplicateIds = profile.DesiredState.Applications
+        var duplicateIds = workspace.DesiredState.Applications
             .GroupBy(application => application.ComponentId, StringComparer.OrdinalIgnoreCase)
             .Where(group => group.Count() > 1)
             .Select(group => group.Key)
@@ -278,21 +273,21 @@ public sealed class ConfigurationStore
         if (duplicateIds.Length > 0)
         {
             throw new InvalidOperationException(
-                $"Profile '{sourceName}' contains duplicate desired applications: {string.Join(", ", duplicateIds)}.");
+                $"Workspace '{sourceName}' contains duplicate desired applications: {string.Join(", ", duplicateIds)}.");
         }
 
-        foreach (var application in profile.DesiredState.Applications)
+        foreach (var application in workspace.DesiredState.Applications)
         {
             if (!string.Equals(application.State, "present", StringComparison.OrdinalIgnoreCase)
                 && !string.Equals(application.State, "absent", StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException(
-                    $"Profile '{sourceName}' contains unsupported application state '{application.State}' for '{application.ComponentId}'.");
+                    $"Workspace '{sourceName}' contains unsupported application state '{application.State}' for '{application.ComponentId}'.");
             }
         }
     }
 
-    private static bool IsValidProfileId(string id)
+    private static bool IsValidWorkspaceId(string id)
     {
         if (string.IsNullOrWhiteSpace(id) || id.Length > 128)
             return false;
@@ -309,10 +304,10 @@ public sealed class ConfigurationStore
     private void ValidateLayout()
     {
         var catalogPath = Path.Combine(ComponentsRoot, "catalog.json");
-        if (!File.Exists(catalogPath) || !Directory.Exists(ProfilesRoot))
+        if (!File.Exists(catalogPath) || !Directory.Exists(TemplatesRoot))
         {
             throw new InvalidOperationException(
-                $"Workspace Control content is incomplete. Expected '{ComponentsRoot}' and '{ProfilesRoot}'.");
+                $"Workspace Control content is incomplete. Expected '{ComponentsRoot}' and '{TemplatesRoot}'.");
         }
     }
 

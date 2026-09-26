@@ -5,7 +5,7 @@ namespace WorkspaceControl.Domain;
 public sealed record ComponentManifest(
     string Id,
     string Name,
-    string[]? Profiles,
+    [property: JsonPropertyName("profiles")] string[]? Templates,
     string? PackageId,
     string? Source,
     string? InstallerType,
@@ -23,7 +23,7 @@ public sealed record OfficialSource(
     string? AssetRegex = null,
     string? VersionRegex = null);
 
-public sealed record ProfileManifest(
+public sealed record WorkspaceManifest(
     string Id,
     string Name,
     string Description,
@@ -31,10 +31,10 @@ public sealed record ProfileManifest(
     int SchemaVersion = 1,
     DesiredStateManifest? DesiredState = null)
 {
-    public IReadOnlyList<ProfileApplication> ApplicationRequests =>
+    public IReadOnlyList<WorkspaceApplication> ApplicationRequests =>
         SchemaVersion >= 2
             ? DesiredState?.Applications ?? []
-            : (Components ?? []).Select(componentId => new ProfileApplication(componentId)).ToArray();
+            : (Components ?? []).Select(componentId => new WorkspaceApplication(componentId)).ToArray();
 }
 
 public sealed record InstallerArtifact(
@@ -45,7 +45,7 @@ public sealed record InstallerArtifact(
     string Url,
     string Sha256);
 
-public static class ProvisioningStateCodes
+public static class ApplicationStateCodes
 {
     public const string Missing = "MISSING";
     public const string Installed = "INSTALLED";
@@ -54,7 +54,7 @@ public static class ProvisioningStateCodes
     public const string Absent = "ABSENT";
 }
 
-public static class ProvisioningOperationStatuses
+public static class WorkspaceOperationStatuses
 {
     public const string AwaitingConfirmation = "awaiting-confirmation";
     public const string Queued = "queued";
@@ -64,7 +64,7 @@ public static class ProvisioningOperationStatuses
     public const string Stale = "stale";
 }
 
-public static class ProvisioningActionCodes
+public static class DesiredStateActionCodes
 {
     public const string Install = "install";
     public const string Update = "update";
@@ -74,15 +74,15 @@ public static class ProvisioningActionCodes
     public const string Blocked = "blocked";
 }
 
-public sealed record ProvisioningPlan(
-    string ProfileId,
-    string ProfileName,
+public sealed record WorkspacePlan(
+    string WorkspaceId,
+    string WorkspaceName,
     string InventoryScanId,
     IReadOnlyList<InventoryProviderDiagnostic> InventoryDiagnostics,
-    IReadOnlyList<ProvisioningPlanItem> Items,
+    IReadOnlyList<WorkspacePlanItem> Items,
     DateTimeOffset CreatedAtUtc);
 
-public sealed record ProvisioningPlanItem(
+public sealed record WorkspacePlanItem(
     string ComponentId,
     string ComponentName,
     string StateCode,
@@ -95,35 +95,35 @@ public sealed record ProvisioningPlanItem(
     string? TargetId = null,
     string? ObservedValue = null);
 
-public sealed record ProvisioningStep(
+public sealed record WorkspaceOperationStep(
     string ComponentId,
     string Name,
     string Status,
     string? Error = null);
 
-public sealed class ProvisioningOperation
+public sealed class WorkspaceOperation
 {
     public string OperationId { get; init; } = Guid.NewGuid().ToString("N");
-    public string ProfileId { get; init; } = "";
-    public string Status { get; set; } = ProvisioningOperationStatuses.AwaitingConfirmation;
-    public ProvisioningPlan? Plan { get; set; }
+    public string WorkspaceId { get; init; } = "";
+    public string Status { get; set; } = WorkspaceOperationStatuses.AwaitingConfirmation;
+    public WorkspacePlan? Plan { get; set; }
     public int Completed { get; set; }
     public int Total { get; set; }
     public string? CurrentComponentName { get; set; }
     public string? Error { get; set; }
     public bool CanResume { get; set; }
-    public List<ProvisioningStep> Steps { get; init; } = [];
-    public List<ProvisioningApplicationSnapshot> ApplicationSnapshots { get; init; } = [];
-    public List<ProvisioningRegistrySnapshot> RegistrySnapshots { get; init; } = [];
+    public List<WorkspaceOperationStep> Steps { get; init; } = [];
+    public List<WorkspaceApplicationSnapshot> ApplicationSnapshots { get; init; } = [];
+    public List<WorkspaceRegistrySnapshot> RegistrySnapshots { get; init; } = [];
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 
-public sealed record ProvisioningApplicationSnapshot(
+public sealed record WorkspaceApplicationSnapshot(
     string ComponentId,
     string? InstalledVersion,
     int PlanIndex = 0);
 
-public sealed record ProvisioningRegistrySnapshot(
+public sealed record WorkspaceRegistrySnapshot(
     string Hive,
     string Key,
     string ValueName,

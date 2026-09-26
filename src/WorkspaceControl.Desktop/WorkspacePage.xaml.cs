@@ -5,13 +5,13 @@ using WorkspaceControl.Domain;
 
 namespace WorkspaceControl.Desktop;
 
-public sealed partial class ProfilesPage : Page
+public sealed partial class WorkspacePage : Page
 {
     private readonly WorkspaceControlViewModel _viewModel;
     private readonly DispatcherQueueTimer _pollTimer;
-    private ProfileManifest? _selectedWorkspace;
+    private WorkspaceManifest? _selectedWorkspace;
 
-    public ProfilesPage()
+    public WorkspacePage()
     {
         InitializeComponent();
         _viewModel = ((App)Microsoft.UI.Xaml.Application.Current).ViewModel;
@@ -22,37 +22,37 @@ public sealed partial class ProfilesPage : Page
         _pollTimer.Interval = TimeSpan.FromMilliseconds(750);
         _pollTimer.Tick += PollTimer_Tick;
 
-        Loaded += ProfilesPage_Loaded;
-        Unloaded += ProfilesPage_Unloaded;
+        Loaded += WorkspacePage_Loaded;
+        Unloaded += WorkspacePage_Unloaded;
     }
 
-    private void ProfilesPage_Loaded(object sender, RoutedEventArgs e)
+    private void WorkspacePage_Loaded(object sender, RoutedEventArgs e)
     {
         if (_viewModel.SelectedWorkspaceId is not null)
         {
-            WorkspaceList.SelectedItem = _viewModel.Profiles.FirstOrDefault(profile =>
+            WorkspaceList.SelectedItem = _viewModel.Workspaces.FirstOrDefault(workspace =>
                 string.Equals(
-                    profile.Id,
+                    workspace.Id,
                     _viewModel.SelectedWorkspaceId,
                     StringComparison.OrdinalIgnoreCase));
         }
 
         ApplicationSearchBox.Text = _viewModel.ApplicationSearchText;
 
-        if (_viewModel.IsProvisioningActive)
+        if (_viewModel.IsWorkspaceOperationActive)
             _pollTimer.Start();
 
         UpdateButtons();
     }
 
-    private void ProfilesPage_Unloaded(object sender, RoutedEventArgs e) =>
+    private void WorkspacePage_Unloaded(object sender, RoutedEventArgs e) =>
         _pollTimer.Stop();
 
     private void WorkspaceList_SelectionChanged(
         object sender,
         SelectionChangedEventArgs e)
     {
-        _selectedWorkspace = WorkspaceList.SelectedItem as ProfileManifest;
+        _selectedWorkspace = WorkspaceList.SelectedItem as WorkspaceManifest;
         if (_selectedWorkspace is not null)
             _viewModel.SelectWorkspace(_selectedWorkspace.Id);
 
@@ -62,7 +62,7 @@ public sealed partial class ProfilesPage : Page
     private void NewWorkspaceButton_Click(object sender, RoutedEventArgs e)
     {
         _viewModel.CreateBlankWorkspace();
-        WorkspaceList.SelectedItem = _viewModel.Profiles.LastOrDefault();
+        WorkspaceList.SelectedItem = _viewModel.Workspaces.LastOrDefault();
         UpdateButtons();
     }
 
@@ -70,9 +70,9 @@ public sealed partial class ProfilesPage : Page
     {
         _viewModel.SaveWorkspace();
 
-        WorkspaceList.SelectedItem = _viewModel.Profiles.FirstOrDefault(profile =>
+        WorkspaceList.SelectedItem = _viewModel.Workspaces.FirstOrDefault(workspace =>
             string.Equals(
-                profile.Id,
+                workspace.Id,
                 _viewModel.SelectedWorkspaceId,
                 StringComparison.OrdinalIgnoreCase));
 
@@ -100,19 +100,19 @@ public sealed partial class ProfilesPage : Page
             return;
 
         CreatePlanButton.IsEnabled = false;
-        await _viewModel.CreateProvisioningAsync(_selectedWorkspace.Id);
+        await _viewModel.CreateWorkspaceOperationAsync(_selectedWorkspace.Id);
         UpdateButtons();
     }
 
     private void ConfirmButton_Click(object sender, RoutedEventArgs e)
     {
-        _viewModel.ConfirmProvisioning();
+        _viewModel.ConfirmWorkspaceOperation();
         UpdatePolling();
     }
 
     private void ResumeButton_Click(object sender, RoutedEventArgs e)
     {
-        _viewModel.ResumeProvisioning();
+        _viewModel.ResumeWorkspaceOperation();
         UpdatePolling();
     }
 
@@ -120,13 +120,13 @@ public sealed partial class ProfilesPage : Page
         DispatcherQueueTimer sender,
         object args)
     {
-        _viewModel.RefreshProvisioningOperation();
+        _viewModel.RefreshWorkspaceOperation();
         UpdatePolling();
     }
 
     private void UpdatePolling()
     {
-        if (_viewModel.IsProvisioningActive)
+        if (_viewModel.IsWorkspaceOperationActive)
             _pollTimer.Start();
         else
             _pollTimer.Stop();
@@ -139,7 +139,7 @@ public sealed partial class ProfilesPage : Page
         var canInteract =
             _selectedWorkspace is not null &&
             !_viewModel.IsBusy &&
-            !_viewModel.IsProvisioningActive;
+            !_viewModel.IsWorkspaceOperationActive;
 
         ObserveDiffButton.IsEnabled = canInteract;
         CreatePlanButton.IsEnabled =

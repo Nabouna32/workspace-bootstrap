@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace WorkspaceControl.Infrastructure;
 
-public sealed class ProvisioningEngine
+public sealed class WorkspaceOperationEngine
 {
     private readonly ConfigurationStore _config;
     private readonly InstallerEngine _installer;
@@ -13,7 +13,7 @@ public sealed class ProvisioningEngine
     private readonly RegistryDesiredStateObserver _registry;
     private readonly RegistryDesiredStateWriter _registryWriter;
 
-    public ProvisioningEngine(
+    public WorkspaceOperationEngine(
         ConfigurationStore config,
         InstallerEngine installer,
         WorkspacePaths paths,
@@ -31,37 +31,37 @@ public sealed class ProvisioningEngine
         _registryWriter = registryWriter ?? new RegistryDesiredStateWriter();
     }
 
-    public IReadOnlyList<ProfileManifest> Profiles() =>
-        _config.LoadProfiles().Values.OrderBy(x => x.Name).ToArray();
+    public IReadOnlyList<WorkspaceManifest> Workspaces() =>
+        _config.LoadWorkspaces().Values.OrderBy(x => x.Name).ToArray();
 
     public IReadOnlyList<ComponentManifest> ApplicationCatalog() =>
         _config.LoadComponents().Values.OrderBy(x => x.Name).ToArray();
 
-    public ProfileManifest CreateWorkspace(
+    public WorkspaceManifest CreateWorkspace(
         string name,
         string description,
         IReadOnlyCollection<string> componentIds) =>
         _config.CreateWorkspace(name, description, componentIds);
 
-    public void SaveWorkspace(ProfileManifest workspace) =>
+    public void SaveWorkspace(WorkspaceManifest workspace) =>
         _config.SaveWorkspace(workspace);
 
     public async Task<DesiredStateDiff> DiffAsync(
-        string profileId,
+        string workspaceId,
         CancellationToken token = default)
     {
-        var profile = GetProfile(profileId);
+        var workspace = GetWorkspace(workspaceId);
         var components = _config.LoadComponents();
         var inventory = await _inventory.ScanAsync(token);
 
-        var requests = profile.ApplicationRequests;
+        var requests = workspace.ApplicationRequests;
 
         var items = requests.Select(request =>
         {
             if (!components.TryGetValue(request.ComponentId, out var catalogComponent))
                 throw new InvalidOperationException($"Unknown component: {request.ComponentId}");
 
-            var component = ApplyProfileOverrides(catalogComponent, request);
+            var component = ApplyWorkspaceOverrides(catalogComponent, request);
             var match = FindInventoryMatch(component, inventory.Items);
             var planItem = BuildApplicationPlanItem(
                 component,
@@ -81,41 +81,41 @@ public sealed class ProvisioningEngine
                 planItem.Message);
         }).ToList();
 
-        AddUnsupportedDesiredStateItems(profile, items);
-        AddConditionDiffItems(profile, items);
-        AddRegistryDiffItems(profile, items);
+        AddUnsupportedDesiredStateItems(workspace, items);
+        AddConditionDiffItems(workspace, items);
+        AddRegistryDiffItems(workspace, items);
 
         return new DesiredStateDiff(
-            profile.Id,
-            profile.Name,
+            workspace.Id,
+            workspace.Name,
             inventory.ScanId,
             inventory.ProviderDiagnostics,
             items,
             DateTimeOffset.UtcNow);
     }
 
-    public async Task<ProvisioningPlan> PlanAsync(
-        string profileId,
+    public async Task<WorkspacePlan> PlanAsync(
+        string workspaceId,
         CancellationToken token = default)
     {
-        var diff = await DiffAsync(profileId, token);
+        var diff = await DiffAsync(workspaceId, token);
 
         var unsupported = diff.Items
             .Where(item =>
                 item.Domain != DesiredStateDomainCodes.Application &&
-                item.ActionCode == ProvisioningActionCodes.Blocked)
+                item.ActionCode == DesiredStateActionCodes.Blocked)
             .ToArray();
 
         if (unsupported.Length > 0)
         {
             throw new InvalidOperationException(
-                $"Profile '{diff.ProfileId}' contains desired-state sections that are not executable yet. " +
+                $"Workspace '{diff.WorkspaceId}' contains desired-state sections that are not executable yet. " +
                 "The diff identifies these sections explicitly; no mutation plan was created.");
         }
 
         var items = diff.Items
             .Where(item => item.Domain != DesiredStateDomainCodes.Condition)
-            .Select(item => new ProvisioningPlanItem(
+            .Select(item => new WorkspacePlanItem(
                 item.TargetId,
                 item.TargetName,
                 item.StateCode,
@@ -129,9 +129,9 @@ public sealed class ProvisioningEngine
                 item.ObservedValue))
             .ToArray();
 
-        return new ProvisioningPlan(
-            diff.ProfileId,
-            diff.ProfileName,
+        return new WorkspacePlan(
+            diff.WorkspaceId,
+            diff.WorkspaceName,
             diff.InventoryScanId,
             diff.InventoryDiagnostics,
             items,
@@ -152,20 +152,20 @@ public sealed class ProvisioningEngine
                 observation.ProviderId?.EndsWith($":{component.PackageId}", StringComparison.OrdinalIgnoreCase) == true));
     }
 
-    private static ProvisioningPlanItem BuildApplicationPlanItem(
+    private static WorkspacePlanItem BuildApplicationPlanItem(
         ComponentManifest component,
-        ProfileApplication request,
+        WorkspaceApplication request,
         InventoryItem? match,
         IReadOnlyList<InventoryProviderDiagnostic> diagnostics)
     {
         if (!string.Equals(request.State, "present", StringComparison.OrdinalIgnoreCase)
             && !string.Equals(request.State, "absent", StringComparison.OrdinalIgnoreCase))
         {
-            return new ProvisioningPlanItem(
+            return new WorkspacePlanItem(
                 component.Id,
                 component.Name,
-                ProvisioningStateCodes.Unknown,
-                ProvisioningActionCodes.Blocked,
+                ApplicationStateCodes.Unknown,
+                DesiredStateActionCodes.Blocked,
                 match?.Version,
                 null,
                 null,
@@ -181,11 +181,11 @@ public sealed class ProvisioningEngine
         {
             if (diagnostics.Any(diagnostic => !diagnostic.Success))
             {
-                return new ProvisioningPlanItem(
+                return new WorkspacePlanItem(
                     component.Id,
                     component.Name,
-                    ProvisioningStateCodes.Unknown,
-                    ProvisioningActionCodes.Blocked,
+                    ApplicationStateCodes.Unknown,
+                    DesiredStateActionCodes.Blocked,
                     match?.Version,
                     null,
                     null,
@@ -194,11 +194,11 @@ public sealed class ProvisioningEngine
 
             if (match is null)
             {
-                return new ProvisioningPlanItem(
+                return new WorkspacePlanItem(
                     component.Id,
                     component.Name,
-                    ProvisioningStateCodes.Absent,
-                    ProvisioningActionCodes.None,
+                    ApplicationStateCodes.Absent,
+                    DesiredStateActionCodes.None,
                     null,
                     null,
                     null,
@@ -207,11 +207,11 @@ public sealed class ProvisioningEngine
 
             if (string.IsNullOrWhiteSpace(match.Version))
             {
-                return new ProvisioningPlanItem(
+                return new WorkspacePlanItem(
                     component.Id,
                     component.Name,
-                    ProvisioningStateCodes.Unknown,
-                    ProvisioningActionCodes.Blocked,
+                    ApplicationStateCodes.Unknown,
+                    DesiredStateActionCodes.Blocked,
                     null,
                     null,
                     null,
@@ -220,22 +220,22 @@ public sealed class ProvisioningEngine
 
             if (string.IsNullOrWhiteSpace(component.PackageId))
             {
-                return new ProvisioningPlanItem(
+                return new WorkspacePlanItem(
                     component.Id,
                     component.Name,
-                    ProvisioningStateCodes.Unknown,
-                    ProvisioningActionCodes.Blocked,
+                    ApplicationStateCodes.Unknown,
+                    DesiredStateActionCodes.Blocked,
                     match.Version,
                     null,
                     null,
                     "Application does not declare a package id for the supported uninstall provider.");
             }
 
-            return new ProvisioningPlanItem(
+            return new WorkspacePlanItem(
                 component.Id,
                 component.Name,
-                ProvisioningStateCodes.Installed,
-                ProvisioningActionCodes.Remove,
+                ApplicationStateCodes.Installed,
+                DesiredStateActionCodes.Remove,
                 match.Version,
                 null,
                 null,
@@ -246,22 +246,22 @@ public sealed class ProvisioningEngine
         {
             if (diagnostics.Any(diagnostic => !diagnostic.Success))
             {
-                return new ProvisioningPlanItem(
+                return new WorkspacePlanItem(
                     component.Id,
                     component.Name,
-                    ProvisioningStateCodes.Unknown,
-                    ProvisioningActionCodes.Blocked,
+                    ApplicationStateCodes.Unknown,
+                    DesiredStateActionCodes.Blocked,
                     null,
                     null,
                     null,
                     "Inventory is incomplete; Workspace Control cannot safely determine whether the component is installed.");
             }
 
-            return new ProvisioningPlanItem(
+            return new WorkspacePlanItem(
                 component.Id,
                 component.Name,
-                ProvisioningStateCodes.Missing,
-                ProvisioningActionCodes.Install,
+                ApplicationStateCodes.Missing,
+                DesiredStateActionCodes.Install,
                 null,
                 null,
                 null,
@@ -276,11 +276,11 @@ public sealed class ProvisioningEngine
         {
             if (!TryParseVersion(component.MinimumVersion, out var minimumVersion))
             {
-                return new ProvisioningPlanItem(
+                return new WorkspacePlanItem(
                     component.Id,
                     component.Name,
-                    ProvisioningStateCodes.Unknown,
-                    ProvisioningActionCodes.Blocked,
+                    ApplicationStateCodes.Unknown,
+                    DesiredStateActionCodes.Blocked,
                     installedVersion,
                     availableVersion,
                     component.MinimumVersion,
@@ -290,22 +290,22 @@ public sealed class ProvisioningEngine
             if (!TryParseVersion(installedVersion, out var installed)
                 || installed < minimumVersion)
             {
-                return new ProvisioningPlanItem(
+                return new WorkspacePlanItem(
                     component.Id,
                     component.Name,
-                    ProvisioningStateCodes.Outdated,
-                    ProvisioningActionCodes.Update,
+                    ApplicationStateCodes.Outdated,
+                    DesiredStateActionCodes.Update,
                     installedVersion,
                     availableVersion,
                     component.MinimumVersion,
                     $"Installed version: {installedVersion ?? "unknown"}; minimum required version: {component.MinimumVersion}.");
             }
 
-            return new ProvisioningPlanItem(
+            return new WorkspacePlanItem(
                 component.Id,
                 component.Name,
-                ProvisioningStateCodes.Installed,
-                ProvisioningActionCodes.None,
+                ApplicationStateCodes.Installed,
+                DesiredStateActionCodes.None,
                 installedVersion,
                 availableVersion,
                 component.MinimumVersion,
@@ -314,11 +314,11 @@ public sealed class ProvisioningEngine
 
         if (!string.IsNullOrWhiteSpace(policy) && policy != "latest-stable" && policy != "stable-compatible")
         {
-            return new ProvisioningPlanItem(
+            return new WorkspacePlanItem(
                 component.Id,
                 component.Name,
-                ProvisioningStateCodes.Unknown,
-                ProvisioningActionCodes.Blocked,
+                ApplicationStateCodes.Unknown,
+                DesiredStateActionCodes.Blocked,
                 installedVersion,
                 availableVersion,
                 null,
@@ -331,22 +331,22 @@ public sealed class ProvisioningEngine
                 ? "stable-compatible available"
                 : "latest stable available";
 
-            return new ProvisioningPlanItem(
+            return new WorkspacePlanItem(
                 component.Id,
                 component.Name,
-                ProvisioningStateCodes.Outdated,
-                ProvisioningActionCodes.Update,
+                ApplicationStateCodes.Outdated,
+                DesiredStateActionCodes.Update,
                 installedVersion,
                 availableVersion,
                 availableVersion,
                 $"Installed version: {installedVersion ?? "unknown"}; {policyDescription} version: {availableVersion}.");
         }
 
-        return new ProvisioningPlanItem(
+        return new WorkspacePlanItem(
             component.Id,
             component.Name,
-            ProvisioningStateCodes.Installed,
-            ProvisioningActionCodes.None,
+            ApplicationStateCodes.Installed,
+            DesiredStateActionCodes.None,
             installedVersion,
             null,
             null,
@@ -355,11 +355,11 @@ public sealed class ProvisioningEngine
 
     private static void ValidatePostcondition(
         ComponentManifest component,
-        ProvisioningPlanItem planned,
-        ProvisioningPlanItem verified)
+        WorkspacePlanItem planned,
+        WorkspacePlanItem verified)
     {
-        if (verified.StateCode != ProvisioningStateCodes.Installed
-            || verified.ActionCode != ProvisioningActionCodes.None)
+        if (verified.StateCode != ApplicationStateCodes.Installed
+            || verified.ActionCode != DesiredStateActionCodes.None)
         {
             throw new InvalidOperationException(
                 $"Post-condition verification failed for '{component.Name}': {verified.Message}");
@@ -397,11 +397,11 @@ public sealed class ProvisioningEngine
     }
 
     private static void ValidateRemovePostcondition(
-        ProvisioningPlanItem planned,
-        ProvisioningPlanItem verified)
+        WorkspacePlanItem planned,
+        WorkspacePlanItem verified)
     {
-        if (verified.StateCode != ProvisioningStateCodes.Absent
-            || verified.ActionCode != ProvisioningActionCodes.None)
+        if (verified.StateCode != ApplicationStateCodes.Absent
+            || verified.ActionCode != DesiredStateActionCodes.None)
         {
             throw new InvalidOperationException(
                 $"Post-condition verification failed for '{planned.ComponentName}': {verified.Message}");
@@ -420,16 +420,16 @@ public sealed class ProvisioningEngine
         return false;
     }
 
-    public async Task<ProvisioningOperation> CreateAsync(
-        string profileId,
+    public async Task<WorkspaceOperation> CreateAsync(
+        string workspaceId,
         CancellationToken token = default)
     {
-        var plan = await PlanAsync(profileId, token);
-        var operation = new ProvisioningOperation
+        var plan = await PlanAsync(workspaceId, token);
+        var operation = new WorkspaceOperation
         {
-            ProfileId = plan.ProfileId,
+            WorkspaceId = plan.WorkspaceId,
             Plan = plan,
-            Status = ProvisioningOperationStatuses.AwaitingConfirmation,
+            Status = WorkspaceOperationStatuses.AwaitingConfirmation,
             Total = plan.Items.Count,
             CanResume = false
         };
@@ -443,19 +443,19 @@ public sealed class ProvisioningEngine
         var operation = Get(operationId)
             ?? throw new InvalidOperationException("Operation not found.");
 
-        if (operation.Status != ProvisioningOperationStatuses.AwaitingConfirmation)
+        if (operation.Status != WorkspaceOperationStatuses.AwaitingConfirmation)
             throw new InvalidOperationException(
                 "Only an operation awaiting confirmation can be confirmed.");
 
         if (operation.Plan is null)
             throw new InvalidOperationException(
-                "The operation does not contain a provisioning plan.");
+                "The operation does not contain a workspace operation plan.");
 
-        if (operation.Plan.Items.Any(item => item.ActionCode == ProvisioningActionCodes.Blocked))
+        if (operation.Plan.Items.Any(item => item.ActionCode == DesiredStateActionCodes.Blocked))
             throw new InvalidOperationException(
-                "The provisioning plan contains blocked actions and cannot be confirmed.");
+                "The workspace operation plan contains blocked actions and cannot be confirmed.");
 
-        operation.Status = ProvisioningOperationStatuses.Queued;
+        operation.Status = WorkspaceOperationStatuses.Queued;
         operation.CanResume = false;
         operation.Error = null;
         Save(operation);
@@ -466,7 +466,7 @@ public sealed class ProvisioningEngine
         }
         catch (Exception ex)
         {
-            operation.Status = ProvisioningOperationStatuses.Failed;
+            operation.Status = WorkspaceOperationStatuses.Failed;
             operation.Error = $"Unable to start worker: {ex.Message}";
             operation.CanResume = true;
             Save(operation);
@@ -483,7 +483,7 @@ public sealed class ProvisioningEngine
         var operation = Get(operationId)
             ?? throw new InvalidOperationException("Operation not found.");
 
-        if (operation.Status is ProvisioningOperationStatuses.Completed)
+        if (operation.Status is WorkspaceOperationStatuses.Completed)
             return;
 
         await using var operationLock = await AcquireOperationLockAsync(token);
@@ -491,27 +491,27 @@ public sealed class ProvisioningEngine
         operation = Get(operationId)
             ?? throw new InvalidOperationException("Operation not found.");
 
-        if (operation.Status is ProvisioningOperationStatuses.Completed)
+        if (operation.Status is WorkspaceOperationStatuses.Completed)
             return;
 
-        var profile = GetProfile(operation.ProfileId);
+        var workspace = GetWorkspace(operation.WorkspaceId);
         var components = _config.LoadComponents();
         var plan = operation.Plan
             ?? throw new InvalidOperationException(
-                "The operation has no persisted provisioning plan.");
+                "The operation has no persisted workspace operation plan.");
 
-        if (operation.Status is ProvisioningOperationStatuses.AwaitingConfirmation
-            or ProvisioningOperationStatuses.Stale
-            or ProvisioningOperationStatuses.Completed)
+        if (operation.Status is WorkspaceOperationStatuses.AwaitingConfirmation
+            or WorkspaceOperationStatuses.Stale
+            or WorkspaceOperationStatuses.Completed)
             throw new InvalidOperationException(
-                "The provisioning operation is not in an executable state.");
+                "The workspace operation is not in an executable state.");
 
         try
         {
-            var currentPlan = await PlanAsync(operation.ProfileId, token);
+            var currentPlan = await PlanAsync(operation.WorkspaceId, token);
             ValidateUncompletedPlanState(operation, plan, currentPlan);
 
-            operation.Status = ProvisioningOperationStatuses.Running;
+            operation.Status = WorkspaceOperationStatuses.Running;
             operation.Error = null;
             operation.CanResume = true;
             Save(operation);
@@ -524,13 +524,13 @@ public sealed class ProvisioningEngine
                 operation.CurrentComponentName = planned.ComponentName;
                 Save(operation);
 
-                if (planned.ActionCode == ProvisioningActionCodes.Blocked)
+                if (planned.ActionCode == DesiredStateActionCodes.Blocked)
                     throw new InvalidOperationException(planned.Message);
 
-                if (planned.ActionCode == ProvisioningActionCodes.None)
+                if (planned.ActionCode == DesiredStateActionCodes.None)
                 {
                     operation.Steps.Add(
-                        new ProvisioningStep(
+                        new WorkspaceOperationStep(
                             planned.TargetId ?? planned.ComponentId,
                             planned.ComponentName,
                             "skipped"));
@@ -546,7 +546,7 @@ public sealed class ProvisioningEngine
                             DesiredStateDomainCodes.RegistrySetting,
                             StringComparison.Ordinal))
                     {
-                        var desired = FindRegistryDesired(profile, planned.TargetId ?? planned.ComponentId);
+                        var desired = FindRegistryDesired(workspace, planned.TargetId ?? planned.ComponentId);
                         var snapshot = _registryWriter.Capture(desired);
 
                         operation.RegistrySnapshots.Add(snapshot with { PlanIndex = index });
@@ -562,18 +562,18 @@ public sealed class ProvisioningEngine
                         if (!components.TryGetValue(planned.ComponentId, out var catalogComponent))
                             throw new InvalidOperationException($"Unknown component: {planned.ComponentId}");
 
-                        var request = profile.ApplicationRequests
+                        var request = workspace.ApplicationRequests
                             .FirstOrDefault(item =>
                                 string.Equals(item.ComponentId, planned.ComponentId, StringComparison.Ordinal))
                             ?? throw new InvalidOperationException(
-                                $"Profile '{profile.Id}' does not contain application '{planned.ComponentId}'.");
+                                $"Workspace '{workspace.Id}' does not contain application '{planned.ComponentId}'.");
 
-                        var component = ApplyProfileOverrides(catalogComponent, request);
+                        var component = ApplyWorkspaceOverrides(catalogComponent, request);
 
-                        if (planned.ActionCode == ProvisioningActionCodes.Remove)
+                        if (planned.ActionCode == DesiredStateActionCodes.Remove)
                         {
                             operation.ApplicationSnapshots.Add(
-                                new ProvisioningApplicationSnapshot(
+                                new WorkspaceApplicationSnapshot(
                                     planned.ComponentId,
                                     planned.InstalledVersion,
                                     index));
@@ -601,7 +601,7 @@ public sealed class ProvisioningEngine
                     operation.CurrentComponentName = $"Verifying: {planned.ComponentName}";
                     Save(operation);
 
-                    var verificationPlan = await PlanAsync(operation.ProfileId, token);
+                    var verificationPlan = await PlanAsync(operation.WorkspaceId, token);
                     var verified = verificationPlan.Items
                         .FirstOrDefault(item =>
                             string.Equals(item.TargetId, planned.TargetId, StringComparison.Ordinal)
@@ -618,7 +618,7 @@ public sealed class ProvisioningEngine
                     }
                     else
                     {
-                        if (planned.ActionCode == ProvisioningActionCodes.Remove)
+                        if (planned.ActionCode == DesiredStateActionCodes.Remove)
                         {
                             ValidateRemovePostcondition(planned, verified);
                         }
@@ -627,21 +627,21 @@ public sealed class ProvisioningEngine
                             if (!components.TryGetValue(planned.ComponentId, out var catalogComponent))
                                 throw new InvalidOperationException($"Unknown component: {planned.ComponentId}");
 
-                            var request = profile.ApplicationRequests
+                            var request = workspace.ApplicationRequests
                                 .FirstOrDefault(item =>
                                     string.Equals(item.ComponentId, planned.ComponentId, StringComparison.Ordinal))
                                 ?? throw new InvalidOperationException(
-                                    $"Profile '{profile.Id}' does not contain application '{planned.ComponentId}'.");
+                                    $"Workspace '{workspace.Id}' does not contain application '{planned.ComponentId}'.");
 
                             ValidatePostcondition(
-                                ApplyProfileOverrides(catalogComponent, request),
+                                ApplyWorkspaceOverrides(catalogComponent, request),
                                 planned,
                                 verified);
                         }
                     }
 
                     operation.Steps.Add(
-                        new ProvisioningStep(
+                        new WorkspaceOperationStep(
                             planned.TargetId ?? planned.ComponentId,
                             planned.ComponentName,
                             "completed"));
@@ -652,7 +652,7 @@ public sealed class ProvisioningEngine
                 catch (Exception ex)
                 {
                     operation.Steps.Add(
-                        new ProvisioningStep(
+                        new WorkspaceOperationStep(
                             planned.TargetId ?? planned.ComponentId,
                             planned.ComponentName,
                             "failed",
@@ -665,14 +665,14 @@ public sealed class ProvisioningEngine
                     catch (Exception rollbackEx)
                     {
                         operation.Error = $"{ex.Message} Rollback also failed: {rollbackEx.Message}";
-                        operation.Status = ProvisioningOperationStatuses.Failed;
+                        operation.Status = WorkspaceOperationStatuses.Failed;
                         operation.CanResume = false;
                         Save(operation);
                         return;
                     }
 
                     operation.Error = ex.Message;
-                    operation.Status = ProvisioningOperationStatuses.Failed;
+                    operation.Status = WorkspaceOperationStatuses.Failed;
                     operation.CanResume = true;
                     Save(operation);
                     return;
@@ -682,7 +682,7 @@ public sealed class ProvisioningEngine
             operation.CurrentComponentName = "Verifying final state…";
             Save(operation);
 
-            var finalPlan = await PlanAsync(operation.ProfileId, token);
+            var finalPlan = await PlanAsync(operation.WorkspaceId, token);
             if (finalPlan.Items.Count != plan.Items.Count)
                 throw new InvalidOperationException(
                     "Final state verification failed because the desired-state item set changed.");
@@ -704,14 +704,14 @@ public sealed class ProvisioningEngine
                     continue;
                 }
 
-                if (planned.ActionCode == ProvisioningActionCodes.None)
+                if (planned.ActionCode == DesiredStateActionCodes.None)
                 {
-                    if (planned.StateCode == ProvisioningStateCodes.Absent)
+                    if (planned.StateCode == ApplicationStateCodes.Absent)
                     {
                         ValidateRemovePostcondition(planned, verified);
                     }
-                    else if (verified.StateCode != ProvisioningStateCodes.Installed
-                             || verified.ActionCode != ProvisioningActionCodes.None)
+                    else if (verified.StateCode != ApplicationStateCodes.Installed
+                             || verified.ActionCode != DesiredStateActionCodes.None)
                     {
                         throw new InvalidOperationException(
                             $"Final state verification failed for '{planned.ComponentName}': {verified.Message}");
@@ -720,7 +720,7 @@ public sealed class ProvisioningEngine
                     continue;
                 }
 
-                if (planned.ActionCode == ProvisioningActionCodes.Remove)
+                if (planned.ActionCode == DesiredStateActionCodes.Remove)
                 {
                     ValidateRemovePostcondition(planned, verified);
                     continue;
@@ -729,19 +729,19 @@ public sealed class ProvisioningEngine
                 if (!components.TryGetValue(planned.ComponentId, out var catalogComponent))
                     throw new InvalidOperationException($"Unknown component: {planned.ComponentId}");
 
-                var request = profile.ApplicationRequests
+                var request = workspace.ApplicationRequests
                     .FirstOrDefault(item =>
                         string.Equals(item.ComponentId, planned.ComponentId, StringComparison.Ordinal))
                     ?? throw new InvalidOperationException(
-                        $"Profile '{profile.Id}' does not contain application '{planned.ComponentId}'.");
+                        $"Workspace '{workspace.Id}' does not contain application '{planned.ComponentId}'.");
 
                 ValidatePostcondition(
-                    ApplyProfileOverrides(catalogComponent, request),
+                    ApplyWorkspaceOverrides(catalogComponent, request),
                     planned,
                     verified);
             }
 
-            operation.Status = ProvisioningOperationStatuses.Completed;
+            operation.Status = WorkspaceOperationStatuses.Completed;
             operation.CurrentComponentName = null;
             operation.CanResume = false;
             operation.Error = null;
@@ -758,13 +758,13 @@ public sealed class ProvisioningEngine
             catch (Exception rollbackEx)
             {
                 operation.Error = $"Operation cancelled. Registry rollback failed: {rollbackEx.Message}";
-                operation.Status = ProvisioningOperationStatuses.Failed;
+                operation.Status = WorkspaceOperationStatuses.Failed;
                 operation.CanResume = false;
                 Save(operation);
                 throw;
             }
 
-            operation.Status = ProvisioningOperationStatuses.Failed;
+            operation.Status = WorkspaceOperationStatuses.Failed;
             operation.Error = "Operation cancelled.";
             operation.CanResume = true;
             Save(operation);
@@ -778,20 +778,20 @@ public sealed class ProvisioningEngine
             }
             catch (Exception rollbackEx)
             {
-                operation.Status = ProvisioningOperationStatuses.Failed;
+                operation.Status = WorkspaceOperationStatuses.Failed;
                 operation.Error = $"{ex.Message} Rollback also failed: {rollbackEx.Message}";
                 operation.CanResume = false;
                 Save(operation);
                 throw;
             }
 
-            if (operation.Status == ProvisioningOperationStatuses.Stale)
+            if (operation.Status == WorkspaceOperationStatuses.Stale)
             {
                 Save(operation);
                 throw;
             }
 
-            operation.Status = ProvisioningOperationStatuses.Failed;
+            operation.Status = WorkspaceOperationStatuses.Failed;
             operation.Error = ex.Message;
             operation.CanResume = true;
             Save(operation);
@@ -799,19 +799,19 @@ public sealed class ProvisioningEngine
         }
     }
 
-    public ProvisioningOperation? Get(string id)
+    public WorkspaceOperation? Get(string id)
     {
         var path = OperationPath(id);
         return File.Exists(path)
-            ? JsonSerializer.Deserialize<ProvisioningOperation>(
+            ? JsonSerializer.Deserialize<WorkspaceOperation>(
                 File.ReadAllText(path),
                 JsonDefaults.Options)
             : null;
     }
 
-    public IEnumerable<ProvisioningOperation> History() =>
+    public IEnumerable<WorkspaceOperation> History() =>
         Directory.EnumerateFiles(_paths.StateRoot, "operation-*.json")
-            .Select(path => JsonSerializer.Deserialize<ProvisioningOperation>(
+            .Select(path => JsonSerializer.Deserialize<WorkspaceOperation>(
                 File.ReadAllText(path),
                 JsonDefaults.Options))
             .Where(x => x is not null)
@@ -823,11 +823,11 @@ public sealed class ProvisioningEngine
         var operation = Get(id)
             ?? throw new InvalidOperationException("Operation not found.");
 
-        if (operation.Status != ProvisioningOperationStatuses.Failed || !operation.CanResume)
+        if (operation.Status != WorkspaceOperationStatuses.Failed || !operation.CanResume)
             throw new InvalidOperationException(
                 "This operation cannot be resumed.");
 
-        operation.Status = ProvisioningOperationStatuses.Queued;
+        operation.Status = WorkspaceOperationStatuses.Queued;
         operation.CanResume = false;
         Save(operation);
 
@@ -837,7 +837,7 @@ public sealed class ProvisioningEngine
         }
         catch (Exception ex)
         {
-            operation.Status = ProvisioningOperationStatuses.Failed;
+            operation.Status = WorkspaceOperationStatuses.Failed;
             operation.Error = $"Unable to restart worker: {ex.Message}";
             operation.CanResume = true;
             Save(operation);
@@ -872,7 +872,7 @@ public sealed class ProvisioningEngine
                 CreateNoWindow = true
             };
             psi.ArgumentList.Add(entryAssembly);
-            psi.ArgumentList.Add("provisioning-worker");
+            psi.ArgumentList.Add("workspace-operation-worker");
             psi.ArgumentList.Add("--operation");
             psi.ArgumentList.Add(operationId);
         }
@@ -885,7 +885,7 @@ public sealed class ProvisioningEngine
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
-            psi.ArgumentList.Add("provisioning-worker");
+            psi.ArgumentList.Add("workspace-operation-worker");
             psi.ArgumentList.Add("--operation");
             psi.ArgumentList.Add(operationId);
         }
@@ -899,7 +899,7 @@ public sealed class ProvisioningEngine
 
     private async Task<FileStream> AcquireOperationLockAsync(CancellationToken token)
     {
-        var path = Path.Combine(_paths.StateRoot, "provisioning.lock");
+        var path = Path.Combine(_paths.StateRoot, "workspace-operation.lock");
 
         while (true)
         {
@@ -923,36 +923,36 @@ public sealed class ProvisioningEngine
     }
 
     private static void AddUnsupportedDesiredStateItems(
-        ProfileManifest profile,
+        WorkspaceManifest workspace,
         List<DesiredStateDiffItem> items)
     {
-        if (profile.DesiredState is null)
+        if (workspace.DesiredState is null)
             return;
 
         AddUnsupportedSection(
-            profile.DesiredState.WindowsSettings.Count,
+            workspace.DesiredState.WindowsSettings.Count,
             DesiredStateDomainCodes.WindowsSetting,
             "windowsSettings",
             items);
 
         AddUnsupportedSection(
-            profile.DesiredState.Policies.Count,
+            workspace.DesiredState.Policies.Count,
             DesiredStateDomainCodes.Policy,
             "policies",
             items);
 
         AddUnsupportedSection(
-            profile.DesiredState.Optimizations.Count,
+            workspace.DesiredState.Optimizations.Count,
             DesiredStateDomainCodes.Optimization,
             "optimizations",
             items);
     }
 
     private void AddRegistryDiffItems(
-        ProfileManifest profile,
+        WorkspaceManifest workspace,
         List<DesiredStateDiffItem> items)
     {
-        var registrySettings = profile.DesiredState?.RegistrySettings;
+        var registrySettings = workspace.DesiredState?.RegistrySettings;
         if (registrySettings is null || registrySettings.Count == 0)
             return;
 
@@ -967,8 +967,8 @@ public sealed class ProvisioningEngine
                     DesiredStateDomainCodes.RegistrySetting,
                     targetId,
                     targetId,
-                    ProvisioningStateCodes.Unknown,
-                    ProvisioningActionCodes.Blocked,
+                    ApplicationStateCodes.Unknown,
+                    DesiredStateActionCodes.Blocked,
                     null,
                     null,
                     desired.Value,
@@ -982,8 +982,8 @@ public sealed class ProvisioningEngine
                     DesiredStateDomainCodes.RegistrySetting,
                     targetId,
                     targetId,
-                    ProvisioningStateCodes.Missing,
-                    ProvisioningActionCodes.Set,
+                    ApplicationStateCodes.Missing,
+                    DesiredStateActionCodes.Set,
                     null,
                     null,
                     desired.Value,
@@ -1000,7 +1000,7 @@ public sealed class ProvisioningEngine
                 targetId,
                 targetId,
                 matches ? DesiredStateStateCodes.Compliant : DesiredStateStateCodes.Drifted,
-                matches ? ProvisioningActionCodes.None : ProvisioningActionCodes.Set,
+                matches ? DesiredStateActionCodes.None : DesiredStateActionCodes.Set,
                 observation.Value,
                 observation.ValueType,
                 desired.Value,
@@ -1011,10 +1011,10 @@ public sealed class ProvisioningEngine
     }
 
     private void AddConditionDiffItems(
-        ProfileManifest profile,
+        WorkspaceManifest workspace,
         List<DesiredStateDiffItem> items)
     {
-        var conditions = profile.DesiredState?.Conditions;
+        var conditions = workspace.DesiredState?.Conditions;
         if (conditions is null || conditions.Count == 0)
             return;
 
@@ -1027,10 +1027,10 @@ public sealed class ProvisioningEngine
                 evaluation.Condition.Fact,
                 evaluation.IsSatisfied
                     ? "COMPLIANT"
-                    : ProvisioningStateCodes.Unknown,
+                    : ApplicationStateCodes.Unknown,
                 evaluation.IsSatisfied
-                    ? ProvisioningActionCodes.None
-                    : ProvisioningActionCodes.Blocked,
+                    ? DesiredStateActionCodes.None
+                    : DesiredStateActionCodes.Blocked,
                 evaluation.IsKnown ? evaluation.Message : null,
                 null,
                 evaluation.Condition.Value,
@@ -1051,17 +1051,17 @@ public sealed class ProvisioningEngine
             domain,
             sectionName,
             sectionName,
-            ProvisioningStateCodes.Unknown,
-            ProvisioningActionCodes.Blocked,
+            ApplicationStateCodes.Unknown,
+            DesiredStateActionCodes.Blocked,
             null,
             null,
             count.ToString(System.Globalization.CultureInfo.InvariantCulture),
             $"Desired-state section '{sectionName}' contains {count} item(s), but observation and execution are not implemented yet."));
     }
 
-    private static ComponentManifest ApplyProfileOverrides(
+    private static ComponentManifest ApplyWorkspaceOverrides(
         ComponentManifest component,
-        ProfileApplication request)
+        WorkspaceApplication request)
     {
         if (request.VersionPolicy is null && request.MinimumVersion is null)
             return component;
@@ -1073,21 +1073,21 @@ public sealed class ProvisioningEngine
         };
     }
 
-    private ProfileManifest GetProfile(string id) =>
-        _config.LoadProfiles().TryGetValue(id, out var profile)
-            ? profile
-            : throw new InvalidOperationException($"Unknown profile: {id}");
+    private WorkspaceManifest GetWorkspace(string id) =>
+        _config.LoadWorkspaces().TryGetValue(id, out var workspace)
+            ? workspace
+            : throw new InvalidOperationException($"Unknown workspace: {id}");
 
     private static void ValidateUncompletedPlanState(
-        ProvisioningOperation operation,
-        ProvisioningPlan persistedPlan,
-        ProvisioningPlan currentPlan)
+        WorkspaceOperation operation,
+        WorkspacePlan persistedPlan,
+        WorkspacePlan currentPlan)
     {
         if (persistedPlan.Items.Count != currentPlan.Items.Count)
         {
-            operation.Status = ProvisioningOperationStatuses.Stale;
+            operation.Status = WorkspaceOperationStatuses.Stale;
             operation.CanResume = false;
-            operation.Error = "Provisioning plan is stale because the desired-state item set changed.";
+            operation.Error = "Workspace operation plan is stale because the desired-state item set changed.";
             throw new InvalidOperationException(operation.Error);
         }
 
@@ -1105,10 +1105,10 @@ public sealed class ProvisioningEngine
                 || !string.Equals(expected.DesiredVersion, observed.DesiredVersion, StringComparison.Ordinal)
                 || !string.Equals(expected.ObservedValue, observed.ObservedValue, StringComparison.Ordinal))
             {
-                operation.Status = ProvisioningOperationStatuses.Stale;
+                operation.Status = WorkspaceOperationStatuses.Stale;
                 operation.CanResume = false;
                 operation.Error =
-                    $"Provisioning plan is stale for '{expected.ComponentName}'. " +
+                    $"Workspace operation plan is stale for '{expected.ComponentName}'. " +
                     $"Observed state is {observed.StateCode}/{observed.ActionCode} " +
                     $"but the confirmed plan expected {expected.StateCode}/{expected.ActionCode}.";
                 throw new InvalidOperationException(operation.Error);
@@ -1117,10 +1117,10 @@ public sealed class ProvisioningEngine
     }
 
     private static RegistrySettingDesiredState FindRegistryDesired(
-        ProfileManifest profile,
+        WorkspaceManifest workspace,
         string targetId)
     {
-        var desired = profile.DesiredState?.RegistrySettings
+        var desired = workspace.DesiredState?.RegistrySettings
             .FirstOrDefault(item =>
                 string.Equals(
                     $"registry:{item.Hive}:{item.Key}:{item.ValueName}",
@@ -1132,11 +1132,11 @@ public sealed class ProvisioningEngine
     }
 
     private static void ValidateRegistryPostcondition(
-        ProvisioningPlanItem planned,
-        ProvisioningPlanItem verified)
+        WorkspacePlanItem planned,
+        WorkspacePlanItem verified)
     {
         if (verified.StateCode != DesiredStateStateCodes.Compliant
-            || verified.ActionCode != ProvisioningActionCodes.None)
+            || verified.ActionCode != DesiredStateActionCodes.None)
         {
             throw new InvalidOperationException(
                 $"Post-condition verification failed for registry target '{planned.ComponentName}': {verified.Message}");
@@ -1144,7 +1144,7 @@ public sealed class ProvisioningEngine
     }
 
     private async Task RollbackSnapshotsAsync(
-        ProvisioningOperation operation,
+        WorkspaceOperation operation,
         IReadOnlyDictionary<string, ComponentManifest> components,
         CancellationToken token)
     {
@@ -1173,7 +1173,7 @@ public sealed class ProvisioningEngine
     }
 
     private async Task RollbackApplicationSnapshotsAsync(
-        ProvisioningOperation operation,
+        WorkspaceOperation operation,
         IReadOnlyDictionary<string, ComponentManifest> components,
         CancellationToken token)
     {
@@ -1196,7 +1196,7 @@ public sealed class ProvisioningEngine
 
                 await _installer.InstallAsync(
                     component,
-                    ProvisioningActionCodes.Install,
+                    DesiredStateActionCodes.Install,
                     snapshot.InstalledVersion,
                     token);
             }
@@ -1214,7 +1214,7 @@ public sealed class ProvisioningEngine
         operation.ApplicationSnapshots.Clear();
     }
 
-    private void RollbackRegistrySnapshots(ProvisioningOperation operation)
+    private void RollbackRegistrySnapshots(WorkspaceOperation operation)
     {
         var failures = new List<string>();
 
@@ -1243,12 +1243,12 @@ public sealed class ProvisioningEngine
         operation.RegistrySnapshots.Clear();
     }
 
-    private void Save(ProvisioningOperation operation)
+    private void Save(WorkspaceOperation operation)
     {
         if (string.IsNullOrWhiteSpace(operation.OperationId))
             throw new InvalidOperationException("Operation must have an identifier.");
-        if (string.IsNullOrWhiteSpace(operation.ProfileId))
-            throw new InvalidOperationException("Operation must reference a profile.");
+        if (string.IsNullOrWhiteSpace(operation.WorkspaceId))
+            throw new InvalidOperationException("Operation must reference a workspace.");
         if (operation.Completed < 0 || operation.Total < 0 || operation.Completed > operation.Total)
             throw new InvalidOperationException("Operation progress is inconsistent.");
 

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Nabouna32/workspace-control/blob/main/contracts/configuration-profile.schema.json",
-  "title": "Workspace Control Profile Manifest",
-  "description": "Versioned desired-state profile manifest consumed by the local Workspace Control engine.",
+  "$id": "https://github.com/Nabouna32/workspace-control/blob/main/contracts/workspace-manifest.schema.json",
+  "title": "Workspace Control Workspace Manifest",
+  "description": "Versioned desired-state Workspace manifest consumed by the local Workspace Control engine.",
   "oneOf": [
     {
       "type": "object",

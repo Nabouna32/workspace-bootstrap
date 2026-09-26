@@ -12,12 +12,13 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     private readonly IUiLocalizer _localizer;
     private BaselineSnapshot? _baseline;
     private SoftwareInventorySnapshot? _software;
-    private ProvisioningOperation? _provisioningOperation;
+    private WorkspaceOperation? _workspaceOperation;
     private DesiredStateDiff? _desiredStateDiff;
-    private string? _desiredStateDiffProfileId;
+    private string? _desiredStateDiffWorkspaceId;
     private string? _selectedWorkspaceId;
     private string _workspaceName = string.Empty;
     private string _workspaceDescription = string.Empty;
+    private string _windowsAppearance = WindowsAppearanceValues.Undefined;
     private string _applicationSearchText = string.Empty;
     private string _applicationCatalogSearchText = string.Empty;
     private string _applicationCatalogFilter = ApplicationCatalogFilters.All;
@@ -46,76 +47,76 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         private set => SetField(ref _software, value);
     }
 
-    public ProvisioningOperation? ProvisioningOperation
+    public WorkspaceOperation? WorkspaceOperation
     {
-        get => _provisioningOperation;
+        get => _workspaceOperation;
         private set
         {
-            if (!SetField(ref _provisioningOperation, value))
+            if (!SetField(ref _workspaceOperation, value))
                 return;
 
-            OnPropertyChanged(nameof(ProvisioningPlan));
-            OnPropertyChanged(nameof(HasProvisioningOperation));
+            OnPropertyChanged(nameof(WorkspacePlan));
+            OnPropertyChanged(nameof(HasWorkspaceOperation));
             OnPropertyChanged(nameof(IsAwaitingConfirmation));
-            OnPropertyChanged(nameof(IsProvisioningActive));
-            OnPropertyChanged(nameof(IsProvisioningCompleted));
-            OnPropertyChanged(nameof(IsProvisioningFailed));
-            OnPropertyChanged(nameof(IsProvisioningStale));
-            OnPropertyChanged(nameof(CanResumeProvisioning));
-            OnPropertyChanged(nameof(ProvisioningStatusDisplay));
-            OnPropertyChanged(nameof(ProvisioningProgressDisplay));
+            OnPropertyChanged(nameof(IsWorkspaceOperationActive));
+            OnPropertyChanged(nameof(IsWorkspaceOperationCompleted));
+            OnPropertyChanged(nameof(IsWorkspaceOperationFailed));
+            OnPropertyChanged(nameof(IsWorkspaceOperationStale));
+            OnPropertyChanged(nameof(CanResumeWorkspaceOperation));
+            OnPropertyChanged(nameof(WorkspaceOperationStatusDisplay));
+            OnPropertyChanged(nameof(WorkspaceOperationProgressDisplay));
             OnPropertyChanged(nameof(CurrentComponentDisplay));
-            OnPropertyChanged(nameof(ProvisioningError));
-            OnPropertyChanged(nameof(HasProvisioningError));
+            OnPropertyChanged(nameof(WorkspaceOperationError));
+            OnPropertyChanged(nameof(HasWorkspaceOperationError));
         }
     }
 
     public DesiredStateDiff? DesiredStateDiff => _desiredStateDiff;
     public bool HasDesiredStateDiff => DesiredStateDiff is not null;
-    public ProvisioningPlan? ProvisioningPlan => ProvisioningOperation?.Plan;
-    public bool HasProvisioningOperation => ProvisioningOperation is not null;
+    public WorkspacePlan? WorkspacePlan => WorkspaceOperation?.Plan;
+    public bool HasWorkspaceOperation => WorkspaceOperation is not null;
     public bool IsAwaitingConfirmation =>
-        ProvisioningOperation?.Status == ProvisioningOperationStatuses.AwaitingConfirmation;
-    public bool IsProvisioningActive =>
-        ProvisioningOperation?.Status is ProvisioningOperationStatuses.Queued
-            or ProvisioningOperationStatuses.Running;
-    public bool IsProvisioningCompleted =>
-        ProvisioningOperation?.Status == ProvisioningOperationStatuses.Completed;
-    public bool IsProvisioningFailed =>
-        ProvisioningOperation?.Status == ProvisioningOperationStatuses.Failed;
-    public bool IsProvisioningStale =>
-        ProvisioningOperation?.Status == ProvisioningOperationStatuses.Stale;
-    public bool CanResumeProvisioning =>
-        ProvisioningOperation?.Status == ProvisioningOperationStatuses.Failed
-        && ProvisioningOperation.CanResume;
+        WorkspaceOperation?.Status == WorkspaceOperationStatuses.AwaitingConfirmation;
+    public bool IsWorkspaceOperationActive =>
+        WorkspaceOperation?.Status is WorkspaceOperationStatuses.Queued
+            or WorkspaceOperationStatuses.Running;
+    public bool IsWorkspaceOperationCompleted =>
+        WorkspaceOperation?.Status == WorkspaceOperationStatuses.Completed;
+    public bool IsWorkspaceOperationFailed =>
+        WorkspaceOperation?.Status == WorkspaceOperationStatuses.Failed;
+    public bool IsWorkspaceOperationStale =>
+        WorkspaceOperation?.Status == WorkspaceOperationStatuses.Stale;
+    public bool CanResumeWorkspaceOperation =>
+        WorkspaceOperation?.Status == WorkspaceOperationStatuses.Failed
+        && WorkspaceOperation.CanResume;
 
-    public string ProvisioningStatusDisplay =>
-        ProvisioningOperation?.Status switch
+    public string WorkspaceOperationStatusDisplay =>
+        WorkspaceOperation?.Status switch
         {
-            ProvisioningOperationStatuses.AwaitingConfirmation => _localizer.Get("AwaitingConfirmation"),
-            ProvisioningOperationStatuses.Queued => _localizer.Get("Queued"),
-            ProvisioningOperationStatuses.Running => _localizer.Get("ApplyingConfirmedPlan"),
-            ProvisioningOperationStatuses.Completed => _localizer.Get("Completed"),
-            ProvisioningOperationStatuses.Failed => _localizer.Get("Failed"),
-            ProvisioningOperationStatuses.Stale => _localizer.Get("PlanIsStale"),
-            _ => _localizer.Get("NoProvisioningOperation")
+            WorkspaceOperationStatuses.AwaitingConfirmation => _localizer.Get("AwaitingConfirmation"),
+            WorkspaceOperationStatuses.Queued => _localizer.Get("Queued"),
+            WorkspaceOperationStatuses.Running => _localizer.Get("ApplyingConfirmedPlan"),
+            WorkspaceOperationStatuses.Completed => _localizer.Get("Completed"),
+            WorkspaceOperationStatuses.Failed => _localizer.Get("Failed"),
+            WorkspaceOperationStatuses.Stale => _localizer.Get("PlanIsStale"),
+            _ => _localizer.Get("NoWorkspaceOperation")
         };
 
-    public string ProvisioningProgressDisplay =>
-        ProvisioningOperation is null
+    public string WorkspaceOperationProgressDisplay =>
+        WorkspaceOperation is null
             ? _localizer.Get("NoOperation")
             : _localizer.Format(
                 "StepsCompletedFormat",
-                ProvisioningOperation.Completed,
-                ProvisioningOperation.Total);
+                WorkspaceOperation.Completed,
+                WorkspaceOperation.Total);
 
     public string CurrentComponentDisplay =>
-        string.IsNullOrWhiteSpace(ProvisioningOperation?.CurrentComponentName)
+        string.IsNullOrWhiteSpace(WorkspaceOperation?.CurrentComponentName)
             ? _localizer.Get("Preparing")
-            : ProvisioningOperation.CurrentComponentName;
+            : WorkspaceOperation.CurrentComponentName;
 
-    public string? ProvisioningError => ProvisioningOperation?.Error;
-    public bool HasProvisioningError => !string.IsNullOrWhiteSpace(ProvisioningError);
+    public string? WorkspaceOperationError => WorkspaceOperation?.Error;
+    public bool HasWorkspaceOperationError => !string.IsNullOrWhiteSpace(WorkspaceOperationError);
 
     public string MemoryDisplay => Baseline is null ? "—" : $"{Baseline.MemoryGB:F1} GB RAM";
     public string CpuCoresDisplay => Baseline is null ? "—" : $"{Baseline.CpuCores} logical cores";
@@ -123,13 +124,13 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public string SoftwareCountDisplay => $"{SoftwareItems.Count} detected entries";
     public int ApplicationInstalledCount => ApplicationCatalogItems.Count(item => item.IsInstalled);
     public int ApplicationUpdatesCount => ApplicationCatalogItems.Count(item => item.IsUpdateAvailable);
-    public int ApplicationAvailableCount => ApplicationCatalogItems.Count(item => string.Equals(item.StateCode, ProvisioningStateCodes.Missing, StringComparison.OrdinalIgnoreCase));
+    public int ApplicationAvailableCount => ApplicationCatalogItems.Count(item => string.Equals(item.StateCode, ApplicationStateCodes.Missing, StringComparison.OrdinalIgnoreCase));
     public int DiagnosticCount => Diagnostics.Count;
     public string HomeHealthCode
     {
         get
         {
-            if (HasError || IsProvisioningFailed || IsProvisioningStale)
+            if (HasError || IsWorkspaceOperationFailed || IsWorkspaceOperationStale)
                 return "ERROR";
 
             if (DiagnosticCount > 0 || ApplicationUpdatesCount > 0)
@@ -147,16 +148,16 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public string HomeWorkspaceDisplay => HasSelectedWorkspace
         ? WorkspaceName
         : _localizer.Get("HomeNoWorkspace");
-    public string HomeProvisioningDisplay => ProvisioningOperation is null
-        ? _localizer.Get("NoProvisioningOperation")
-        : ProvisioningStatusDisplay;
+    public string HomeWorkspaceOperationDisplay => WorkspaceOperation is null
+        ? _localizer.Get("NoWorkspaceOperation")
+        : WorkspaceOperationStatusDisplay;
     public bool HasError => !string.IsNullOrWhiteSpace(Error);
 
     public ObservableCollection<SoftwareItem> SoftwareItems { get; } = [];
     public ObservableCollection<ApplicationCatalogItem> ApplicationCatalogItems { get; } = [];
     public ObservableCollection<ApplicationCatalogItem> VisibleApplicationCatalogItems { get; } = [];
     public ObservableCollection<string> Diagnostics { get; } = [];
-    public ObservableCollection<ProfileManifest> Profiles { get; } = [];
+    public ObservableCollection<WorkspaceManifest> Workspaces { get; } = [];
     public ObservableCollection<WorkspaceApplicationOption> ApplicationOptions { get; } = [];
     public ObservableCollection<WorkspaceApplicationOption> VisibleApplicationOptions { get; } = [];
     public ObservableCollection<DesiredStateDiffItem> DesiredStateDiffItems { get; } = [];
@@ -179,6 +180,26 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         set => SetField(ref _workspaceDescription, value);
     }
 
+    public string WindowsAppearance
+    {
+        get => _windowsAppearance;
+        set
+        {
+            if (!SetField(ref _windowsAppearance, value))
+                return;
+
+            OnPropertyChanged(nameof(WindowsAppearanceDisplay));
+        }
+    }
+
+    public string WindowsAppearanceDisplay => WindowsAppearance switch
+    {
+        WindowsAppearanceValues.Light => _localizer.Get("WindowsAppearanceLight"),
+        WindowsAppearanceValues.Dark => _localizer.Get("WindowsAppearanceDark"),
+        WindowsAppearanceValues.System => _localizer.Get("WindowsAppearanceSystem"),
+        _ => _localizer.Get("Undefined")
+    };
+
     public string ApplicationSearchText
     {
         get => _applicationSearchText;
@@ -199,7 +220,9 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
     public bool HasSelectedWorkspace => !string.IsNullOrWhiteSpace(SelectedWorkspaceId);
     public bool IsSelectedWorkspaceUserOwned =>
-        SelectedWorkspaceId?.StartsWith("workspace-", StringComparison.OrdinalIgnoreCase) == true;
+        SelectedWorkspaceId is not null
+        && Workspaces.Any(workspace =>
+            string.Equals(workspace.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase));
 
     public bool IsBusy
     {
@@ -246,9 +269,9 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
             ClearDesiredStateDiff();
 
-            Profiles.Clear();
-            foreach (var profile in _application.GetProfiles())
-                Profiles.Add(profile);
+            Workspaces.Clear();
+            foreach (var workspace in _application.GetWorkspaces())
+                Workspaces.Add(workspace);
 
             var catalog = _application.GetApplicationCatalog();
             ApplicationOptions.Clear();
@@ -262,18 +285,17 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
             SetApplicationSearchText(string.Empty);
 
-            var selected = Profiles.FirstOrDefault(profile =>
-                string.Equals(profile.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase))
-                ?? Profiles.FirstOrDefault(profile =>
-                    profile.Id.StartsWith("workspace-", StringComparison.OrdinalIgnoreCase));
+            var selected = Workspaces.FirstOrDefault(workspace =>
+                string.Equals(workspace.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase))
+                ?? Workspaces.FirstOrDefault();
 
             if (selected is not null)
                 SelectWorkspace(selected.Id);
             else
                 ClearWorkspaceEditor();
 
-            var recovery = _application.GetProvisioningRecovery();
-            SetProvisioningOperation(recovery);
+            var recovery = _application.GetRecoverableWorkspaceOperation();
+            SetWorkspaceOperation(recovery);
 
             var software = await _application.GetSoftwareInventoryAsync(cancellationToken);
             Software = software;
@@ -309,7 +331,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     }
 
     public async Task ObserveDesiredStateAsync(
-        string profileId,
+        string workspaceId,
         CancellationToken cancellationToken = default)
     {
         if (IsBusy)
@@ -321,9 +343,9 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
         try
         {
-            var diff = await _application.GetDesiredStateDiffAsync(profileId, cancellationToken);
+            var diff = await _application.GetDesiredStateDiffAsync(workspaceId, cancellationToken);
             _desiredStateDiff = diff;
-            _desiredStateDiffProfileId = profileId;
+            _desiredStateDiffWorkspaceId = workspaceId;
 
             DesiredStateDiffItems.Clear();
             foreach (var item in diff.Items)
@@ -350,14 +372,14 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         }
     }
 
-    public bool HasDesiredStateDiffFor(string profileId) =>
+    public bool HasDesiredStateDiffFor(string workspaceId) =>
         HasDesiredStateDiff &&
-        string.Equals(_desiredStateDiffProfileId, profileId, StringComparison.OrdinalIgnoreCase);
+        string.Equals(_desiredStateDiffWorkspaceId, workspaceId, StringComparison.OrdinalIgnoreCase);
 
     public void ClearDesiredStateDiff()
     {
         _desiredStateDiff = null;
-        _desiredStateDiffProfileId = null;
+        _desiredStateDiffWorkspaceId = null;
         DesiredStateDiffItems.Clear();
         OnPropertyChanged(nameof(DesiredStateDiff));
         OnPropertyChanged(nameof(HasDesiredStateDiff));
@@ -365,8 +387,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
     public void SelectWorkspace(string workspaceId)
     {
-        var workspace = Profiles.FirstOrDefault(profile =>
-            string.Equals(profile.Id, workspaceId, StringComparison.OrdinalIgnoreCase));
+        var workspace = Workspaces.FirstOrDefault(workspace =>
+            string.Equals(workspace.Id, workspaceId, StringComparison.OrdinalIgnoreCase));
 
         if (workspace is null)
             return;
@@ -383,6 +405,9 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         foreach (var option in ApplicationOptions)
             option.IsSelected = selectedApplications.Contains(option.ComponentId);
 
+        WindowsAppearance = WindowsAppearanceSettings.Read(
+            workspace.DesiredState?.RegistrySettings ?? []);
+
         ClearDesiredStateDiff();
         OnPropertyChanged(nameof(HasSelectedWorkspace));
         OnPropertyChanged(nameof(IsSelectedWorkspaceUserOwned));
@@ -396,6 +421,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
         foreach (var option in ApplicationOptions)
             option.IsSelected = false;
+
+        WindowsAppearance = WindowsAppearanceValues.Undefined;
 
         ClearDesiredStateDiff();
         OnPropertyChanged(nameof(HasSelectedWorkspace));
@@ -419,7 +446,11 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public void AddApplicationToWorkspace(string componentId)
     {
         if (!IsSelectedWorkspaceUserOwned)
-            CreateBlankWorkspace();
+        {
+            Error = _localizer.Get("WorkspaceSelectionRequired");
+            Status = _localizer.Get("WorkspaceSelectionRequired");
+            return;
+        }
 
         var option = ApplicationOptions.FirstOrDefault(item =>
             string.Equals(item.ComponentId, componentId, StringComparison.OrdinalIgnoreCase));
@@ -447,19 +478,19 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
                 || string.Equals(item.Name, component.Name, StringComparison.OrdinalIgnoreCase));
 
             var state = software.Diagnostics.Count > 0 && installed is null
-                ? ProvisioningStateCodes.Unknown
+                ? ApplicationStateCodes.Unknown
                 : installed is null
-                    ? ProvisioningStateCodes.Missing
+                    ? ApplicationStateCodes.Missing
                     : !string.IsNullOrWhiteSpace(installed.AvailableVersion)
-                        ? ProvisioningStateCodes.Outdated
-                        : ProvisioningStateCodes.Installed;
+                        ? ApplicationStateCodes.Outdated
+                        : ApplicationStateCodes.Installed;
 
             var action = state switch
             {
-                ProvisioningStateCodes.Missing => ProvisioningActionCodes.Install,
-                ProvisioningStateCodes.Outdated => ProvisioningActionCodes.Update,
-                ProvisioningStateCodes.Unknown => ProvisioningActionCodes.Blocked,
-                _ => ProvisioningActionCodes.None
+                ApplicationStateCodes.Missing => DesiredStateActionCodes.Install,
+                ApplicationStateCodes.Outdated => DesiredStateActionCodes.Update,
+                ApplicationStateCodes.Unknown => DesiredStateActionCodes.Blocked,
+                _ => DesiredStateActionCodes.None
             };
 
             ApplicationCatalogItems.Add(new ApplicationCatalogItem(
@@ -498,7 +529,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             {
                 ApplicationCatalogFilters.Installed => item.IsInstalled,
                 ApplicationCatalogFilters.Updates => item.IsUpdateAvailable,
-                ApplicationCatalogFilters.Available => string.Equals(item.StateCode, ProvisioningStateCodes.Missing, StringComparison.OrdinalIgnoreCase),
+                ApplicationCatalogFilters.Available => string.Equals(item.StateCode, ApplicationStateCodes.Missing, StringComparison.OrdinalIgnoreCase),
                 _ => true
             };
 
@@ -533,7 +564,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
                 _localizer.Get("DefaultWorkspaceDescription"),
                 []);
 
-            Profiles.Add(workspace);
+            Workspaces.Add(workspace);
             SelectWorkspace(workspace.Id);
             Status = _localizer.Get("WorkspaceCreated");
             Error = null;
@@ -562,8 +593,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         {
             if (IsSelectedWorkspaceUserOwned && SelectedWorkspaceId is not null)
             {
-                var current = Profiles.First(profile =>
-                    string.Equals(profile.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase));
+                var current = Workspaces.First(workspace =>
+                    string.Equals(workspace.Id, SelectedWorkspaceId, StringComparison.OrdinalIgnoreCase));
 
                 var desiredState = current.DesiredState
                     ?? new DesiredStateManifest([], [], [], [], [], []);
@@ -576,15 +607,18 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
                     DesiredState = desiredState with
                     {
                         Applications = selectedApplications
-                            .Select(componentId => new ProfileApplication(componentId))
-                            .ToArray()
+                            .Select(componentId => new WorkspaceApplication(componentId))
+                            .ToArray(),
+                        RegistrySettings = WindowsAppearanceSettings.Apply(
+                            desiredState.RegistrySettings,
+                            WindowsAppearance)
                     }
                 };
 
                 _application.SaveWorkspace(updated);
 
-                var index = Profiles.IndexOf(current);
-                Profiles[index] = updated;
+                var index = Workspaces.IndexOf(current);
+                Workspaces[index] = updated;
                 SelectWorkspace(updated.Id);
                 Status = _localizer.Get("WorkspaceSaved");
                 Error = null;
@@ -596,9 +630,9 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
                 WorkspaceDescription.Trim(),
                 selectedApplications);
 
-            Profiles.Add(created);
+            Workspaces.Add(created);
             SelectWorkspace(created.Id);
-            Status = _localizer.Get("WorkspaceCreatedFromTemplate");
+            Status = _localizer.Get("WorkspaceCreated");
             Error = null;
         }
         catch (Exception ex)
@@ -608,8 +642,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         }
     }
 
-    public async Task CreateProvisioningAsync(
-        string profileId,
+    public async Task CreateWorkspaceOperationAsync(
+        string workspaceId,
         CancellationToken cancellationToken = default)
     {
         if (IsBusy)
@@ -617,12 +651,12 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 
         IsBusy = true;
         Error = null;
-        Status = _localizer.Get("GeneratingProvisioningPlan");
+        Status = _localizer.Get("GeneratingWorkspacePlan");
 
         try
         {
-            SetProvisioningOperation(
-                await _application.CreateProvisioningAsync(profileId, cancellationToken));
+            SetWorkspaceOperation(
+                await _application.CreateWorkspaceOperationAsync(workspaceId, cancellationToken));
             Status = _localizer.Get("PlanReadyForReview");
         }
         catch (OperationCanceledException)
@@ -640,63 +674,63 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         }
     }
 
-    public void ConfirmProvisioning()
+    public void ConfirmWorkspaceOperation()
     {
-        if (ProvisioningOperation is null)
+        if (WorkspaceOperation is null)
             return;
 
         Error = null;
-        Status = _localizer.Get("StartingProvisioning");
+        Status = _localizer.Get("StartingWorkspaceOperation");
 
         try
         {
-            _application.ConfirmProvisioning(ProvisioningOperation.OperationId);
-            RefreshProvisioningOperation();
-            Status = _localizer.Get("ProvisioningStarted");
+            _application.ConfirmWorkspaceOperation(WorkspaceOperation.OperationId);
+            RefreshWorkspaceOperation();
+            Status = _localizer.Get("WorkspaceOperationStarted");
         }
         catch (Exception ex)
         {
             Error = ex.Message;
-            RefreshProvisioningOperation();
-            Status = _localizer.Get("ProvisioningCouldNotStart");
+            RefreshWorkspaceOperation();
+            Status = _localizer.Get("WorkspaceOperationCouldNotStart");
         }
     }
 
-    public void ResumeProvisioning()
+    public void ResumeWorkspaceOperation()
     {
-        if (ProvisioningOperation is null)
+        if (WorkspaceOperation is null)
             return;
 
         Error = null;
-        Status = _localizer.Get("ResumingProvisioning");
+        Status = _localizer.Get("ResumingWorkspaceOperation");
 
         try
         {
-            _application.ResumeProvisioning(ProvisioningOperation.OperationId);
-            RefreshProvisioningOperation();
-            Status = _localizer.Get("ProvisioningResumed");
+            _application.ResumeWorkspaceOperation(WorkspaceOperation.OperationId);
+            RefreshWorkspaceOperation();
+            Status = _localizer.Get("WorkspaceOperationResumed");
         }
         catch (Exception ex)
         {
             Error = ex.Message;
-            RefreshProvisioningOperation();
-            Status = _localizer.Get("ProvisioningCouldNotResume");
+            RefreshWorkspaceOperation();
+            Status = _localizer.Get("WorkspaceOperationCouldNotResume");
         }
     }
 
-    public bool RefreshProvisioningOperation()
+    public bool RefreshWorkspaceOperation()
     {
-        if (ProvisioningOperation is null)
+        if (WorkspaceOperation is null)
             return false;
 
-        var operation = _application.GetProvisioningStatus(ProvisioningOperation.OperationId);
-        SetProvisioningOperation(operation);
+        var operation = _application.GetWorkspaceOperation(WorkspaceOperation.OperationId);
+        SetWorkspaceOperation(operation);
         return operation is not null;
     }
 
-    private void SetProvisioningOperation(ProvisioningOperation? operation)
+    private void SetWorkspaceOperation(WorkspaceOperation? operation)
     {
-        ProvisioningOperation = operation;
+        WorkspaceOperation = operation;
         NotifyHomeDashboardChanged();
     }
 
@@ -709,7 +743,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(HomeHealthCode));
         OnPropertyChanged(nameof(HomeHealthDisplay));
         OnPropertyChanged(nameof(HomeWorkspaceDisplay));
-        OnPropertyChanged(nameof(HomeProvisioningDisplay));
+        OnPropertyChanged(nameof(HomeWorkspaceOperationDisplay));
     }
 
     private void OnPropertyChanged(string? propertyName) =>
@@ -733,7 +767,7 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
 public sealed class WorkspaceApplicationOption : INotifyPropertyChanged
 {
     private bool _isSelected;
-    private string _stateCode = ProvisioningStateCodes.Unknown;
+    private string _stateCode = ApplicationStateCodes.Unknown;
     private string? _installedVersion;
     private string? _availableVersion;
 
@@ -767,8 +801,8 @@ public sealed class WorkspaceApplicationOption : INotifyPropertyChanged
     }
 
     public bool IsInstalled =>
-        string.Equals(StateCode, ProvisioningStateCodes.Installed, StringComparison.OrdinalIgnoreCase)
-        || string.Equals(StateCode, ProvisioningStateCodes.Outdated, StringComparison.OrdinalIgnoreCase);
+        string.Equals(StateCode, ApplicationStateCodes.Installed, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(StateCode, ApplicationStateCodes.Outdated, StringComparison.OrdinalIgnoreCase);
 
     public bool IsSelected
     {
@@ -828,5 +862,6 @@ public sealed record ApplicationCatalogItem(
     bool IsInstalled)
 {
     public bool IsUpdateAvailable =>
-        string.Equals(StateCode, ProvisioningStateCodes.Outdated, StringComparison.OrdinalIgnoreCase);
+        string.Equals(StateCode, ApplicationStateCodes.Outdated, StringComparison.OrdinalIgnoreCase);
 }
+

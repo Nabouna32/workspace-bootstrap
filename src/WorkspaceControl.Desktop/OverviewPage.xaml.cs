@@ -18,7 +18,7 @@ public sealed partial class OverviewPage : Page
         Frame.Navigate(typeof(SoftwarePage));
 
     private void Workspace_Click(object sender, RoutedEventArgs e) =>
-        Frame.Navigate(typeof(ProfilesPage));
+        Frame.Navigate(typeof(WorkspacePage));
 
     private void Diagnostics_Click(object sender, RoutedEventArgs e) =>
         Frame.Navigate(typeof(DiagnosticsPage));

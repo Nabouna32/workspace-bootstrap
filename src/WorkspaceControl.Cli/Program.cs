@@ -7,7 +7,7 @@ try
 {
     var application = WorkspaceControlApplicationFactory.Create();
     var command = args.FirstOrDefault()?.ToLowerInvariant() ?? "help";
-    var profile = GetOption(args, "--profile");
+    var workspaceId = GetOption(args, "--workspace");
     var operation = GetOption(args, "--operation");
     object? data;
     IReadOnlyList<string> messages = Array.Empty<string>();
@@ -15,7 +15,7 @@ try
     switch (command)
     {
         case "capabilities":
-            data = new[] { "baseline", "provisioning", "optimization", "official-sources", "winget-fallback" };
+            data = new[] { "baseline", "operation", "optimization", "official-sources", "winget-fallback" };
             break;
         case "baseline":
             data = application.GetBaseline();
@@ -34,53 +34,59 @@ try
             messages = application.RollbackOptimization();
             data = new { Restored = messages.Count };
             break;
-        case "provisioning-profiles":
-            data = application.GetProfiles()
+        case "workspaces":
+            data = application.GetWorkspaces()
                 .Select(x => new { x.Id, x.Name, x.Description })
                 .ToArray();
             break;
         case "desired-state-diff":
-            data = MapDiff(await application.GetDesiredStateDiffAsync(profile ?? throw new ArgumentException("--profile est requis.")));
+            data = MapDiff(await application.GetDesiredStateDiffAsync(workspaceId ?? throw new ArgumentException("--workspace est requis.")));
             break;
-        case "provisioning-plan":
-            data = MapPlan(await application.GetPlanAsync(profile ?? throw new ArgumentException("--profile est requis.")));
+        case "workspace-plan":
+            data = MapPlan(await application.CreateWorkspacePlanAsync(workspaceId ?? throw new ArgumentException("--workspace est requis.")));
             break;
-        case "provisioning-worker":
-            await application.RunProvisioningAsync(
+        case "workspace-operation-worker":
+            await application.RunWorkspaceOperationAsync(
                 operation ?? throw new ArgumentException("--operation est requis."),
                 CancellationToken.None);
             data = new { OperationId = operation, Status = "completed" };
             break;
-        case "provisioning-start":
-            data = MapOperation(await application.CreateProvisioningAsync(
-                profile ?? throw new ArgumentException("--profile est requis.")));
+        case "operation-run":
+            await application.RunWorkspaceOperationAsync(
+                operation ?? throw new ArgumentException("--operation est requis."),
+                CancellationToken.None);
+            data = new { OperationId = operation, Status = "completed" };
             break;
-        case "provisioning-confirm":
+        case "operation-start":
+            data = MapOperation(await application.CreateWorkspaceOperationAsync(
+                workspaceId ?? throw new ArgumentException("--workspace est requis.")));
+            break;
+        case "operation-confirm":
             data = new
             {
-                OperationId = application.ConfirmProvisioning(
+                OperationId = application.ConfirmWorkspaceOperation(
                     operation ?? throw new ArgumentException("--operation est requis.")),
                 Status = "queued"
             };
             break;
-        case "provisioning-status":
-            data = MapOperation(application.GetProvisioningStatus(operation ?? throw new ArgumentException("--operation est requis.")));
+        case "operation-status":
+            data = MapOperation(application.GetWorkspaceOperation(operation ?? throw new ArgumentException("--operation est requis.")));
             break;
-        case "provisioning-recovery":
-            data = MapOperation(application.GetProvisioningRecovery());
+        case "operation-recovery":
+            data = MapOperation(application.GetRecoverableWorkspaceOperation());
             break;
-        case "provisioning-resume":
+        case "operation-resume":
             data = new
             {
-                OperationId = application.ResumeProvisioning(operation ?? throw new ArgumentException("--operation est requis.")),
+                OperationId = application.ResumeWorkspaceOperation(operation ?? throw new ArgumentException("--operation est requis.")),
                 Status = "starting"
             };
             break;
-        case "provisioning-history":
-            data = application.GetProvisioningHistory().Select(MapHistory).ToArray();
+        case "operation-history":
+            data = application.GetWorkspaceOperationHistory().Select(MapHistory).ToArray();
             break;
-        case "provisioning-detail":
-            data = MapDetail(application.GetProvisioningDetail(operation ?? throw new ArgumentException("--operation est requis.")));
+        case "operation-detail":
+            data = MapDetail(application.GetWorkspaceOperationDetail(operation ?? throw new ArgumentException("--operation est requis.")));
             break;
         default:
             throw new ArgumentException($"Commande inconnue : {command}");
@@ -99,10 +105,10 @@ static object MapDiff(DesiredStateDiff diff)
 {
     return new
     {
-        Profile = new
+        Workspace = new
         {
-            Id = diff.ProfileId,
-            Name = diff.ProfileName
+            Id = diff.WorkspaceId,
+            Name = diff.WorkspaceName
         },
         InventoryScanId = diff.InventoryScanId,
         InventoryDiagnostics = diff.InventoryDiagnostics,
@@ -121,14 +127,14 @@ static object MapDiff(DesiredStateDiff diff)
     };
 }
 
-static object MapPlan(ProvisioningPlan plan)
+static object MapPlan(WorkspacePlan plan)
 {
     return new
     {
-        Profile = new
+        Workspace = new
         {
-            Id = plan.ProfileId,
-            Name = plan.ProfileName
+            Id = plan.WorkspaceId,
+            Name = plan.WorkspaceName
         },
         InventoryScanId = plan.InventoryScanId,
         InventoryDiagnostics = plan.InventoryDiagnostics,
@@ -149,7 +155,7 @@ static object MapPlan(ProvisioningPlan plan)
     };
 }
 
-static object? MapOperation(ProvisioningOperation? operation)
+static object? MapOperation(WorkspaceOperation? operation)
 {
     if (operation is null) return null;
 
@@ -159,8 +165,8 @@ static object? MapOperation(ProvisioningOperation? operation)
         SchemaVersion = 1,
         OperationId = operation.OperationId,
         Status = operation.Status,
-        Phase = "provisioning",
-        ProfileId = operation.ProfileId,
+        Phase = "operation",
+        WorkspaceId = operation.WorkspaceId,
         CurrentComponentId = operation.Steps.LastOrDefault(x => x.Status == "completed")?.ComponentId,
         CurrentComponentName = operation.CurrentComponentName,
         Completed = operation.Completed,
@@ -185,7 +191,7 @@ static object? MapOperation(ProvisioningOperation? operation)
     };
 }
 
-static object? MapDetail(ProvisioningOperation? operation)
+static object? MapDetail(WorkspaceOperation? operation)
 {
     if (operation is null) return null;
     return new
@@ -196,8 +202,8 @@ static object? MapDetail(ProvisioningOperation? operation)
         Summary = new
         {
             RunId = operation.OperationId,
-            Mode = "provisioning",
-            Selection = operation.ProfileId,
+            Mode = "operation",
+            Selection = operation.WorkspaceId,
             StartedAt = operation.UpdatedAt,
             FinishedAt = operation.Status is "completed" or "failed" ? operation.UpdatedAt : (DateTimeOffset?)null,
             ExitCode = operation.Status == "completed" ? 0 : 1,
@@ -207,14 +213,14 @@ static object? MapDetail(ProvisioningOperation? operation)
     };
 }
 
-static object MapHistory(ProvisioningOperation operation) =>
+static object MapHistory(WorkspaceOperation operation) =>
     new
     {
         SchemaVersion = 1,
         OperationId = operation.OperationId,
         Status = operation.Status,
-        Phase = "provisioning",
-        ProfileId = operation.ProfileId,
+        Phase = "operation",
+        WorkspaceId = operation.WorkspaceId,
         Completed = operation.Completed,
         Total = operation.Total,
         Percent = operation.Total == 0 ? 100 : operation.Completed * 100.0 / operation.Total,

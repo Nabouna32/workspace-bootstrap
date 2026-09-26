@@ -48,7 +48,7 @@ public sealed partial class MainWindow : Window
             "software" => typeof(SoftwarePage),
             "windows" => typeof(WindowsPage),
             "diagnostics" => typeof(DiagnosticsPage),
-            "profiles" => typeof(ProfilesPage),
+            "workspace" => typeof(WorkspacePage),
             _ => typeof(OverviewPage)
         };
 

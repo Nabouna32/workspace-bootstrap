@@ -4,7 +4,7 @@ using WorkspaceControl.Application;
 using WorkspaceControl.Application.Contracts;
 using WorkspaceControl.Domain;
 
-namespace WorkspaceBootstrap.Tests;
+namespace WorkspaceControl.Tests;
 
 [TestClass]
 public sealed class WorkspaceControlApplicationTests
@@ -29,27 +29,27 @@ public sealed class WorkspaceControlApplicationTests
     [TestMethod]
     public async Task Provisioning_creation_is_delegated_without_applying()
     {
-        var plan = new ProvisioningPlan(
+        var plan = new WorkspacePlan(
             "base",
             "Base",
             "scan-1",
             [],
             [],
             DateTimeOffset.UtcNow);
-        var operation = new ProvisioningOperation
+        var operation = new WorkspaceOperation
         {
             OperationId = "op-1",
-            ProfileId = "base",
+            WorkspaceId = "base",
             Plan = plan,
-            Status = ProvisioningOperationStatuses.AwaitingConfirmation
+            Status = WorkspaceOperationStatuses.AwaitingConfirmation
         };
         var provisioning = new FakeProvisioningService(operation);
         var application = CreateApplication(provisioning: provisioning);
 
-        var actual = await application.CreateProvisioningAsync("base");
+        var actual = await application.CreateWorkspaceOperationAsync("base");
 
         Assert.AreSame(operation, actual);
-        Assert.AreEqual(ProvisioningOperationStatuses.AwaitingConfirmation, actual.Status);
+        Assert.AreEqual(WorkspaceOperationStatuses.AwaitingConfirmation, actual.Status);
         Assert.AreSame(plan, actual.Plan);
         Assert.IsFalse(provisioning.Confirmed);
     }
@@ -60,7 +60,7 @@ public sealed class WorkspaceControlApplicationTests
         var provisioning = new FakeProvisioningService();
         var application = CreateApplication(provisioning: provisioning);
 
-        var operationId = application.ConfirmProvisioning("op-1");
+        var operationId = application.ConfirmWorkspaceOperation("op-1");
 
         Assert.AreEqual("op-1", operationId);
         Assert.IsTrue(provisioning.Confirmed);
@@ -69,13 +69,13 @@ public sealed class WorkspaceControlApplicationTests
     [TestMethod]
     public void Recovery_only_returns_the_latest_operation_when_recoverable()
     {
-        var latestCompleted = new ProvisioningOperation
+        var latestCompleted = new WorkspaceOperation
         {
             OperationId = "completed",
             Status = "completed",
             UpdatedAt = DateTimeOffset.UtcNow
         };
-        var olderFailed = new ProvisioningOperation
+        var olderFailed = new WorkspaceOperation
         {
             OperationId = "failed",
             Status = "failed",
@@ -85,16 +85,16 @@ public sealed class WorkspaceControlApplicationTests
         var application = CreateApplication(
             provisioning: new FakeProvisioningService(latestCompleted, olderFailed));
 
-        Assert.IsNull(application.GetProvisioningRecovery());
+        Assert.IsNull(application.GetRecoverableWorkspaceOperation());
     }
 
     [TestMethod]
     public void Recovery_does_not_offer_stale_operation()
     {
-        var stale = new ProvisioningOperation
+        var stale = new WorkspaceOperation
         {
             OperationId = "stale",
-            Status = ProvisioningOperationStatuses.Stale,
+            Status = WorkspaceOperationStatuses.Stale,
             CanResume = false,
             UpdatedAt = DateTimeOffset.UtcNow
         };
@@ -102,19 +102,19 @@ public sealed class WorkspaceControlApplicationTests
         var application = CreateApplication(
             provisioning: new FakeProvisioningService(stale));
 
-        Assert.IsNull(application.GetProvisioningRecovery());
+        Assert.IsNull(application.GetRecoverableWorkspaceOperation());
     }
 
     [TestMethod]
     public void Recovery_returns_latest_failed_operation()
     {
-        var olderRunning = new ProvisioningOperation
+        var olderRunning = new WorkspaceOperation
         {
             OperationId = "running",
             Status = "running",
             UpdatedAt = DateTimeOffset.UtcNow.AddMinutes(-1)
         };
-        var latestFailed = new ProvisioningOperation
+        var latestFailed = new WorkspaceOperation
         {
             OperationId = "failed",
             Status = "failed",
@@ -124,11 +124,11 @@ public sealed class WorkspaceControlApplicationTests
         var application = CreateApplication(
             provisioning: new FakeProvisioningService(latestFailed, olderRunning));
 
-        Assert.AreSame(latestFailed, application.GetProvisioningRecovery());
+        Assert.AreSame(latestFailed, application.GetRecoverableWorkspaceOperation());
     }
 
     private static WorkspaceControlApplication CreateApplication(
-        IProvisioningService? provisioning = null,
+        IWorkspaceOperationService? provisioning = null,
         IInventoryService? inventory = null)
     {
         return new WorkspaceControlApplication(
@@ -150,40 +150,40 @@ public sealed class WorkspaceControlApplicationTests
             Task.FromResult(snapshot);
     }
 
-    private sealed class FakeProvisioningService(params ProvisioningOperation[] history) : IProvisioningService
+    private sealed class FakeProvisioningService(params WorkspaceOperation[] history) : IWorkspaceOperationService
     {
-        public IReadOnlyList<ProfileManifest> GetProfiles() => [];
+        public IReadOnlyList<WorkspaceManifest> GetWorkspaces() => [];
         public IReadOnlyList<ComponentManifest> GetApplicationCatalog() => [];
-        public ProfileManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
+        public WorkspaceManifest CreateWorkspace(string name, string description, IReadOnlyCollection<string> componentIds) =>
             new("workspace-test", name, description, SchemaVersion: 2, DesiredState: new DesiredStateManifest(
-                componentIds.Select(id => new ProfileApplication(id)).ToArray(), [], [], [], [], []));
-        public void SaveWorkspace(ProfileManifest workspace) { }
-        public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string profileId, CancellationToken cancellationToken = default) =>
+                componentIds.Select(id => new WorkspaceApplication(id)).ToArray(), [], [], [], [], []));
+        public void SaveWorkspace(WorkspaceManifest workspace) { }
+        public Task<DesiredStateDiff> GetDesiredStateDiffAsync(string workspaceId, CancellationToken cancellationToken = default) =>
             Task.FromResult(new DesiredStateDiff(
-                profileId,
-                profileId,
+                workspaceId,
+                workspaceId,
                 "test-scan",
                 [],
                 [],
                 DateTimeOffset.UtcNow));
 
-        public Task<ProvisioningPlan> GetPlanAsync(string profileId, CancellationToken cancellationToken = default) =>
-            Task.FromResult(new ProvisioningPlan(
-                profileId,
-                profileId,
+        public Task<WorkspacePlan> GetPlanAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(new WorkspacePlan(
+                workspaceId,
+                workspaceId,
                 "test-scan",
                 [],
                 [],
                 DateTimeOffset.UtcNow));
         public bool Confirmed { get; private set; }
 
-        public Task<ProvisioningOperation> CreateAsync(string profileId, CancellationToken cancellationToken = default) =>
-            Task.FromResult(history.FirstOrDefault() ?? new ProvisioningOperation
+        public Task<WorkspaceOperation> CreateAsync(string workspaceId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(history.FirstOrDefault() ?? new WorkspaceOperation
             {
                 OperationId = "operation",
-                ProfileId = profileId,
-                Plan = new ProvisioningPlan(profileId, profileId, "test-scan", [], [], DateTimeOffset.UtcNow),
-                Status = ProvisioningOperationStatuses.AwaitingConfirmation
+                WorkspaceId = workspaceId,
+                Plan = new WorkspacePlan(workspaceId, workspaceId, "test-scan", [], [], DateTimeOffset.UtcNow),
+                Status = WorkspaceOperationStatuses.AwaitingConfirmation
             });
 
         public string Confirm(string operationId)
@@ -194,10 +194,10 @@ public sealed class WorkspaceControlApplicationTests
 
         public Task RunAsync(string operationId, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
-        public ProvisioningOperation? Get(string operationId) =>
+        public WorkspaceOperation? Get(string operationId) =>
             history.FirstOrDefault(x => x.OperationId == operationId);
         public string Resume(string operationId) => operationId;
-        public IReadOnlyList<ProvisioningOperation> GetHistory() => history;
+        public IReadOnlyList<WorkspaceOperation> GetHistory() => history;
     }
 
     private sealed class FakeSoftwareInventoryService : ISoftwareInventoryService

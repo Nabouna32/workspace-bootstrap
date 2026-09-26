@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: workspace-bootstrap-ci-${{ github.workflow }}-${{ github.ref }}
+  group: workspace-control-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
@@ -115,8 +115,8 @@ jobs:
         run: |
           dotnet restore src/WorkspaceControl.Infrastructure/WorkspaceControl.Infrastructure.csproj
           dotnet restore src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj --runtime win-x64
-          dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
-          dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
+          dotnet restore src/WorkspaceControl.Cli/WorkspaceControl.Cli.csproj --runtime win-x64
+          dotnet restore tests/WorkspaceControl.Tests/WorkspaceControl.Tests.csproj
 
       - name: Validate desktop localization and accessibility resources
         shell: pwsh
@@ -140,11 +140,11 @@ jobs:
             }
           }
 
-          $profilesPage = Get-Content src/WorkspaceControl.Desktop/ProfilesPage.xaml -Raw
-          if ($profilesPage -notmatch 'x:Uid="WorkspacePage_WorkspaceList"' -or
-              $profilesPage -notmatch 'x:Uid="WorkspacePage_PlanList"' -or
-              $profilesPage -notmatch 'x:Uid="WorkspacePage_ProgressRing"') {
-            throw "ProfilesPage.xaml is missing required accessibility resource bindings."
+          $workspacePage = Get-Content src/WorkspaceControl.Desktop/WorkspacePage.xaml -Raw
+          if ($workspacePage -notmatch 'x:Uid="WorkspacePage_WorkspaceList"' -or
+              $workspacePage -notmatch 'x:Uid="WorkspacePage_PlanList"' -or
+              $workspacePage -notmatch 'x:Uid="WorkspacePage_ProgressRing"') {
+            throw "WorkspacePage.xaml is missing required accessibility resource bindings."
           }
 
       - name: Build
@@ -155,13 +155,13 @@ jobs:
           if (-not $msbuild) { throw "Visual Studio MSBuild could not be located." }
           & $msbuild src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj /t:Build /p:Configuration=Release /p:Platform=x64 /warnAsError
           if ($LASTEXITCODE -ne 0) { throw "WinUI desktop build failed with exit code $LASTEXITCODE." }
-          dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --no-restore --warnaserror
+          dotnet build src/WorkspaceControl.Cli/WorkspaceControl.Cli.csproj --configuration Release --no-restore --warnaserror
 
       - name: Test
-        run: dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=tests-Release.trx"
+        run: dotnet test tests/WorkspaceControl.Tests/WorkspaceControl.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=tests-Release.trx"
 
       - name: Verify formatting
-        run: dotnet format tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --no-restore --verify-no-changes
+        run: dotnet format tests/WorkspaceControl.Tests/WorkspaceControl.Tests.csproj --no-restore --verify-no-changes
 
       - name: Upload test results
         if: always()
@@ -202,8 +202,8 @@ jobs:
         run: |
           dotnet restore src/WorkspaceControl.Infrastructure/WorkspaceControl.Infrastructure.csproj
           dotnet restore src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj --runtime win-x64
-          dotnet restore src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --runtime win-x64
-          dotnet restore tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj
+          dotnet restore src/WorkspaceControl.Cli/WorkspaceControl.Cli.csproj --runtime win-x64
+          dotnet restore tests/WorkspaceControl.Tests/WorkspaceControl.Tests.csproj
 
       - name: Build
         shell: pwsh
@@ -213,14 +213,14 @@ jobs:
           if (-not $msbuild) { throw "Visual Studio MSBuild could not be located." }
           & $msbuild src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj /restore /t:Build /p:Configuration=${{ matrix.configuration }} /p:Platform=x64 /warnAsError
           if ($LASTEXITCODE -ne 0) { throw "WinUI desktop build failed with exit code $LASTEXITCODE." }
-          dotnet build src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
+          dotnet build src/WorkspaceControl.Cli/WorkspaceControl.Cli.csproj --configuration ${{ matrix.configuration }} --no-restore --warnaserror
 
       - name: Test
-        run: dotnet test tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --configuration ${{ matrix.configuration }} --no-restore --logger "trx;LogFileName=tests-${{ matrix.configuration }}.trx"
+        run: dotnet test tests/WorkspaceControl.Tests/WorkspaceControl.Tests.csproj --configuration ${{ matrix.configuration }} --no-restore --logger "trx;LogFileName=tests-${{ matrix.configuration }}.trx"
 
       - name: Verify formatting
         if: matrix.configuration == 'Release'
-        run: dotnet format tests/WorkspaceBootstrap.Tests/WorkspaceBootstrap.Tests.csproj --no-restore --verify-no-changes
+        run: dotnet format tests/WorkspaceControl.Tests/WorkspaceControl.Tests.csproj --no-restore --verify-no-changes
 
       - name: Upload test results
         if: always()
@@ -234,23 +234,23 @@ jobs:
         if: matrix.configuration == 'Release'
         shell: pwsh
         run: |
-          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-weekly"
+          $package = Join-Path $env:RUNNER_TEMP "workspace-control-weekly"
           New-Item -ItemType Directory -Force -Path $package | Out-Null
           $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe | Select-Object -First 1
           if (-not $msbuild) { throw "Visual Studio MSBuild could not be located." }
           & $msbuild src/WorkspaceControl.Desktop/WorkspaceControl.Desktop.csproj /restore /t:Publish /p:Configuration=Release /p:Platform=x64 /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishDir="$package\WorkspaceControl\"
           if ($LASTEXITCODE -ne 0) { throw "Workspace Control publish failed with exit code $LASTEXITCODE." }
-          dotnet publish src/WorkspaceBootstrap.Cli/WorkspaceBootstrap.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
+          dotnet publish src/WorkspaceControl.Cli/WorkspaceControl.Cli.csproj --configuration Release --runtime win-x64 --self-contained true --no-restore --output $package
 
       - name: Smoke-test weekly package
         if: matrix.configuration == 'Release'
         shell: pwsh
         run: |
-          $package = Join-Path $env:RUNNER_TEMP "workspace-bootstrap-weekly"
+          $package = Join-Path $env:RUNNER_TEMP "workspace-control-weekly"
           $desktop = Join-Path $package "WorkspaceControl/WorkspaceControl.exe"
-          $cli = Join-Path $package "WorkspaceBootstrap.Cli.exe"
-          $catalog = Join-Path $package "bootstrap/windows/components/catalog.json"
-          $profiles = Join-Path $package "bootstrap/windows/profiles"
+          $cli = Join-Path $package "WorkspaceControl.Cli.exe"
+          $catalog = Join-Path $package "catalog/windows/components/catalog.json"
+          $profiles = Join-Path $package "catalog/windows/templates"
           $readme = Join-Path $package "README.md"
           $license = Join-Path $package "LICENSE"
           Copy-Item README.md $readme -Force
@@ -259,7 +259,7 @@ jobs:
           if (-not (Test-Path $desktop)) { throw "Workspace Control executable is missing: $desktop" }
           if (-not (Test-Path $cli)) { throw "CLI executable is missing: $cli" }
           if (-not (Test-Path $catalog)) { throw "Bundled component catalog is missing: $catalog" }
-          if (-not (Test-Path $profiles -PathType Container)) { throw "Bundled profiles directory is missing: $profiles" }
+          if (-not (Test-Path $profiles -PathType Container)) { throw "Bundled workspace templates directory is missing: $profiles" }
           if (-not (Test-Path $readme)) { throw "Portable package README is missing: $readme" }
           if (-not (Test-Path $license)) { throw "Portable package LICENSE is missing: $license" }
 

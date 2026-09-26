@@ -3,7 +3,7 @@ using WorkspaceControl.Domain;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WorkspaceControl.Infrastructure;
 
-namespace WorkspaceBootstrap.Tests;
+namespace WorkspaceControl.Tests;
 
 [TestClass]
 public sealed class ConfigurationTests
@@ -56,46 +56,46 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
-    public void Profiles_are_loadable_and_reference_known_components()
+    public void Workspace_templates_are_loadable_and_reference_known_components()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var components = configuration.LoadComponents();
-        var profiles = configuration.LoadProfiles();
+        var templates = configuration.LoadWorkspaceTemplates();
 
-        Assert.IsNotEmpty(profiles);
+        Assert.IsNotEmpty(templates);
         Assert.AreEqual(
-            profiles.Count,
-            profiles.Values.Select(x => x.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+            templates.Count,
+            templates.Values.Select(x => x.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count());
 
-        foreach (var profile in profiles.Values)
+        foreach (var template in templates.Values)
         {
-            Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Id));
-            Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Name));
-            Assert.IsFalse(string.IsNullOrWhiteSpace(profile.Description));
-            Assert.AreEqual(2, profile.SchemaVersion);
-            Assert.IsNotNull(profile.DesiredState);
-            Assert.IsNotEmpty(profile.ApplicationRequests);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(template.Id));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(template.Name));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(template.Description));
+            Assert.AreEqual(2, template.SchemaVersion);
+            Assert.IsNotNull(template.DesiredState);
+            Assert.IsNotEmpty(template.ApplicationRequests);
 
-            var componentIds = profile.ApplicationRequests.Select(x => x.ComponentId).ToArray();
+            var componentIds = template.ApplicationRequests.Select(x => x.ComponentId).ToArray();
             Assert.AreEqual(
                 componentIds.Length,
                 componentIds.Distinct(StringComparer.OrdinalIgnoreCase).Count(),
-                $"{profile.Id} contains duplicate applications.");
+                $"{template.Id} contains duplicate applications.");
 
             foreach (var componentId in componentIds)
-                Assert.IsTrue(components.ContainsKey(componentId), $"{profile.Id} references unknown component {componentId}.");
+                Assert.IsTrue(components.ContainsKey(componentId), $"{template.Id} references unknown component {componentId}.");
         }
 
         foreach (var component in components.Values)
         {
-            foreach (var profileId in component.Profiles ?? Array.Empty<string>())
-                Assert.IsTrue(profiles.ContainsKey(profileId), $"{component.Id} references unknown profile {profileId}.");
+            foreach (var workspaceId in component.Templates ?? Array.Empty<string>())
+                Assert.IsTrue(templates.ContainsKey(workspaceId), $"{component.Id} references unknown template {workspaceId}.");
         }
     }
 
 
     [TestMethod]
-    public void Profile_export_and_import_validate_and_require_explicit_overwrite()
+    public void Workspace_export_and_import_validate_and_require_explicit_overwrite()
     {
         var root = CreateConfigurationRoot();
         var configuration = new ConfigurationStore(root);
@@ -103,13 +103,21 @@ public sealed class ConfigurationTests
         var exported = Path.Combine(Path.GetTempPath(), $"workspace-control-export-{Guid.NewGuid():N}.json");
         try
         {
-            var exportedPath = configuration.ExportProfile("base", exported);
+            var workspace = new WorkspaceManifest(
+                "workspace-export",
+                "Export workspace",
+                "User-owned workspace",
+                DesiredState: new DesiredStateManifest([], [], [], [], [], []),
+                SchemaVersion: 2);
+            configuration.SaveWorkspace(workspace);
+
+            var exportedPath = configuration.ExportWorkspace(workspace.Id, exported);
             Assert.IsTrue(File.Exists(exportedPath));
 
-            var imported = configuration.ImportProfile(exported, overwrite: true);
-            Assert.AreEqual("base", imported.Id);
+            var imported = configuration.ImportWorkspace(exported, overwrite: true);
+            Assert.AreEqual("workspace-export", imported.Id);
 
-            Assert.ThrowsExactly<IOException>(() => configuration.ImportProfile(exported));
+            Assert.ThrowsExactly<IOException>(() => configuration.ImportWorkspace(exported));
         }
         finally
         {
@@ -120,7 +128,7 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
-    public void Profile_import_rejects_path_traversal_identifier()
+    public void Workspace_import_rejects_path_traversal_identifier()
     {
         var root = CreateConfigurationRoot();
         var configuration = new ConfigurationStore(root);
@@ -128,7 +136,7 @@ public sealed class ConfigurationTests
 
         try
         {
-            var malicious = new ProfileManifest(
+            var malicious = new WorkspaceManifest(
                 "../outside",
                 "Malicious",
                 "Invalid identifier",
@@ -137,7 +145,7 @@ public sealed class ConfigurationTests
 
             File.WriteAllText(source, JsonSerializer.Serialize(malicious, JsonDefaults.Options));
 
-            Assert.ThrowsExactly<InvalidOperationException>(() => configuration.ImportProfile(source));
+            Assert.ThrowsExactly<InvalidOperationException>(() => configuration.ImportWorkspace(source));
             Assert.IsFalse(File.Exists(Path.Combine(root, "outside.json")));
         }
         finally
@@ -172,24 +180,24 @@ public sealed class ConfigurationTests
 
         var componentDirectory = Path.Combine(
             root,
-            "bootstrap",
+            "catalog",
             "windows",
             "components",
             "test-app");
         Directory.CreateDirectory(componentDirectory);
         File.WriteAllText(
-            Path.Combine(root, "bootstrap", "windows", "components", "catalog.json"),
+            Path.Combine(root, "catalog", "windows", "components", "catalog.json"),
             """{"components":["test-app"]}""");
         File.WriteAllText(
             Path.Combine(componentDirectory, "component.json"),
             JsonSerializer.Serialize(component, JsonDefaults.Options));
 
-        var profile = new ProfileManifest(
+        var workspace = new WorkspaceManifest(
             "remove-app",
             "Remove app",
             "Application removal test",
             DesiredState: new DesiredStateManifest(
-                [new ProfileApplication("test-app", null, null, "absent")],
+                [new WorkspaceApplication("test-app", null, null, "absent")],
                 [],
                 [],
                 [],
@@ -198,12 +206,12 @@ public sealed class ConfigurationTests
             SchemaVersion: 2);
 
         File.WriteAllText(
-            Path.Combine(root, "bootstrap", "windows", "profiles", "remove-app.json"),
-            JsonSerializer.Serialize(profile, JsonDefaults.Options));
+            Path.Combine(root, "workspaces", "remove-app.json"),
+            JsonSerializer.Serialize(workspace, JsonDefaults.Options));
 
         try
         {
-            var engine = new ProvisioningEngine(
+            var engine = new WorkspaceOperationEngine(
                 configuration,
                 new InstallerEngine(paths),
                 paths,
@@ -214,14 +222,14 @@ public sealed class ConfigurationTests
             var diff = await engine.DiffAsync("remove-app");
             var diffItem = diff.Items.Single(item => item.TargetId == "test-app");
 
-            Assert.AreEqual(ProvisioningStateCodes.Installed, diffItem.StateCode);
-            Assert.AreEqual(ProvisioningActionCodes.Remove, diffItem.ActionCode);
+            Assert.AreEqual(ApplicationStateCodes.Installed, diffItem.StateCode);
+            Assert.AreEqual(DesiredStateActionCodes.Remove, diffItem.ActionCode);
             Assert.AreEqual("2.0.0", diffItem.ObservedValue);
 
             var plan = await engine.PlanAsync("remove-app");
             var planItem = plan.Items.Single(item => item.ComponentId == "test-app");
 
-            Assert.AreEqual(ProvisioningActionCodes.Remove, planItem.ActionCode);
+            Assert.AreEqual(DesiredStateActionCodes.Remove, planItem.ActionCode);
             Assert.AreEqual("2.0.0", planItem.InstalledVersion);
             Assert.IsNull(planItem.DesiredVersion);
         }
@@ -261,7 +269,7 @@ public sealed class ConfigurationTests
             "workspace-control-registry-plan-tests",
             Guid.NewGuid().ToString("N")));
 
-        var profile = new ProfileManifest(
+        var profile = new WorkspaceManifest(
             "registry-only",
             "Registry only",
             "Registry desired-state test",
@@ -281,14 +289,14 @@ public sealed class ConfigurationTests
                 []),
             SchemaVersion: 2);
 
-        var profilePath = Path.Combine(root, "bootstrap", "windows", "profiles", "registry-only.json");
+        var profilePath = Path.Combine(root, "workspaces", "registry-only.json");
         File.WriteAllText(profilePath, JsonSerializer.Serialize(profile, JsonDefaults.Options));
 
         try
         {
             var registry = new RegistryDesiredStateObserver(
                 new FakeRegistryReader(new RegistryObservation(true, "0", "dword", null)));
-            var engine = new ProvisioningEngine(
+            var engine = new WorkspaceOperationEngine(
                 configuration,
                 new InstallerEngine(paths),
                 paths,
@@ -299,13 +307,13 @@ public sealed class ConfigurationTests
             var diff = await engine.DiffAsync("registry-only");
             var diffItem = diff.Items.Single(item => item.Domain == DesiredStateDomainCodes.RegistrySetting);
             Assert.AreEqual(DesiredStateStateCodes.Drifted, diffItem.StateCode);
-            Assert.AreEqual(ProvisioningActionCodes.Set, diffItem.ActionCode);
+            Assert.AreEqual(DesiredStateActionCodes.Set, diffItem.ActionCode);
             StringAssert.Contains(diffItem.Message, "will be updated after explicit confirmation");
 
             var plan = await engine.PlanAsync("registry-only");
             var planItem = plan.Items.Single();
             Assert.AreEqual(DesiredStateDomainCodes.RegistrySetting, planItem.Domain);
-            Assert.AreEqual(ProvisioningActionCodes.Set, planItem.ActionCode);
+            Assert.AreEqual(DesiredStateActionCodes.Set, planItem.ActionCode);
             Assert.AreEqual(diffItem.TargetId, planItem.TargetId);
         }
         finally
@@ -374,36 +382,38 @@ public sealed class ConfigurationTests
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-diff-tests", Guid.NewGuid().ToString("N")));
-        var engine = new ProvisioningEngine(
+        var engine = new WorkspaceOperationEngine(
             configuration,
             new InstallerEngine(paths),
             paths,
             new InventoryScanner([new VersionedInventoryProvider("Microsoft.VisualStudioCode", "1.0.0", "2.0.0")]));
 
-        var diff = await engine.DiffAsync("development-extended");
+        var workspaceId = CreateUserWorkspaceFromTemplate(configuration, "development-extended");
+        var diff = await engine.DiffAsync(workspaceId);
         var item = diff.Items.Single(item => item.TargetId == "vscode");
 
         Assert.AreEqual(DesiredStateDomainCodes.Application, item.Domain);
-        Assert.AreEqual(ProvisioningStateCodes.Outdated, item.StateCode);
-        Assert.AreEqual(ProvisioningActionCodes.Update, item.ActionCode);
+        Assert.AreEqual(ApplicationStateCodes.Outdated, item.StateCode);
+        Assert.AreEqual(DesiredStateActionCodes.Update, item.ActionCode);
         Assert.AreEqual("1.0.0", item.ObservedValue);
         Assert.AreEqual("2.0.0", item.AvailableValue);
         Assert.AreEqual("2.0.0", item.DesiredValue);
     }
 
     [TestMethod]
-    public async Task Provisioning_plan_is_derived_from_the_same_desired_state_diff()
+    public async Task Workspace_plan_is_derived_from_the_same_desired_state_diff()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-diff-tests", Guid.NewGuid().ToString("N")));
-        var engine = new ProvisioningEngine(
+        var engine = new WorkspaceOperationEngine(
             configuration,
             new InstallerEngine(paths),
             paths,
             new InventoryScanner([new VersionedInventoryProvider("Microsoft.VisualStudioCode", "1.0.0", "2.0.0")]));
 
-        var diff = await engine.DiffAsync("development-extended");
-        var plan = await engine.PlanAsync("development-extended");
+        var workspaceId = CreateUserWorkspaceFromTemplate(configuration, "development-extended");
+        var diff = await engine.DiffAsync(workspaceId);
+        var plan = await engine.PlanAsync(workspaceId);
         var diffItem = diff.Items.Single(item => item.TargetId == "vscode");
         var planItem = plan.Items.Single(item => item.ComponentId == "vscode");
 
@@ -414,21 +424,22 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
-    public async Task Provisioning_plan_uses_available_version_for_latest_stable()
+    public async Task Workspace_plan_uses_available_version_for_latest_stable()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
-        var engine = new ProvisioningEngine(
+        var engine = new WorkspaceOperationEngine(
             configuration,
             new InstallerEngine(paths),
             paths,
             new InventoryScanner([new VersionedInventoryProvider("Microsoft.VisualStudioCode", "1.0.0", "2.0.0")]));
 
-        var plan = await engine.PlanAsync("development-extended");
+        var workspaceId = CreateUserWorkspaceFromTemplate(configuration, "development-extended");
+        var plan = await engine.PlanAsync(workspaceId);
         var item = plan.Items.Single(item => item.ComponentId == "vscode");
 
-        Assert.AreEqual(ProvisioningStateCodes.Outdated, item.StateCode);
-        Assert.AreEqual(ProvisioningActionCodes.Update, item.ActionCode);
+        Assert.AreEqual(ApplicationStateCodes.Outdated, item.StateCode);
+        Assert.AreEqual(DesiredStateActionCodes.Update, item.ActionCode);
         Assert.AreEqual("1.0.0", item.InstalledVersion);
         Assert.AreEqual("2.0.0", item.AvailableVersion);
         Assert.AreEqual("2.0.0", item.DesiredVersion);
@@ -438,12 +449,12 @@ public sealed class ConfigurationTests
     [TestMethod]
     public void Desired_state_profile_maps_applications_to_requests()
     {
-        var profile = new ProfileManifest(
+        var workspace = new WorkspaceManifest(
             "test",
             "Test",
-            "Test profile",
+            "Test workspace",
             DesiredState: new DesiredStateManifest(
-                [new ProfileApplication("vscode", "minimum", "1.2.3")],
+                [new WorkspaceApplication("vscode", "minimum", "1.2.3")],
                 [],
                 [],
                 [],
@@ -451,68 +462,71 @@ public sealed class ConfigurationTests
                 []),
             SchemaVersion: 2);
 
-        var request = profile.ApplicationRequests.Single();
+        var request = workspace.ApplicationRequests.Single();
 
         Assert.AreEqual("vscode", request.ComponentId);
         Assert.AreEqual("minimum", request.VersionPolicy);
         Assert.AreEqual("1.2.3", request.MinimumVersion);
-        Assert.IsTrue(profile.DesiredState is not null);
+        Assert.IsTrue(workspace.DesiredState is not null);
     }
 
     [TestMethod]
-    public async Task Provisioning_plan_preserves_stable_compatible_policy()
+    public async Task Workspace_plan_preserves_stable_compatible_policy()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
-        var engine = new ProvisioningEngine(
+        var engine = new WorkspaceOperationEngine(
             configuration,
             new InstallerEngine(paths),
             paths,
             new InventoryScanner([new VersionedInventoryProvider("Microsoft.VisualStudio.2022.BuildTools", "17.14.0", "17.14.1")]));
 
-        var plan = await engine.PlanAsync("development");
+        var workspaceId = CreateUserWorkspaceFromTemplate(configuration, "development");
+        var plan = await engine.PlanAsync(workspaceId);
         var item = plan.Items.Single(item => item.ComponentId == "visual-studio");
 
-        Assert.AreEqual(ProvisioningStateCodes.Outdated, item.StateCode);
-        Assert.AreEqual(ProvisioningActionCodes.Update, item.ActionCode);
+        Assert.AreEqual(ApplicationStateCodes.Outdated, item.StateCode);
+        Assert.AreEqual(DesiredStateActionCodes.Update, item.ActionCode);
         Assert.AreEqual("17.14.0", item.InstalledVersion);
         Assert.AreEqual("17.14.1", item.AvailableVersion);
         Assert.AreEqual("17.14.1", item.DesiredVersion);
     }
 
     [TestMethod]
-    public async Task Provisioning_plan_applies_minimum_version_policy()
+    public async Task Workspace_plan_applies_minimum_version_policy()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
-        var engine = new ProvisioningEngine(
+        var engine = new WorkspaceOperationEngine(
             configuration,
             new InstallerEngine(paths),
             paths,
             new InventoryScanner([new VersionedInventoryProvider("EclipseAdoptium.Temurin.21.JDK", "21.0.0")]));
 
-        var plan = await engine.PlanAsync("development-extended");
+        var workspaceId = CreateUserWorkspaceFromTemplate(configuration, "development-extended");
+        var plan = await engine.PlanAsync(workspaceId);
         var item = plan.Items.Single(item => item.ComponentId == "temurin21");
 
-        Assert.AreEqual(ProvisioningStateCodes.Installed, item.StateCode);
-        Assert.AreEqual(ProvisioningActionCodes.None, item.ActionCode);
+        Assert.AreEqual(ApplicationStateCodes.Installed, item.StateCode);
+        Assert.AreEqual(DesiredStateActionCodes.None, item.ActionCode);
         Assert.AreEqual("21.0.0", item.InstalledVersion);
         Assert.AreEqual("21.0.0", item.DesiredVersion);
     }
 
     [TestMethod]
-    public async Task Provisioning_plan_blocks_mutation_when_inventory_is_incomplete()
+    public async Task Workspace_plan_blocks_mutation_when_inventory_is_incomplete()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
         var inventory = new InventoryScanner([new FailedInventoryProvider()]);
-        var engine = new ProvisioningEngine(
+        var engine = new WorkspaceOperationEngine(
             configuration,
             new InstallerEngine(paths),
             paths,
             inventory);
 
-        var plan = await engine.PlanAsync(configuration.LoadProfiles().Values.First().Id);
+        var workspaceId = CreateUserWorkspaceFromTemplate(configuration, configuration.LoadWorkspaceTemplates().Values.First().Id);
+        var plan = await engine.PlanAsync(workspaceId);
 
         Assert.IsNotEmpty(plan.Items);
         Assert.IsTrue(plan.Items.All(item =>
@@ -520,19 +534,35 @@ public sealed class ConfigurationTests
             item.ActionCode == "blocked"));
     }
 
+
+    private static string CreateUserWorkspaceFromTemplate(ConfigurationStore configuration, string templateId)
+    {
+        var template = configuration.LoadWorkspaceTemplates().TryGetValue(templateId, out var value)
+            ? value
+            : throw new AssertFailedException($"Unknown workspace template: {templateId}");
+
+        var workspace = template with
+        {
+            Id = $"workspace-test-{template.Id}"
+        };
+
+        configuration.SaveWorkspace(workspace);
+        return workspace.Id;
+    }
+
     private static string CreateConfigurationRoot()
     {
         var root = Path.Combine(Path.GetTempPath(), "workspace-control-config-tests", Guid.NewGuid().ToString("N"));
-        var componentsRoot = Path.Combine(root, "bootstrap", "windows", "components");
-        var profilesRoot = Path.Combine(root, "bootstrap", "windows", "profiles");
+        var componentsRoot = Path.Combine(root, "catalog", "windows", "components");
+        var templatesRoot = Path.Combine(root, "catalog", "windows", "templates");
         Directory.CreateDirectory(componentsRoot);
-        Directory.CreateDirectory(profilesRoot);
+        Directory.CreateDirectory(templatesRoot);
 
         File.WriteAllText(
             Path.Combine(componentsRoot, "catalog.json"),
             """{"components":[]}""");
 
-        var profile = new ProfileManifest(
+        var profile = new WorkspaceManifest(
             "base",
             "Base",
             "Test profile",
@@ -540,7 +570,7 @@ public sealed class ConfigurationTests
             SchemaVersion: 2);
 
         File.WriteAllText(
-            Path.Combine(profilesRoot, "base.json"),
+            Path.Combine(templatesRoot, "base.json"),
             JsonSerializer.Serialize(profile, JsonDefaults.Options));
 
         return root;
@@ -566,12 +596,12 @@ public sealed class ConfigurationTests
         public int CaptureCount { get; private set; }
         public int WriteCount { get; private set; }
         public int RestoreCount { get; private set; }
-        public ProvisioningRegistrySnapshot? RestoredSnapshot { get; private set; }
+        public WorkspaceRegistrySnapshot? RestoredSnapshot { get; private set; }
 
-        public ProvisioningRegistrySnapshot Capture(RegistrySettingDesiredState desired)
+        public WorkspaceRegistrySnapshot Capture(RegistrySettingDesiredState desired)
         {
             CaptureCount++;
-            return new ProvisioningRegistrySnapshot(
+            return new WorkspaceRegistrySnapshot(
                 desired.Hive,
                 desired.Key,
                 desired.ValueName,
@@ -582,7 +612,7 @@ public sealed class ConfigurationTests
 
         public void Write(RegistrySettingDesiredState desired) => WriteCount++;
 
-        public void Restore(ProvisioningRegistrySnapshot snapshot)
+        public void Restore(WorkspaceRegistrySnapshot snapshot)
         {
             RestoreCount++;
             RestoredSnapshot = snapshot;
@@ -664,7 +694,7 @@ public sealed class ConfigurationTests
         var current = new DirectoryInfo(AppContext.BaseDirectory);
         while (current is not null)
         {
-            if (File.Exists(Path.Combine(current.FullName, "bootstrap", "windows", "components", "catalog.json")))
+            if (File.Exists(Path.Combine(current.FullName, "catalog", "windows", "components", "catalog.json")))
                 return current.FullName;
 
             current = current.Parent;
@@ -677,21 +707,21 @@ public sealed class ConfigurationTests
 
 
 [TestClass]
-public sealed class ProvisioningPlanContractTests
+public sealed class WorkspacePlanContractTests
 {
     [TestMethod]
-    public async Task Provisioning_plan_exposes_typed_contract_fields()
+    public async Task Workspace_plan_exposes_typed_contract_fields()
     {
         var configuration = new ConfigurationStore(FindRepositoryRoot());
         var paths = new WorkspacePaths(Path.Combine(Path.GetTempPath(), "workspace-bootstrap-plan-tests", Guid.NewGuid().ToString("N")));
-        var engine = new ProvisioningEngine(
+        var engine = new WorkspaceOperationEngine(
             configuration,
             new InstallerEngine(paths),
             paths,
             new InventoryScanner([]));
 
-        var plan = await engine.PlanAsync(configuration.LoadProfiles().Values.First().Id);
-        Assert.AreEqual(configuration.LoadProfiles().Values.First().Id, plan.ProfileId);
+        var plan = await engine.PlanAsync(configuration.LoadWorkspaces().Values.First().Id);
+        Assert.AreEqual(configuration.LoadWorkspaces().Values.First().Id, plan.WorkspaceId);
         Assert.IsFalse(string.IsNullOrWhiteSpace(plan.InventoryScanId));
         Assert.IsNotEmpty(plan.Items);
 
@@ -711,7 +741,7 @@ public sealed class ProvisioningPlanContractTests
         var current = new DirectoryInfo(AppContext.BaseDirectory);
         while (current is not null)
         {
-            if (File.Exists(Path.Combine(current.FullName, "bootstrap", "windows", "components", "catalog.json")))
+            if (File.Exists(Path.Combine(current.FullName, "catalog", "windows", "components", "catalog.json")))
                 return current.FullName;
 
             current = current.Parent;
@@ -744,7 +774,7 @@ public sealed class InstallerEngineTests
 
         var arguments = InstallerEngine.BuildWingetArguments(
             component,
-            ProvisioningActionCodes.Install);
+            DesiredStateActionCodes.Install);
 
         Assert.AreEqual("install", arguments[0]);
         CollectionAssert.Contains(arguments.ToArray(), "Test.Package");
@@ -768,12 +798,12 @@ public sealed class InstallerEngineTests
 
         var installArguments = InstallerEngine.BuildWingetArguments(
             component,
-            ProvisioningActionCodes.Install,
+            DesiredStateActionCodes.Install,
             "2.0.0");
 
         var upgradeArguments = InstallerEngine.BuildWingetArguments(
             component,
-            ProvisioningActionCodes.Update,
+            DesiredStateActionCodes.Update,
             "2.0.0");
 
         CollectionAssert.AreEqual(
@@ -802,7 +832,7 @@ public sealed class InstallerEngineTests
 
         var arguments = InstallerEngine.BuildWingetArguments(
             component,
-            ProvisioningActionCodes.Remove);
+            DesiredStateActionCodes.Remove);
 
         CollectionAssert.AreEqual(
             new[] { "uninstall", "--id", "Test.Package", "--exact", "--accept-source-agreements", "--accept-package-agreements", "--silent" },
@@ -827,7 +857,7 @@ public sealed class InstallerEngineTests
 
         var arguments = InstallerEngine.BuildWingetArguments(
             component,
-            ProvisioningActionCodes.Update);
+            DesiredStateActionCodes.Update);
 
         Assert.AreEqual("upgrade", arguments[0]);
         CollectionAssert.Contains(arguments.ToArray(), "Test.Package");
@@ -874,7 +904,7 @@ public sealed class WorkspaceStorageContractTests
         var current = new DirectoryInfo(AppContext.BaseDirectory);
         while (current is not null)
         {
-            if (File.Exists(Path.Combine(current.FullName, "bootstrap", "windows", "components", "catalog.json")))
+            if (File.Exists(Path.Combine(current.FullName, "catalog", "windows", "components", "catalog.json")))
                 return current.FullName;
 
             current = current.Parent;
@@ -903,7 +933,7 @@ public sealed class WorkspaceStoreTests
             "User-owned desired state.",
             ["github-cli"]);
 
-        var loaded = configuration.LoadProfiles();
+        var loaded = configuration.LoadWorkspaces();
 
         Assert.IsTrue(File.Exists(Path.Combine(workspaceRoot, $"{workspace.Id}.json")));
         Assert.IsTrue(loaded.ContainsKey(workspace.Id));
@@ -911,7 +941,7 @@ public sealed class WorkspaceStoreTests
             workspace.DesiredState!.Applications.Any(
                 application => application.ComponentId == "github-cli"));
         Assert.IsFalse(File.Exists(
-            Path.Combine(repositoryRoot, "bootstrap", "windows", "profiles", $"{workspace.Id}.json")));
+            Path.Combine(repositoryRoot, "catalog", "windows", "templates", $"{workspace.Id}.json")));
     }
 
     [TestMethod]
@@ -934,13 +964,13 @@ public sealed class WorkspaceStoreTests
             Name = "Updated Workspace",
             DesiredState = workspace.DesiredState! with
             {
-                Applications = [new ProfileApplication("vscode")]
+                Applications = [new WorkspaceApplication("vscode")]
             }
         };
 
         configuration.SaveWorkspace(updated);
 
-        var loaded = configuration.LoadProfiles()[workspace.Id];
+        var loaded = configuration.LoadWorkspaces()[workspace.Id];
 
         Assert.AreEqual("Updated Workspace", loaded.Name);
         CollectionAssert.AreEqual(
@@ -972,7 +1002,7 @@ public sealed class WorkspaceStoreTests
         var current = new DirectoryInfo(AppContext.BaseDirectory);
         while (current is not null)
         {
-            if (File.Exists(Path.Combine(current.FullName, "bootstrap", "windows", "components", "catalog.json")))
+            if (File.Exists(Path.Combine(current.FullName, "catalog", "windows", "components", "catalog.json")))
                 return current.FullName;
 
             current = current.Parent;

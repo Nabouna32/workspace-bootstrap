@@ -3,7 +3,7 @@ using WorkspaceControl.Application;
 using WorkspaceControl.Application.Contracts;
 using WorkspaceControl.Domain;
 
-namespace WorkspaceBootstrap.Tests;
+namespace WorkspaceControl.Tests;
 
 [TestClass]
 public sealed class SoftwareInventoryServiceTests

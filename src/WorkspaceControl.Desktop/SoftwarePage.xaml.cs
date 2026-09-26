@@ -31,6 +31,6 @@ public sealed partial class SoftwarePage : Page
         var viewModel = (WorkspaceControlViewModel)DataContext;
         viewModel.AddApplicationToWorkspace(componentId);
 
-        Frame.Navigate(typeof(ProfilesPage));
+        Frame.Navigate(typeof(WorkspacePage));
     }
 }
