@@ -8,11 +8,18 @@ public sealed record DesiredStateManifest(
     IReadOnlyList<OptimizationDesiredState> Optimizations,
     IReadOnlyList<MachineCondition> Conditions);
 
+public static class WorkspaceApplicationIntentCodes
+{
+    public const string Undefined = "undefined";
+    public const string Present = "present";
+    public const string Absent = "absent";
+}
+
 public sealed record WorkspaceApplication(
     string ComponentId,
     string? VersionPolicy = null,
     string? MinimumVersion = null,
-    string State = "present");
+    string State = WorkspaceApplicationIntentCodes.Present);
 
 public sealed record WindowsSettingDesiredState(
     string Id,
