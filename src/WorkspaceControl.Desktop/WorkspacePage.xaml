@@ -73,7 +73,7 @@
                             <Button
                                 x:Uid="WorkspacePage_Capture"
                                 Click="CaptureWorkspaceButton_Click"
-                                IsEnabled="{Binding Software}" />
+                                IsEnabled="{Binding HasSoftwareObservation}" />
                         </StackPanel>
                         <TextBlock
                             x:Uid="WorkspacePage_CaptureHint"
