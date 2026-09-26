@@ -1060,7 +1060,7 @@ public sealed class InstallerEngineTests
             DesiredStateActionCodes.Remove);
 
         CollectionAssert.AreEqual(
-            new[] { "uninstall", "--id", "Test.Package", "--exact", "--accept-source-agreements", "--accept-package-agreements", "--silent" },
+            new[] { "uninstall", "--id", "Test.Package", "--exact", "--accept-source-agreements", "--accept-package-agreements", "--silent", "--disable-interactivity" },
             arguments.ToArray());
     }
 
