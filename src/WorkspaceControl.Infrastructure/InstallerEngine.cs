@@ -60,15 +60,71 @@ public sealed class InstallerEngine
 
     public async Task UninstallAsync(
         ComponentManifest component,
+        RemovalCapability removalCapability,
+        string? installedVersion,
         CancellationToken token)
     {
-        if (string.IsNullOrWhiteSpace(component.PackageId))
+        if (!string.Equals(
+                removalCapability.Kind,
+                RemovalCapabilityKindCodes.WinGet,
+                StringComparison.OrdinalIgnoreCase))
+        {
             throw new InvalidOperationException(
-                $"Application '{component.Name}' does not declare a package id.");
+                $"Unsupported application removal capability '{removalCapability.Kind}'.");
+        }
+
+        if (!string.Equals(
+                removalCapability.ProviderId,
+                "windows.winget",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"Unsupported removal provider '{removalCapability.ProviderId}'.");
+        }
+
+        if (string.IsNullOrWhiteSpace(removalCapability.PackageId))
+            throw new InvalidOperationException(
+                $"Application '{component.Name}' has no package id in its observed removal capability.");
 
         await RunWingetAsync(
-            BuildWingetArguments(component, DesiredStateActionCodes.Remove),
+            BuildWingetArguments(
+                removalCapability.PackageId,
+                DesiredStateActionCodes.Remove,
+                installedVersion,
+                removalCapability.Source,
+                removalCapability.Scope),
             component.Name,
+            token);
+    }
+
+    public async Task InstallFromRemovalCapabilityAsync(
+        RemovalCapability removalCapability,
+        string componentName,
+        string version,
+        CancellationToken token)
+    {
+        if (!string.Equals(
+                removalCapability.Kind,
+                RemovalCapabilityKindCodes.WinGet,
+                StringComparison.OrdinalIgnoreCase)
+            || !string.Equals(
+                removalCapability.ProviderId,
+                "windows.winget",
+                StringComparison.OrdinalIgnoreCase)
+            || string.IsNullOrWhiteSpace(removalCapability.PackageId))
+        {
+            throw new InvalidOperationException(
+                "Rollback requires a supported WinGet removal capability.");
+        }
+
+        await RunWingetAsync(
+            BuildWingetArguments(
+                removalCapability.PackageId,
+                DesiredStateActionCodes.Install,
+                version,
+                removalCapability.Source,
+                removalCapability.Scope),
+            componentName,
             token);
     }
 
@@ -572,9 +628,21 @@ public sealed class InstallerEngine
     internal static IReadOnlyList<string> BuildWingetArguments(
         ComponentManifest component,
         string actionCode,
-        string? desiredVersion = null)
+        string? desiredVersion = null) =>
+        BuildWingetArguments(
+            component.PackageId
+                ?? throw new InvalidOperationException("WinGet operation requires a package id."),
+            actionCode,
+            desiredVersion);
+
+    internal static IReadOnlyList<string> BuildWingetArguments(
+        string packageId,
+        string actionCode,
+        string? desiredVersion = null,
+        string? source = null,
+        InventoryScope scope = InventoryScope.Unknown)
     {
-        if (string.IsNullOrWhiteSpace(component.PackageId))
+        if (string.IsNullOrWhiteSpace(packageId))
             throw new InvalidOperationException("WinGet operation requires a package id.");
 
         var command = actionCode switch
@@ -589,7 +657,7 @@ public sealed class InstallerEngine
         {
             command,
             "--id",
-            component.PackageId,
+            packageId,
             "--exact",
             "--accept-source-agreements",
             "--accept-package-agreements",
@@ -600,6 +668,23 @@ public sealed class InstallerEngine
         {
             arguments.Add("--version");
             arguments.Add(desiredVersion);
+        }
+
+        if (!string.IsNullOrWhiteSpace(source))
+        {
+            arguments.Add("--source");
+            arguments.Add(source);
+        }
+
+        if (scope is InventoryScope.User or InventoryScope.System)
+        {
+            arguments.Add("--scope");
+            arguments.Add(scope == InventoryScope.User ? "user" : "machine");
+        }
+
+        if (actionCode == DesiredStateActionCodes.Remove)
+        {
+            arguments.Add("--disable-interactivity");
         }
 
         return arguments;

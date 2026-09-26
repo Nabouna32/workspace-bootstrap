@@ -38,6 +38,18 @@ public sealed record InventoryEvidence(
     bool IsStrong,
     string? Source = null);
 
+public static class RemovalCapabilityKindCodes
+{
+    public const string WinGet = "winget";
+}
+
+public sealed record RemovalCapability(
+    string Kind,
+    string ProviderId,
+    string? PackageId = null,
+    string? Source = null,
+    InventoryScope Scope = InventoryScope.Unknown);
+
 public sealed record InventoryObservation(
     string Id,
     string DisplayName,
@@ -54,7 +66,8 @@ public sealed record InventoryObservation(
     IReadOnlyList<string> Capabilities,
     IReadOnlyList<InventoryEvidence> Evidence,
     DateTimeOffset DetectedAtUtc,
-    string? AvailableVersion = null);
+    string? AvailableVersion = null,
+    RemovalCapability? RemovalCapability = null);
 
 public sealed class InventoryItem
 {
@@ -66,6 +79,7 @@ public sealed class InventoryItem
     public InventoryScope Scope { get; init; }
     public string? InstallLocation { get; init; }
     public string? RemovalCommand { get; init; }
+    public IReadOnlyList<RemovalCapability> RemovalCapabilities { get; init; } = [];
     public string? Publisher { get; init; }
     public InventoryOwnership Ownership { get; init; }
     public required IReadOnlyList<string> Capabilities { get; init; }

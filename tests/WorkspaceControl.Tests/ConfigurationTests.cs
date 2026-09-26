@@ -232,6 +232,82 @@ public sealed class ConfigurationTests
             Assert.AreEqual(DesiredStateActionCodes.Remove, planItem.ActionCode);
             Assert.AreEqual("2.0.0", planItem.InstalledVersion);
             Assert.IsNull(planItem.DesiredVersion);
+            Assert.IsNotNull(planItem.RemovalCapability);
+            Assert.AreEqual(RemovalCapabilityKindCodes.WinGet, planItem.RemovalCapability!.Kind);
+            Assert.AreEqual("Test.Package", planItem.RemovalCapability.PackageId);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task Desired_state_plan_blocks_removal_without_supported_capability()
+    {
+        var root = CreateConfigurationRoot();
+        var configuration = new ConfigurationStore(root);
+        var paths = new WorkspacePaths(Path.Combine(
+            Path.GetTempPath(),
+            "workspace-control-remove-capability-tests",
+            Guid.NewGuid().ToString("N")));
+
+        var component = new ComponentManifest(
+            "test-app",
+            "Test app",
+            null,
+            "Test.Package",
+            null,
+            "exe",
+            null,
+            "x64",
+            null,
+            [],
+            "winget",
+            "latest-stable");
+
+        var componentDirectory = Path.Combine(root, "catalog", "windows", "components", "test-app");
+        Directory.CreateDirectory(componentDirectory);
+        File.WriteAllText(
+            Path.Combine(root, "catalog", "windows", "components", "catalog.json"),
+            """{"components":["test-app"]}""");
+        File.WriteAllText(
+            Path.Combine(componentDirectory, "component.json"),
+            JsonSerializer.Serialize(component, JsonDefaults.Options));
+
+        var workspace = new WorkspaceManifest(
+            "remove-app",
+            "Remove app",
+            "Removal capability test",
+            DesiredState: new DesiredStateManifest(
+                [new WorkspaceApplication("test-app", null, null, "absent")],
+                [],
+                [],
+                [],
+                [],
+                []),
+            SchemaVersion: 2);
+
+        File.WriteAllText(
+            Path.Combine(root, "workspaces", "remove-app.json"),
+            JsonSerializer.Serialize(workspace, JsonDefaults.Options));
+
+        try
+        {
+            var engine = new WorkspaceOperationEngine(
+                configuration,
+                new InstallerEngine(paths),
+                paths,
+                new InventoryScanner([
+                    new VersionedInventoryProvider("Test.Package", "2.0.0", removalSupported: false)
+                ]));
+
+            var plan = await engine.PlanAsync("remove-app");
+            var planItem = plan.Items.Single(item => item.ComponentId == "test-app");
+
+            Assert.AreEqual(DesiredStateActionCodes.Blocked, planItem.ActionCode);
+            StringAssert.Contains(planItem.Message, "no supported removal capability");
+            Assert.IsNull(planItem.RemovalCapability);
         }
         finally
         {
@@ -798,7 +874,11 @@ public sealed class ConfigurationTests
                 new InventoryProviderDiagnostic(Id, true, "Synthetic inventory.")));
     }
 
-    private sealed class VersionedInventoryProvider(string packageId, string version, string? availableVersion = null) : IInventoryProvider
+    private sealed class VersionedInventoryProvider(
+        string packageId,
+        string version,
+        string? availableVersion = null,
+        bool removalSupported = true) : IInventoryProvider
     {
         public string Id => "test.versioned";
 
@@ -821,7 +901,15 @@ public sealed class ConfigurationTests
                         [],
                         [new InventoryEvidence("installed", "installed", true, Id)],
                         DateTimeOffset.UtcNow,
-                        availableVersion)
+                        availableVersion,
+                        removalSupported
+                            ? new RemovalCapability(
+                                RemovalCapabilityKindCodes.WinGet,
+                                Id,
+                                packageId,
+                                "test",
+                                InventoryScope.System)
+                            : null)
                 ],
                 new InventoryProviderDiagnostic(Id, true, "Synthetic inventory.")));
     }
@@ -972,7 +1060,28 @@ public sealed class InstallerEngineTests
             DesiredStateActionCodes.Remove);
 
         CollectionAssert.AreEqual(
-            new[] { "uninstall", "--id", "Test.Package", "--exact", "--accept-source-agreements", "--accept-package-agreements", "--silent" },
+            new[] { "uninstall", "--id", "Test.Package", "--exact", "--accept-source-agreements", "--accept-package-agreements", "--silent", "--disable-interactivity" },
+            arguments.ToArray());
+    }
+
+    [TestMethod]
+    public void WinGet_removal_arguments_preserve_observed_source_and_version()
+    {
+        var arguments = InstallerEngine.BuildWingetArguments(
+            "Test.Package",
+            DesiredStateActionCodes.Remove,
+            "2.0.0",
+            "msstore",
+            InventoryScope.User);
+
+        CollectionAssert.AreEqual(
+            new[]
+            {
+                "uninstall", "--id", "Test.Package", "--exact",
+                "--accept-source-agreements", "--accept-package-agreements", "--silent",
+                "--version", "2.0.0", "--source", "msstore", "--scope", "user",
+                "--disable-interactivity"
+            },
             arguments.ToArray());
     }
 

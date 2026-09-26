@@ -73,7 +73,8 @@ public sealed record DesiredStateDiffItem(
     string? ObservedValue,
     string? AvailableValue,
     string? DesiredValue,
-    string Message);
+    string Message,
+    RemovalCapability? RemovalCapability = null);
 
 public sealed record DesiredStateDiff(
     string WorkspaceId,
