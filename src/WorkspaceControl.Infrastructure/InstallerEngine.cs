@@ -6,7 +6,14 @@ using System.Text.RegularExpressions;
 
 namespace WorkspaceControl.Infrastructure;
 
-public sealed class InstallerEngine
+public interface IInstallerEngine
+{
+    Task InstallAsync(ComponentManifest component, string actionCode, string? desiredVersion, CancellationToken token);
+    Task UninstallAsync(ComponentManifest component, RemovalCapability removalCapability, string? installedVersion, CancellationToken token);
+    Task InstallFromRemovalCapabilityAsync(RemovalCapability removalCapability, string componentName, string version, CancellationToken token);
+}
+
+public sealed class InstallerEngine : IInstallerEngine
 {
     private readonly WorkspacePaths _paths;
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromMinutes(20) };
