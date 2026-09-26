@@ -70,7 +70,15 @@
                                 x:Uid="WorkspacePage_Save"
                                 Click="SaveWorkspaceButton_Click"
                                 IsEnabled="{Binding HasSelectedWorkspace}" />
+                            <Button
+                                x:Uid="WorkspacePage_Capture"
+                                Click="CaptureWorkspaceButton_Click"
+                                IsEnabled="{Binding Software}" />
                         </StackPanel>
+                        <TextBlock
+                            x:Uid="WorkspacePage_CaptureHint"
+                            TextWrapping="Wrap"
+                            Opacity="0.65" />
                     </StackPanel>
                 </Border>
 
