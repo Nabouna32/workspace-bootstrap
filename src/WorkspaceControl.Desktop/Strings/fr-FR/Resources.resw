@@ -206,4 +206,18 @@
   <data name="WorkspaceCaptured.Text" xml:space="preserve"><value>Workspace créé à partir de {0} applications détectées comme installées.</value></data>
   <data name="WorkspaceCaptureUnavailable.Text" xml:space="preserve"><value>La capture est indisponible tant que ce PC n’a pas été observé.</value></data>
   <data name="WorkspaceCaptureFailed.Text" xml:space="preserve"><value>Impossible de capturer ce PC dans un Workspace.</value></data>
+  <data name="WorkspacePage_ApplicationObserved.Text" xml:space="preserve"><value>Observé</value></data>
+  <data name="WorkspacePage_ApplicationStateInstalled" xml:space="preserve"><value>Installée</value></data>
+  <data name="WorkspacePage_ApplicationStateOutdated" xml:space="preserve"><value>Mise à jour disponible</value></data>
+  <data name="WorkspacePage_ApplicationStateMissing" xml:space="preserve"><value>Non installée</value></data>
+  <data name="WorkspacePage_ApplicationStateAbsent" xml:space="preserve"><value>Absente</value></data>
+  <data name="WorkspacePage_ApplicationStateUnknown" xml:space="preserve"><value>Inconnue</value></data>
+  <data name="WorkspacePage_ActionInstall" xml:space="preserve"><value>Installer</value></data>
+  <data name="WorkspacePage_ActionUpdate" xml:space="preserve"><value>Mettre à jour</value></data>
+  <data name="WorkspacePage_ActionRemove" xml:space="preserve"><value>Supprimer</value></data>
+  <data name="WorkspacePage_ActionBlocked" xml:space="preserve"><value>Bloquée</value></data>
+  <data name="WorkspacePage_ActionNone" xml:space="preserve"><value>Aucun changement</value></data>
+  <data name="RemovalActionsFormat" xml:space="preserve"><value>{0} application(s) seront supprimées. Vérifiez les détails ci-dessous avant de confirmer.</value></data>
+  <data name="WorkspacePage_RemovalWarning.Title" xml:space="preserve"><value>La suppression nécessite une confirmation</value></data>
+  <data name="WorkspacePage_RemovalWarning.AutomationProperties.Name" xml:space="preserve"><value>Avertissement concernant la suppression d’applications</value></data>
 </root>

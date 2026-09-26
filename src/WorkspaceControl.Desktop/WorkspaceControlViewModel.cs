@@ -76,6 +76,8 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(CurrentComponentDisplay));
             OnPropertyChanged(nameof(WorkspaceOperationError));
             OnPropertyChanged(nameof(HasWorkspaceOperationError));
+            OnPropertyChanged(nameof(HasRemovalActions));
+            OnPropertyChanged(nameof(RemovalActionsDisplay));
         }
     }
 
@@ -83,6 +85,18 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public bool HasDesiredStateDiff => DesiredStateDiff is not null;
     public WorkspacePlan? WorkspacePlan => WorkspaceOperation?.Plan;
     public bool HasWorkspaceOperation => WorkspaceOperation is not null;
+    public bool HasRemovalActions =>
+        WorkspacePlan?.Items.Any(item =>
+            string.Equals(item.ActionCode, DesiredStateActionCodes.Remove, StringComparison.OrdinalIgnoreCase)) == true;
+    public string RemovalActionsDisplay
+    {
+        get
+        {
+            var count = WorkspacePlan?.Items.Count(item =>
+                string.Equals(item.ActionCode, DesiredStateActionCodes.Remove, StringComparison.OrdinalIgnoreCase)) ?? 0;
+            return _localizer.Format("RemovalActionsFormat", count);
+        }
+    }
     public bool IsAwaitingConfirmation =>
         WorkspaceOperation?.Status == WorkspaceOperationStatuses.AwaitingConfirmation;
     public bool IsWorkspaceOperationActive =>

@@ -240,6 +240,143 @@ public sealed class ConfigurationTests
     }
 
     [TestMethod]
+    public async Task Desired_state_plan_does_not_remove_application_when_already_absent()
+    {
+        var root = CreateConfigurationRoot();
+        var configuration = new ConfigurationStore(root);
+        var paths = new WorkspacePaths(Path.Combine(
+            Path.GetTempPath(),
+            "workspace-control-remove-absent-tests",
+            Guid.NewGuid().ToString("N")));
+
+        var component = new ComponentManifest(
+            "test-app",
+            "Test app",
+            null,
+            "Test.Package",
+            null,
+            "exe",
+            null,
+            "x64",
+            null,
+            [],
+            "winget",
+            "latest-stable");
+
+        var componentDirectory = Path.Combine(root, "catalog", "windows", "components", "test-app");
+        Directory.CreateDirectory(componentDirectory);
+        File.WriteAllText(
+            Path.Combine(root, "catalog", "windows", "components", "catalog.json"),
+            """{"components":["test-app"]}""");
+        File.WriteAllText(
+            Path.Combine(componentDirectory, "component.json"),
+            JsonSerializer.Serialize(component, JsonDefaults.Options));
+
+        var workspace = new WorkspaceManifest(
+            "remove-app",
+            "Remove app",
+            "Application already absent",
+            DesiredState: new DesiredStateManifest(
+                [new WorkspaceApplication("test-app", State: WorkspaceApplicationIntentCodes.Absent)],
+                [],
+                [],
+                [],
+                [],
+                []),
+            SchemaVersion: 2);
+
+        File.WriteAllText(
+            Path.Combine(root, "workspaces", "remove-app.json"),
+            JsonSerializer.Serialize(workspace, JsonDefaults.Options));
+
+        try
+        {
+            var engine = new WorkspaceOperationEngine(
+                configuration,
+                new InstallerEngine(paths),
+                paths,
+                new InventoryScanner([new EmptyInventoryProvider()]));
+
+            var item = (await engine.PlanAsync("remove-app")).Items.Single();
+
+            Assert.AreEqual(ApplicationStateCodes.Absent, item.StateCode);
+            Assert.AreEqual(DesiredStateActionCodes.None, item.ActionCode);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task Desired_state_plan_blocks_removal_when_inventory_is_incomplete()
+    {
+        var root = CreateConfigurationRoot();
+        var configuration = new ConfigurationStore(root);
+        var paths = new WorkspacePaths(Path.Combine(
+            Path.GetTempPath(),
+            "workspace-control-remove-unknown-tests",
+            Guid.NewGuid().ToString("N")));
+
+        var component = new ComponentManifest(
+            "test-app",
+            "Test app",
+            null,
+            "Test.Package",
+            null,
+            "exe",
+            null,
+            "x64",
+            null,
+            [],
+            "winget");
+
+        var componentDirectory = Path.Combine(root, "catalog", "windows", "components", "test-app");
+        Directory.CreateDirectory(componentDirectory);
+        File.WriteAllText(
+            Path.Combine(root, "catalog", "windows", "components", "catalog.json"),
+            """{"components":["test-app"]}""");
+        File.WriteAllText(
+            Path.Combine(componentDirectory, "component.json"),
+            JsonSerializer.Serialize(component, JsonDefaults.Options));
+
+        var workspace = new WorkspaceManifest(
+            "remove-app",
+            "Remove app",
+            "Application removal with incomplete inventory",
+            DesiredState: new DesiredStateManifest(
+                [new WorkspaceApplication("test-app", State: WorkspaceApplicationIntentCodes.Absent)],
+                [],
+                [],
+                [],
+                [],
+                []),
+            SchemaVersion: 2);
+
+        File.WriteAllText(
+            Path.Combine(root, "workspaces", "remove-app.json"),
+            JsonSerializer.Serialize(workspace, JsonDefaults.Options));
+
+        try
+        {
+            var engine = new WorkspaceOperationEngine(
+                configuration,
+                new InstallerEngine(paths),
+                paths,
+                new InventoryScanner([new FailedInventoryProvider()]));
+
+            var item = (await engine.PlanAsync("remove-app")).Items.Single();
+
+            Assert.AreEqual(ApplicationStateCodes.Unknown, item.StateCode);
+            Assert.AreEqual(DesiredStateActionCodes.Blocked, item.ActionCode);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public void Registry_desired_state_observer_classifies_matching_values()
     {
         var observer = new RegistryDesiredStateObserver(new FakeRegistryReader(

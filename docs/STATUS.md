@@ -71,6 +71,13 @@ These remaining gaps are alignment work, not reasons to weaken the intended prod
 
 - The Workspace editor now supports an explicit first capture slice: create a new user-owned Workspace from applications detected as installed on the current PC; other settings remain undefined.
 
+## Application removal UX progress
+
+- The application editor now presents the application name, observed state and explicit **Don't manage / Keep / Remove** intent together.
+- Diff and plan action/state codes are localized for the desktop UX instead of exposing internal codes as the primary labels.
+- Review explicitly highlights when the confirmed plan contains application removals.
+- Removal planning is covered for the already-absent and incomplete-inventory safety cases; incomplete evidence blocks removal rather than guessing.
+
 ## Verification
 
 Published Windows validation exists, but automated launch is not a substitute for real interactive Windows 11 UX, accessibility, DPI and localization validation.
