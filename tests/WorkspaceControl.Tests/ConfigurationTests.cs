@@ -1040,6 +1040,33 @@ public sealed class InstallerEngineTests
     }
 
     [TestMethod]
+    public void WorkspaceApplicationSnapshot_persists_removal_capability()
+    {
+        var capability = new RemovalCapability(
+            RemovalCapabilityKindCodes.WinGet,
+            "windows.winget",
+            "Test.Package",
+            "msstore",
+            InventoryScope.User);
+
+        var snapshot = new WorkspaceApplicationSnapshot(
+            "test-component",
+            "2.0.0",
+            capability,
+            3);
+
+        var json = JsonSerializer.Serialize(snapshot, JsonDefaults.Options);
+        var restored = JsonSerializer.Deserialize<WorkspaceApplicationSnapshot>(json, JsonDefaults.Options);
+
+        Assert.IsNotNull(restored);
+        Assert.AreEqual(3, restored!.PlanIndex);
+        Assert.IsNotNull(restored.RemovalCapability);
+        Assert.AreEqual("Test.Package", restored.RemovalCapability!.PackageId);
+        Assert.AreEqual("msstore", restored.RemovalCapability.Source);
+        Assert.AreEqual(InventoryScope.User, restored.RemovalCapability.Scope);
+    }
+
+    [TestMethod]
     public void WinGet_remove_action_uses_uninstall_command()
     {
         var component = new ComponentManifest(
