@@ -248,12 +248,27 @@
                                         </Grid.ColumnDefinitions>
     
                                         <StackPanel Spacing="2">
-                                            <CheckBox
-                                                x:Uid="WorkspacePage_ApplicationCheckBox"
-                                                Content="{Binding Name}"
-                                                IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                                HorizontalAlignment="Stretch" />
-                                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="32,0,0,0">
+                                            <Grid ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock
+                                                    Text="{Binding Name}"
+                                                    FontWeight="SemiBold"
+                                                    VerticalAlignment="Center" />
+                                                <ComboBox
+                                                    x:Uid="WorkspacePage_ApplicationDesiredState"
+                                                    Grid.Column="1"
+                                                    Width="150"
+                                                    SelectedValue="{Binding DesiredState, Mode=TwoWay}"
+                                                    SelectedValuePath="Tag">
+                                                    <ComboBoxItem x:Uid="WorkspacePage_ApplicationDesiredUndefined" Tag="undefined" />
+                                                    <ComboBoxItem x:Uid="WorkspacePage_ApplicationDesiredPresent" Tag="present" />
+                                                    <ComboBoxItem x:Uid="WorkspacePage_ApplicationDesiredAbsent" Tag="absent" />
+                                                </ComboBox>
+                                            </Grid>
+                                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,0">
                                                 <TextBlock
                                                     Text="{Binding Source}"
                                                     Opacity="0.65"
