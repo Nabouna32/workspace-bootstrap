@@ -1,4 +1,5 @@
 using Microsoft.UI.Xaml.Data;
+using WorkspaceControl.Domain;
 
 namespace WorkspaceControl.Desktop;
 
