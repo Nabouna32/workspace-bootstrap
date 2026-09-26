@@ -116,6 +116,7 @@ public sealed class WinGetInventoryProvider : IInventoryProvider
                 InventoryScope.Unknown,
                 null,
                 null,
+                null,
                 InventoryOwnership.Unknown,
                 Array.Empty<string>(),
                 string.IsNullOrWhiteSpace(available)
