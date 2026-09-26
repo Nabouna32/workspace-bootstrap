@@ -821,7 +821,13 @@ public sealed class ConfigurationTests
                         [],
                         [new InventoryEvidence("installed", "installed", true, Id)],
                         DateTimeOffset.UtcNow,
-                        availableVersion)
+                        availableVersion,
+                        new RemovalCapability(
+                            RemovalCapabilityKindCodes.WinGet,
+                            Id,
+                            packageId,
+                            "test",
+                            InventoryScope.System))
                 ],
                 new InventoryProviderDiagnostic(Id, true, "Synthetic inventory.")));
     }
@@ -973,6 +979,27 @@ public sealed class InstallerEngineTests
 
         CollectionAssert.AreEqual(
             new[] { "uninstall", "--id", "Test.Package", "--exact", "--accept-source-agreements", "--accept-package-agreements", "--silent" },
+            arguments.ToArray());
+    }
+
+    [TestMethod]
+    public void WinGet_removal_arguments_preserve_observed_source_and_version()
+    {
+        var arguments = InstallerEngine.BuildWingetArguments(
+            "Test.Package",
+            DesiredStateActionCodes.Remove,
+            "2.0.0",
+            "msstore",
+            InventoryScope.User);
+
+        CollectionAssert.AreEqual(
+            new[]
+            {
+                "uninstall", "--id", "Test.Package", "--exact",
+                "--accept-source-agreements", "--accept-package-agreements", "--silent",
+                "--version", "2.0.0", "--source", "msstore", "--scope", "user",
+                "--disable-interactivity"
+            },
             arguments.ToArray());
     }
 
