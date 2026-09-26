@@ -1256,27 +1256,38 @@ public sealed class WorkspaceOperationEngine
             throw new InvalidOperationException(
                 "Application rollback failed: " + string.Join(" | ", failures));
 
-        var verificationPlan = await PlanAsync(operation.WorkspaceId, token);
+        var inventory = await _inventory.ScanAsync(token);
         var verificationFailures = new List<string>();
 
         foreach (var snapshot in operation.ApplicationSnapshots)
         {
-            var verified = verificationPlan.Items.FirstOrDefault(item =>
-                string.Equals(item.Domain, DesiredStateDomainCodes.Application, StringComparison.Ordinal)
-                && string.Equals(item.ComponentId, snapshot.ComponentId, StringComparison.Ordinal));
+            var component = components.TryGetValue(snapshot.ComponentId, out var catalogComponent)
+                ? catalogComponent
+                : null;
 
-            if (verified is null
-                || verified.StateCode != ApplicationStateCodes.Installed
-                || verified.ActionCode != DesiredStateActionCodes.None
-                || !string.Equals(
-                    verified.InstalledVersion,
+            if (component is null)
+            {
+                verificationFailures.Add($"{snapshot.ComponentId}: catalog component is unavailable.");
+                continue;
+            }
+
+            var observed = FindInventoryMatch(component, inventory.Items);
+            if (observed is null)
+            {
+                verificationFailures.Add(
+                    $"{snapshot.ComponentId}: application is still absent after rollback; " +
+                    $"expected version '{snapshot.InstalledVersion}'.");
+                continue;
+            }
+
+            if (!string.Equals(
+                    observed.Version,
                     snapshot.InstalledVersion,
                     StringComparison.Ordinal))
             {
                 verificationFailures.Add(
                     $"{snapshot.ComponentId}: expected version '{snapshot.InstalledVersion}', " +
-                    $"observed '{verified?.InstalledVersion ?? "absent"}' with state/action " +
-                    $"{verified?.StateCode ?? "unknown"}/{verified?.ActionCode ?? "unknown"}");
+                    $"observed '{observed.Version ?? "unknown"}'.");
             }
         }
 
