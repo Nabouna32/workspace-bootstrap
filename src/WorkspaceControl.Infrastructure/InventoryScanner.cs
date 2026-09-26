@@ -78,6 +78,12 @@ public sealed class InventoryScanner
                     Scope = first.Scope,
                     InstallLocation = first.InstallLocation,
                     RemovalCommand = first.RemovalCommand,
+                    RemovalCapabilities = ordered
+                        .Select(item => item.RemovalCapability)
+                        .Where(item => item is not null)
+                        .Select(item => item!)
+                        .Distinct()
+                        .ToArray(),
                     Publisher = first.Publisher,
                     Ownership = ResolveOwnership(ordered),
                     Capabilities = ordered
