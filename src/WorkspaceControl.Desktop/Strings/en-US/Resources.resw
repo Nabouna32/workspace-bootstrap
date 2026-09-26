@@ -192,4 +192,12 @@
   <data name="WindowsAppearanceDark" xml:space="preserve"><value>Dark</value></data>
   <data name="WindowsAppearanceSystem" xml:space="preserve"><value>System</value></data>
   <data name="Undefined" xml:space="preserve"><value>Undefined</value></data>
+
+  <data name="WorkspacePage_Capture.Text" xml:space="preserve"><value>Create from this PC</value></data>
+  <data name="WorkspacePage_CaptureHint.Text" xml:space="preserve"><value>Creates a new Workspace from applications detected as installed. Other settings remain undefined.</value></data>
+  <data name="CapturedWorkspaceName.Text" xml:space="preserve"><value>Captured Workspace</value></data>
+  <data name="CapturedWorkspaceDescription.Text" xml:space="preserve"><value>Captured from this PC. Only detected installed applications are included.</value></data>
+  <data name="WorkspaceCaptured.Text" xml:space="preserve"><value>Workspace created from {0} detected installed applications.</value></data>
+  <data name="WorkspaceCaptureUnavailable.Text" xml:space="preserve"><value>Capture is unavailable until this PC has been observed.</value></data>
+  <data name="WorkspaceCaptureFailed.Text" xml:space="preserve"><value>Could not capture this PC into a Workspace.</value></data>
 </root>

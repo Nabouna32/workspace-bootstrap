@@ -64,6 +64,10 @@ These remaining gaps are alignment work, not reasons to weaken the intended prod
 - The Windows appearance mapping, including the System intent, is covered by domain-level tests.
 - The UX now defines a shared semantic color grammar: green for success/healthy, blue for information/neutral action, amber/orange for warning/attention/risk, red for error/failure/blocked, and neutral for undefined/secondary information.
 
+## Recent implementation progress
+
+- The Workspace editor now supports an explicit first capture slice: create a new user-owned Workspace from applications detected as installed on the current PC; other settings remain undefined.
+
 ## Verification
 
 Published Windows validation exists, but automated launch is not a substitute for real interactive Windows 11 UX, accessibility, DPI and localization validation.

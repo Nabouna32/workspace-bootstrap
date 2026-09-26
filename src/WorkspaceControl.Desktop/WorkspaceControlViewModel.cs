@@ -44,8 +44,16 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
     public SoftwareInventorySnapshot? Software
     {
         get => _software;
-        private set => SetField(ref _software, value);
+        private set
+        {
+            if (!SetField(ref _software, value))
+                return;
+
+            OnPropertyChanged(nameof(HasSoftwareObservation));
+        }
     }
+
+    public bool HasSoftwareObservation => Software is not null;
 
     public WorkspaceOperation? WorkspaceOperation
     {
@@ -552,6 +560,40 @@ public sealed class WorkspaceControlViewModel : INotifyPropertyChanged
             {
                 VisibleApplicationOptions.Add(option);
             }
+        }
+    }
+
+    public void CaptureCurrentMachineApplications()
+    {
+        if (Software is null)
+        {
+            Error = _localizer.Get("WorkspaceCaptureUnavailable");
+            Status = _localizer.Get("WorkspaceCaptureUnavailable");
+            return;
+        }
+
+        try
+        {
+            var capturedComponentIds = ApplicationCatalogItems
+                .Where(item => item.IsInstalled)
+                .Select(item => item.ComponentId)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            var workspace = _application.CreateWorkspace(
+                _localizer.Get("CapturedWorkspaceName"),
+                _localizer.Get("CapturedWorkspaceDescription"),
+                capturedComponentIds);
+
+            Workspaces.Add(workspace);
+            SelectWorkspace(workspace.Id);
+            Status = _localizer.Format("WorkspaceCaptured", capturedComponentIds.Length);
+            Error = null;
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+            Status = _localizer.Get("WorkspaceCaptureFailed");
         }
     }
 
